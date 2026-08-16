@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/common/Layout';
 import { ThemeProvider } from './context/ThemeContext';
+import { UserProvider } from './context/UserContext';
+import { CartProvider } from './context/CartContext';
 import './styles/App.css';
 
 // Auth pages
@@ -11,34 +13,62 @@ import Register from './pages/auth/Register/Register';
 import AdminDashboard from './pages/admin/Dashboard/Dashboard';
 import AdminProducts from './pages/admin/Products/Products';
 import AdminCategories from './pages/admin/Categories/Categories';
+import AdminOrders from './pages/admin/Orders/Orders';
+import AdminStock from './pages/admin/Stock/Stock';
 
 // Customer pages
+import Home from './pages/customer/Home/Home';
 import Shop from './pages/customer/Shop/Shop';
+import CustomerDashboard from './pages/customer/Dashboard/Dashboard';
+import Cart from './pages/customer/Cart/Cart';
+import CustomerOrders from './pages/customer/Orders/Orders';
+import ProductDetail from './pages/customer/ProductDetail/ProductDetail';
+
+// Error pages
+import NotFound from './pages/errors/NotFound';
+import Unauthorized from './pages/errors/Unauthorized';
+import ServerError from './pages/errors/ServerError';
 
 function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+      <UserProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin" element={<Layout role="Admin" />}>
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="categories" element={<AdminCategories />} />
-            {/* add more admin routes later */}
-          </Route>
+              {/* Error pages */}
+              <Route path="/403" element={<Unauthorized />} />
+              <Route path="/500" element={<ServerError />} />
 
-          {/* Customer Routes */}
-          <Route path="/" element={<Layout role="Customer" />}>
-            <Route index element={<Shop />} />
-            {/* add more customer routes later */}
-          </Route>
-        </Routes>
-      </BrowserRouter>
+              {/* Admin Routes */}
+              <Route path="/admin" element={<Layout role="Admin" />}>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="categories" element={<AdminCategories />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="stock" element={<AdminStock />} />
+              </Route>
+
+              {/* Customer Routes */}
+              <Route path="/" element={<Layout role="Customer" />}>
+                <Route index element={<Home />} />
+                <Route path="shop" element={<Shop />} />
+                <Route path="product/:id" element={<ProductDetail />} />
+                <Route path="dashboard" element={<CustomerDashboard />} />
+                <Route path="cart" element={<Cart />} />
+                <Route path="orders" element={<CustomerOrders />} />
+              </Route>
+
+              {/* 404 – catch all */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
+      </UserProvider>
     </ThemeProvider>
   );
 }

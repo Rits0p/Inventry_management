@@ -1,0 +1,607 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
+// ─────────────────────────── DATA ─────────────────────────────────────────────
+
+const HERO_SLIDES = [
+  {
+    id: 1,
+    tag: '🔥 Mega Tech Sale — Up to 40% Off',
+    title: 'Next-Gen Tech',
+    highlight: 'Hardware & Gadgets',
+    sub: 'Shop the latest processors, monitors, peripherals and smart home devices.',
+    cta: 'Shop Now',
+    ctaLink: '/shop',
+    bg: 'from-[#0f1e3d] via-[#1a3a6e] to-[#2874F0]',
+    accent: '#FB641B',
+    badge: '40% OFF',
+  },
+  {
+    id: 2,
+    tag: '⚡ Flash Deal — Today Only',
+    title: 'Premium Audio &',
+    highlight: 'Home Entertainment',
+    sub: 'Discover Sony, JBL, and Bose at prices you\'ve never seen before.',
+    cta: 'Grab the Deal',
+    ctaLink: '/shop',
+    bg: 'from-[#1a0533] via-[#3b1070] to-[#7c3aed]',
+    accent: '#FB641B',
+    badge: '35% OFF',
+  },
+  {
+    id: 3,
+    tag: '🆕 New Arrivals — Just Landed',
+    title: 'Future-Ready',
+    highlight: 'Smart Devices',
+    sub: 'Be the first to own the latest in AI-powered smart home and wearable tech.',
+    cta: 'Explore New',
+    ctaLink: '/shop',
+    bg: 'from-[#0d2b1e] via-[#0f5132] to-[#198754]',
+    accent: '#FB641B',
+    badge: 'NEW',
+  },
+];
+
+const CATEGORIES = [
+  { id: 1, name: 'Laptops & Computers', slug: 'laptops', icon: '💻', count: 342, gradient: 'from-blue-500 to-blue-700' },
+  { id: 2, name: 'Smartphones', slug: 'phones', icon: '📱', count: 218, gradient: 'from-violet-500 to-purple-700' },
+  { id: 3, name: 'Audio & Headphones', slug: 'audio', icon: '🎧', count: 156, gradient: 'from-pink-500 to-rose-600' },
+  { id: 4, name: 'Monitors & Displays', slug: 'monitors', icon: '🖥️', count: 89, gradient: 'from-amber-500 to-orange-600' },
+  { id: 5, name: 'Networking', slug: 'networking', icon: '🌐', count: 64, gradient: 'from-teal-500 to-cyan-700' },
+  { id: 6, name: 'Gaming', slug: 'gaming', icon: '🎮', count: 112, gradient: 'from-red-500 to-red-700' },
+  { id: 7, name: 'Smart Home', slug: 'smart-home', icon: '🏠', count: 78, gradient: 'from-emerald-500 to-green-700' },
+  { id: 8, name: 'Accessories', slug: 'accessories', icon: '🖱️', count: 234, gradient: 'from-slate-500 to-gray-700' },
+];
+
+const FLASH_DEALS = [
+  { id: 1, name: 'Sony WH-1000XM5 Headphones', cat: 'Audio', mrp: 34990, price: 20994, discount: 40, rating: 4.9, reviews: 2841 },
+  { id: 2, name: 'LG 27" 4K IPS Monitor', cat: 'Monitors', mrp: 42990, price: 25794, discount: 40, rating: 4.7, reviews: 1203 },
+  { id: 3, name: 'Logitech MX Master 3S', cat: 'Accessories', mrp: 8995, price: 5397, discount: 40, rating: 4.8, reviews: 932 },
+  { id: 4, name: 'JBL Flip 6 Speaker', cat: 'Audio', mrp: 11999, price: 7199, discount: 40, rating: 4.6, reviews: 1540 },
+  { id: 5, name: 'Samsung T7 1TB SSD', cat: 'Storage', mrp: 9999, price: 5999, discount: 40, rating: 4.8, reviews: 876 },
+];
+
+const TOP_PRODUCTS = [
+  { id: 1, name: 'Apple MacBook Air M2', cat: 'Laptops', mrp: 114900, price: 91920, discount: 20, rating: 4.9, reviews: 3241, badge: 'Best Seller', badgeColor: 'bg-amber-500' },
+  { id: 2, name: 'Samsung Galaxy S24 Ultra', cat: 'Smartphones', mrp: 129999, price: 99999, discount: 23, rating: 4.8, reviews: 2104, badge: 'Top Rated', badgeColor: 'bg-blue-500' },
+  { id: 3, name: 'ASUS ROG Zephyrus G14', cat: 'Gaming', mrp: 149999, price: 119999, discount: 20, rating: 4.7, reviews: 892, badge: 'Gaming Pick', badgeColor: 'bg-red-500' },
+  { id: 4, name: 'iPad Pro 12.9" M2', cat: 'Tablets', mrp: 112900, price: 89900, discount: 20, rating: 4.8, reviews: 1567, badge: 'Editor\'s Choice', badgeColor: 'bg-purple-500' },
+  { id: 5, name: 'Dell XPS 15 OLED', cat: 'Laptops', mrp: 189999, price: 151999, discount: 20, rating: 4.7, reviews: 724, badge: 'Premium', badgeColor: 'bg-slate-600' },
+  { id: 6, name: 'Sony A7 IV Camera', cat: 'Cameras', mrp: 249999, price: 199999, discount: 20, rating: 4.9, reviews: 431, badge: 'Pro Choice', badgeColor: 'bg-orange-500' },
+  { id: 7, name: 'Dyson V15 Detect', cat: 'Home', mrp: 64900, price: 51920, discount: 20, rating: 4.6, reviews: 2109, badge: 'Popular', badgeColor: 'bg-teal-500' },
+  { id: 8, name: 'Keychron Q1 Pro Keyboard', cat: 'Accessories', mrp: 16999, price: 13599, discount: 20, rating: 4.8, reviews: 643, badge: 'Trending', badgeColor: 'bg-pink-500' },
+];
+
+const NEW_ARRIVALS = [
+  { id: 1, name: 'ASUS ROG Flow Z13 Gaming Tablet', cat: 'Gaming', price: 129999, discount: 13, rating: 4.7 },
+  { id: 2, name: 'Xiaomi 14 Ultra 5G', cat: 'Smartphones', price: 99999, discount: 10, rating: 4.8 },
+  { id: 3, name: 'Apple Vision Pro', cat: 'Wearables', price: 299999, discount: 0, rating: 4.9 },
+  { id: 4, name: 'Samsung Neo QLED 8K 75"', cat: 'TVs', price: 549999, discount: 15, rating: 4.8 },
+  { id: 5, name: 'Bose QuietComfort Ultra', cat: 'Audio', price: 34990, discount: 8, rating: 4.7 },
+  { id: 6, name: 'Corsair iCUE H170i Elite', cat: 'PC Components', price: 22999, discount: 12, rating: 4.6 },
+];
+
+const BRANDS = ['Apple', 'Samsung', 'Sony', 'LG', 'Dell', 'ASUS', 'Logitech', 'JBL'];
+
+const PROMO_BANNERS = [
+  {
+    tag: 'Gaming Week',
+    title: 'Level Up Your Setup',
+    sub: 'RTX 40 series laptops, gaming chairs & peripherals',
+    bg: 'from-[#1a0533] to-[#7c3aed]',
+    link: '/shop?cat=gaming',
+  },
+  {
+    tag: 'Smart Home',
+    title: 'Make Your Home Smarter',
+    sub: 'Voice assistants, robot vacuums & smart lighting',
+    bg: 'from-[#0d2b1e] to-[#198754]',
+    link: '/shop?cat=smart-home',
+  },
+];
+
+// ─────────────────────── HELPER COMPONENTS ───────────────────────────────────
+
+function Stars({ rating }) {
+  return (
+    <span className="flex items-center gap-0.5 text-amber-400 text-xs">
+      {[1, 2, 3, 4, 5].map(s => (
+        <svg key={s} className={`w-3 h-3 ${s <= Math.round(rating) ? 'fill-current' : 'fill-gray-200 text-gray-200'}`} viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </span>
+  );
+}
+
+// Placeholder image area — user drops real image here later
+function ImgPlaceholder({ className = '', icon = '📦' }) {
+  return (
+    <div className={`flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 ${className}`}>
+      <span className="text-4xl opacity-25">{icon}</span>
+    </div>
+  );
+}
+
+function AddToCartBtn({ small = false }) {
+  const [state, setState] = useState('idle');
+  const handle = () => {
+    setState('added');
+    setTimeout(() => setState('idle'), 1500);
+  };
+  const base = `font-semibold rounded-full transition-all duration-200 flex items-center justify-center gap-1.5 ${small ? 'px-3 py-1.5 text-xs' : 'px-5 py-2.5 text-sm'}`;
+  if (state === 'added') return <button className={`${base} bg-emerald-500 text-white scale-95`}>✓ Added!</button>;
+  return (
+    <button onClick={handle} className={`${base} bg-[#FB641B] hover:bg-orange-600 text-white shadow hover:shadow-md active:scale-95`}>
+      <svg className={small ? 'w-3.5 h-3.5' : 'w-4 h-4'} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      {small ? 'Add' : 'Add to Cart'}
+    </button>
+  );
+}
+
+// ─────────────────────── SECTION: HERO ───────────────────────────────────────
+
+function HeroSection() {
+  const navigate = useNavigate();
+  const [current, setCurrent] = useState(0);
+  const [search, setSearch] = useState('');
+
+  const next = useCallback(() => setCurrent(c => (c + 1) % HERO_SLIDES.length), []);
+  const prev = () => setCurrent(c => (c - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+
+  useEffect(() => {
+    const t = setInterval(next, 5000);
+    return () => clearInterval(t);
+  }, [next]);
+
+  const slide = HERO_SLIDES[current];
+
+  return (
+    <div className="px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto py-4">
+      <section className={`relative rounded-3xl bg-gradient-to-r ${slide.bg} text-white overflow-hidden transition-all duration-700 shadow-2xl flex items-center`}
+        style={{ height: 'calc(100vh - 100px)', minHeight: '480px' }}>
+        {/* Decorative blobs */}
+        <div className="absolute top-[-80px] right-[-80px] w-80 h-80 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute bottom-[-60px] left-[30%] w-64 h-64 rounded-full bg-white/5 pointer-events-none" />
+
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 flex flex-row items-center justify-between gap-6">
+        {/* Text */}
+        <div className="flex-1 z-10">
+          <span className="inline-block text-xs font-bold bg-white/15 border border-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full mb-5">
+            {slide.tag}
+          </span>
+          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-2">
+            {slide.title}
+          </h1>
+          <h2 className="text-3xl md:text-5xl font-extrabold mb-5" style={{ color: slide.accent }}>
+            {slide.highlight}
+          </h2>
+          <p className="text-white/70 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
+            {slide.sub}
+          </p>
+
+          <div className="flex items-center gap-4 flex-wrap mt-2">
+            <Link to={slide.ctaLink}
+              className="px-7 py-3.5 bg-white text-[#2874F0] font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all text-sm">
+              {slide.cta} →
+            </Link>
+            <span className="text-white/60 text-sm flex items-center gap-1.5">
+              <span className="text-green-400 font-bold">✓</span> Free Shipping on orders over ₹2,000
+            </span>
+          </div>
+        </div>
+
+        {/* Right card placeholder */}
+        <div className="relative z-10 flex-shrink-0 w-[45%] md:w-80">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-4">
+            <div className="relative rounded-2xl overflow-hidden mb-4">
+              <ImgPlaceholder className="h-52 w-full" icon="💻" />
+              <span className="absolute top-3 right-3 bg-[#FB641B] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
+                {slide.badge}
+              </span>
+            </div>
+            <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-1">Featured Deal</p>
+            <p className="font-bold text-white text-sm line-clamp-1">Sony WH-1000XM5 Headphones</p>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-xl font-extrabold text-[#FB641B]">₹20,994</span>
+              <span className="text-xs text-white/50 line-through">₹34,990</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Slide controls */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
+        <button onClick={prev}
+          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition">
+          ‹
+        </button>
+        {HERO_SLIDES.map((_, i) => (
+          <button key={i} onClick={() => setCurrent(i)}
+            className={`rounded-full transition-all duration-300 ${i === current ? 'w-7 h-2.5 bg-[#FB641B]' : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/70'}`} />
+        ))}
+        <button onClick={next}
+          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition">
+          ›
+        </button>
+      </div>
+    </section>
+    </div>
+  );
+}
+
+// ─────────────────────── SECTION: TRUST BAR ──────────────────────────────────
+
+function TrustBar() {
+  const items = [
+    { icon: '🚚', label: 'Free Delivery', sub: 'On orders over ₹2,000' },
+    { icon: '🔄', label: 'Easy Returns', sub: '30-day hassle-free policy' },
+    { icon: '🔒', label: 'Secure Payments', sub: 'SSL encrypted checkout' },
+    { icon: '🛠️', label: '24/7 Support', sub: 'Always here to help' },
+  ];
+  return (
+    <div className="bg-white border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
+          {items.map(it => (
+            <div key={it.label} className="flex items-center gap-3 py-4 px-4 sm:px-6">
+              <span className="text-2xl">{it.icon}</span>
+              <div>
+                <p className="text-sm font-bold text-gray-900">{it.label}</p>
+                <p className="text-xs text-gray-500">{it.sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────── SECTION: CATEGORIES ─────────────────────────────────
+
+function CategoriesSection() {
+  return (
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      <div className="flex items-end justify-between mb-6">
+        <div>
+          <p className="text-xs font-bold text-[#FB641B] uppercase tracking-widest mb-1">Browse</p>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">Shop by Category</h2>
+        </div>
+        <Link to="/shop" className="text-sm font-semibold text-[#2874F0] hover:underline">View All →</Link>
+      </div>
+      <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+        {CATEGORIES.map(cat => (
+          <Link key={cat.id} to={`/shop?category=${cat.slug}`}
+            className="group flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-white hover:shadow-md transition-all duration-200">
+            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-200`}>
+              {cat.icon}
+            </div>
+            <p className="text-xs font-semibold text-gray-700 text-center leading-tight">{cat.name}</p>
+            <p className="text-[10px] text-gray-400">{cat.count} items</p>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────── SECTION: FLASH SALE ─────────────────────────────────
+
+function FlashSaleSection() {
+  const TARGET = Date.now() + 8 * 3600 * 1000; // 8h from now
+  const [timeLeft, setTimeLeft] = useState({ h: '08', m: '00', s: '00' });
+
+  useEffect(() => {
+    const tick = () => {
+      const diff = Math.max(0, TARGET - Date.now());
+      const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+      setTimeLeft({ h, m, s });
+    };
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const TimeBox = ({ v, label }) => (
+    <div className="flex flex-col items-center">
+      <div className="bg-gray-900 text-white text-xl md:text-2xl font-extrabold w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center tabular-nums shadow">
+        {v}
+      </div>
+      <span className="text-[9px] text-gray-500 font-bold uppercase mt-1 tracking-widest">{label}</span>
+    </div>
+  );
+
+  return (
+    <section className="bg-gradient-to-r from-gray-900 to-gray-800 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-2xl">⚡</span>
+                <span className="text-xl md:text-2xl font-extrabold text-white">Flash Sale</span>
+                <span className="bg-[#FB641B] text-white text-xs font-bold px-2.5 py-1 rounded-full">UP TO 40% OFF</span>
+              </div>
+              <p className="text-gray-400 text-sm">Prices drop every day — don't miss out!</p>
+            </div>
+          </div>
+          {/* Countdown */}
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-sm font-medium mr-1">Ends in:</span>
+            <TimeBox v={timeLeft.h} label="Hrs" />
+            <span className="text-white font-bold text-xl mb-4">:</span>
+            <TimeBox v={timeLeft.m} label="Min" />
+            <span className="text-white font-bold text-xl mb-4">:</span>
+            <TimeBox v={timeLeft.s} label="Sec" />
+          </div>
+        </div>
+
+        {/* Flash deal cards — horizontal scroll */}
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+          {FLASH_DEALS.map(p => (
+            <div key={p.id}
+              className="flex-shrink-0 w-52 bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-all duration-200 flex flex-col">
+              <div className="relative">
+                <ImgPlaceholder className="h-36 w-full" icon="🛒" />
+                <span className="absolute top-2 left-2 bg-[#FB641B] text-white text-[11px] font-extrabold px-2 py-0.5 rounded-full">
+                  -{p.discount}%
+                </span>
+              </div>
+              <div className="p-3 flex-1 flex flex-col">
+                <p className="text-[10px] font-bold text-[#FB641B] uppercase mb-1">{p.cat}</p>
+                <p className="text-xs font-bold text-gray-900 line-clamp-2 mb-1 flex-1">{p.name}</p>
+                <div className="flex items-center gap-1 mb-2">
+                  <Stars rating={p.rating} />
+                  <span className="text-[10px] text-gray-400">({p.reviews})</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-400 line-through">₹{p.mrp.toLocaleString('en-IN')}</p>
+                    <p className="text-sm font-extrabold text-gray-900">₹{p.price.toLocaleString('en-IN')}</p>
+                  </div>
+                  <AddToCartBtn small />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-5 text-center">
+          <Link to="/shop" className="inline-flex items-center gap-2 text-sm font-semibold text-[#FB641B] hover:underline">
+            View All Flash Deals →
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────── SECTION: TOP PRODUCTS ───────────────────────────────
+
+function TopProductsSection() {
+  return (
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+      <div className="flex items-end justify-between mb-7">
+        <div>
+          <p className="text-xs font-bold text-[#FB641B] uppercase tracking-widest mb-1">🔥 Best Sellers</p>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">Top Selling Products</h2>
+        </div>
+        <Link to="/shop" className="text-sm font-semibold text-[#2874F0] hover:underline">View Full Ranking →</Link>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {TOP_PRODUCTS.map(p => (
+          <Link key={p.id} to={`/product/${p.id}`}
+            className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+            {/* Image */}
+            <div className="relative">
+              <ImgPlaceholder className="h-44 w-full" icon="📦" />
+              <span className={`absolute top-2.5 left-2.5 ${p.badgeColor} text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow`}>
+                {p.badge}
+              </span>
+              {p.discount > 0 && (
+                <span className="absolute top-2.5 right-2.5 bg-[#FB641B] text-white text-[10px] font-extrabold px-2 py-1 rounded-full">
+                  -{p.discount}%
+                </span>
+              )}
+            </div>
+            {/* Info */}
+            <div className="p-4 flex flex-col flex-1">
+              <p className="text-[10px] font-bold text-[#2874F0] uppercase tracking-wide mb-1">{p.cat}</p>
+              <p className="text-sm font-bold text-gray-900 line-clamp-2 mb-2 flex-1">{p.name}</p>
+              <div className="flex items-center gap-1.5 mb-3">
+                <Stars rating={p.rating} />
+                <span className="text-[10px] text-gray-400">({p.reviews.toLocaleString()})</span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-xs text-gray-400 line-through">₹{p.mrp.toLocaleString('en-IN')}</p>
+                  <p className="text-base font-extrabold text-gray-900">₹{p.price.toLocaleString('en-IN')}</p>
+                </div>
+                <AddToCartBtn small />
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────── SECTION: PROMO BANNERS ──────────────────────────────
+
+function PromoBanners() {
+  return (
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {PROMO_BANNERS.map((b, i) => (
+          <div key={i}
+            className={`relative rounded-3xl bg-gradient-to-br ${b.bg} text-white p-8 overflow-hidden flex items-center justify-between gap-4 min-h-[180px]`}>
+            <div className="absolute top-[-40px] right-[-40px] w-48 h-48 rounded-full bg-white/5" />
+            <div className="relative z-10">
+              <span className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full mb-3 inline-block">{b.tag}</span>
+              <h3 className="text-xl md:text-2xl font-extrabold mb-1">{b.title}</h3>
+              <p className="text-white/70 text-sm mb-4">{b.sub}</p>
+              <Link to={b.link}
+                className="inline-flex items-center gap-1 bg-white text-gray-900 font-bold text-sm px-5 py-2.5 rounded-full hover:shadow-lg transition">
+                Shop Now →
+              </Link>
+            </div>
+            {/* Placeholder image area */}
+            <div className="flex-shrink-0 w-28 h-28 rounded-2xl bg-white/10 flex items-center justify-center text-5xl">
+              {i === 0 ? '🎮' : '🏠'}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────── SECTION: NEW ARRIVALS ───────────────────────────────
+
+function NewArrivalsSection() {
+  return (
+    <section className="bg-gradient-to-b from-[#F0F2F5] to-white py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-end justify-between mb-7">
+          <div>
+            <p className="text-xs font-bold text-[#2874F0] uppercase tracking-widest mb-1">🆕 Just Landed</p>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">New Arrivals</h2>
+          </div>
+          <Link to="/shop?sort=newest" className="text-sm font-semibold text-[#2874F0] hover:underline">See All New →</Link>
+        </div>
+
+        <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
+          {NEW_ARRIVALS.map(p => (
+            <Link key={p.id} to={`/product/${p.id}`}
+              className="group flex-shrink-0 w-48 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 overflow-hidden">
+              <div className="relative">
+                <ImgPlaceholder className="h-36 w-full" icon="✨" />
+                <span className="absolute top-2 left-2 bg-[#2874F0] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">NEW</span>
+                {p.discount > 0 && (
+                  <span className="absolute top-2 right-2 bg-[#FB641B] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-{p.discount}%</span>
+                )}
+              </div>
+              <div className="p-3">
+                <p className="text-[10px] font-bold text-[#FB641B] uppercase mb-1">{p.cat}</p>
+                <p className="text-xs font-bold text-gray-900 line-clamp-2 mb-2">{p.name}</p>
+                <Stars rating={p.rating} />
+                <p className="text-sm font-extrabold text-gray-900 mt-1.5">₹{p.price.toLocaleString('en-IN')}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────── SECTION: BRANDS ─────────────────────────────────────
+
+function BrandsSection() {
+  return (
+    <section className="bg-white border-y border-gray-100 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <p className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Trusted Brands We Carry</p>
+        <div className="flex items-center justify-center gap-6 flex-wrap">
+          {BRANDS.map(brand => (
+            <Link key={brand} to={`/shop?brand=${brand.toLowerCase()}`}
+              className="px-6 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm font-semibold text-gray-600 hover:bg-[#2874F0] hover:text-white hover:border-[#2874F0] transition-all duration-200">
+              {brand}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
+
+function Footer() {
+  const LINKS = [
+    { label: 'Shop', to: '/shop' },
+    { label: 'Cart', to: '/cart' },
+    { label: 'Categories', to: '/shop?category=all' },
+    { label: 'Sign In', to: '/login' },
+    { label: 'Admin Portal', to: '/admin/dashboard' },
+  ];
+
+  return (
+    <footer className="bg-gray-900 text-gray-400 border-t border-gray-800">
+      <div className="w-full px-6 py-6 sm:px-10 lg:px-16">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 w-full">
+
+          {/* Left: Brand & Copyright */}
+          <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded bg-gradient-to-br from-[#FB641B] to-orange-500 flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <span className="font-bold text-white tracking-tight text-lg">RPD<span className="text-[#FB641B]">Store</span></span>
+            </div>
+            <span className="hidden md:block text-gray-600">|</span>
+            <span className="text-sm">
+              &copy; {new Date().getFullYear()} All rights reserved.
+            </span>
+          </div>
+
+          {/* Center: Quick Links spread out */}
+          <div className="flex-1 flex flex-wrap items-center justify-center gap-8 text-sm">
+            {LINKS.map(l => (
+              <Link key={l.label} to={l.to} className="hover:text-white hover:text-[#FB641B] transition-colors font-medium">
+                {l.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Right: Support & Top */}
+          <div className="flex items-center gap-6 text-sm flex-shrink-0">
+            <a href="mailto:support@rpdstore.com" className="flex items-center gap-1.5 hover:text-white hover:text-[#FB641B] transition-colors font-medium">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+              Support
+            </a>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white transition-colors"
+              title="Back to Top"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ─────────────────────── PAGE ASSEMBLY ───────────────────────────────────────
+
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-[#F0F2F5]">
+      <HeroSection />
+      <TrustBar />
+      <CategoriesSection />
+      <FlashSaleSection />
+      <TopProductsSection />
+      <PromoBanners />
+      <NewArrivalsSection />
+      <BrandsSection />
+      <Footer />
+    </div>
+  );
+}
