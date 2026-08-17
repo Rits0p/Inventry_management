@@ -167,96 +167,68 @@ function HeroSection() {
         <div className="absolute top-[-80px] right-[-80px] w-80 h-80 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute bottom-[-60px] left-[30%] w-64 h-64 rounded-full bg-white/5 pointer-events-none" />
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 flex flex-row items-center justify-between gap-6">
-        {/* Text */}
-        <div className="flex-1 z-10">
-          <span className="inline-block text-xs font-bold bg-white/15 border border-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full mb-5">
-            {slide.tag}
-          </span>
-          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-2">
-            {slide.title}
-          </h1>
-          <h2 className="text-3xl md:text-5xl font-extrabold mb-5" style={{ color: slide.accent }}>
-            {slide.highlight}
-          </h2>
-          <p className="text-white/70 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
-            {slide.sub}
-          </p>
-
-          <div className="flex items-center gap-4 flex-wrap mt-2">
-            <Link to={slide.ctaLink}
-              className="px-7 py-3.5 bg-white text-[#2874F0] font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all text-sm">
-              {slide.cta} →
-            </Link>
-            <span className="text-white/60 text-sm flex items-center gap-1.5">
-              <span className="text-green-400 font-bold">✓</span> Free Shipping on orders over ₹2,000
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 flex flex-row items-center justify-between gap-6">
+          {/* Text */}
+          <div className="flex-1 z-10">
+            <span className="inline-block text-xs font-bold bg-white/15 border border-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full mb-5">
+              {slide.tag}
             </span>
-          </div>
-        </div>
+            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-2">
+              {slide.title}
+            </h1>
+            <h2 className="text-3xl md:text-5xl font-extrabold mb-5" style={{ color: slide.accent }}>
+              {slide.highlight}
+            </h2>
+            <p className="text-white/70 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
+              {slide.sub}
+            </p>
 
-        {/* Right card placeholder */}
-        <div className="relative z-10 flex-shrink-0 w-[45%] md:w-80">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-4">
-            <div className="relative rounded-2xl overflow-hidden mb-4">
-              <ImgPlaceholder className="h-52 w-full" icon="💻" />
-              <span className="absolute top-3 right-3 bg-[#FB641B] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
-                {slide.badge}
+            <div className="flex items-center gap-4 flex-wrap mt-2">
+              <Link to={slide.ctaLink}
+                className="px-7 py-3.5 bg-white text-[#2874F0] font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all text-sm">
+                {slide.cta} →
+              </Link>
+              <span className="text-white/60 text-sm flex items-center gap-1.5">
+                <span className="text-green-400 font-bold">✓</span> Free Shipping on orders over ₹2,000
               </span>
             </div>
-            <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-1">Featured Deal</p>
-            <p className="font-bold text-white text-sm line-clamp-1">Sony WH-1000XM5 Headphones</p>
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-xl font-extrabold text-[#FB641B]">₹20,994</span>
-              <span className="text-xs text-white/50 line-through">₹34,990</span>
+          </div>
+
+          {/* Right card placeholder */}
+          <div className="relative z-10 flex-shrink-0 w-[45%] md:w-80">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-4">
+              <div className="relative rounded-2xl overflow-hidden mb-4">
+                <ImgPlaceholder className="h-52 w-full" icon="💻" />
+                <span className="absolute top-3 right-3 bg-[#FB641B] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
+                  {slide.badge}
+                </span>
+              </div>
+              <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-1">Featured Deal</p>
+              <p className="font-bold text-white text-sm line-clamp-1">Sony WH-1000XM5 Headphones</p>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-xl font-extrabold text-[#FB641B]">₹20,994</span>
+                <span className="text-xs text-white/50 line-through">₹34,990</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Slide controls */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
-        <button onClick={prev}
-          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition">
-          ‹
-        </button>
-        {HERO_SLIDES.map((_, i) => (
-          <button key={i} onClick={() => setCurrent(i)}
-            className={`rounded-full transition-all duration-300 ${i === current ? 'w-7 h-2.5 bg-[#FB641B]' : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/70'}`} />
-        ))}
-        <button onClick={next}
-          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition">
-          ›
-        </button>
-      </div>
-    </section>
-    </div>
-  );
-}
-
-// ─────────────────────── SECTION: TRUST BAR ──────────────────────────────────
-
-function TrustBar() {
-  const items = [
-    { icon: '🚚', label: 'Free Delivery', sub: 'On orders over ₹2,000' },
-    { icon: '🔄', label: 'Easy Returns', sub: '30-day hassle-free policy' },
-    { icon: '🔒', label: 'Secure Payments', sub: 'SSL encrypted checkout' },
-    { icon: '🛠️', label: '24/7 Support', sub: 'Always here to help' },
-  ];
-  return (
-    <div className="bg-white border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
-          {items.map(it => (
-            <div key={it.label} className="flex items-center gap-3 py-4 px-4 sm:px-6">
-              <span className="text-2xl">{it.icon}</span>
-              <div>
-                <p className="text-sm font-bold text-gray-900">{it.label}</p>
-                <p className="text-xs text-gray-500">{it.sub}</p>
-              </div>
-            </div>
+        {/* Slide controls */}
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
+          <button onClick={prev}
+            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition">
+            ‹
+          </button>
+          {HERO_SLIDES.map((_, i) => (
+            <button key={i} onClick={() => setCurrent(i)}
+              className={`rounded-full transition-all duration-300 ${i === current ? 'w-7 h-2.5 bg-[#FB641B]' : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/70'}`} />
           ))}
+          <button onClick={next}
+            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition">
+            ›
+          </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
@@ -526,82 +498,18 @@ function BrandsSection() {
 
 
 
-function Footer() {
-  const LINKS = [
-    { label: 'Shop', to: '/shop' },
-    { label: 'Cart', to: '/cart' },
-    { label: 'Categories', to: '/shop?category=all' },
-    { label: 'Sign In', to: '/login' },
-    { label: 'Admin Portal', to: '/admin/dashboard' },
-  ];
-
-  return (
-    <footer className="bg-gray-900 text-gray-400 border-t border-gray-800">
-      <div className="w-full px-6 py-6 sm:px-10 lg:px-16">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 w-full">
-
-          {/* Left: Brand & Copyright */}
-          <div className="flex items-center gap-4 flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded bg-gradient-to-br from-[#FB641B] to-orange-500 flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-              <span className="font-bold text-white tracking-tight text-lg">RPD<span className="text-[#FB641B]">Store</span></span>
-            </div>
-            <span className="hidden md:block text-gray-600">|</span>
-            <span className="text-sm">
-              &copy; {new Date().getFullYear()} All rights reserved.
-            </span>
-          </div>
-
-          {/* Center: Quick Links spread out */}
-          <div className="flex-1 flex flex-wrap items-center justify-center gap-8 text-sm">
-            {LINKS.map(l => (
-              <Link key={l.label} to={l.to} className="hover:text-white hover:text-[#FB641B] transition-colors font-medium">
-                {l.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Right: Support & Top */}
-          <div className="flex items-center gap-6 text-sm flex-shrink-0">
-            <a href="mailto:support@rpdstore.com" className="flex items-center gap-1.5 hover:text-white hover:text-[#FB641B] transition-colors font-medium">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-              Support
-            </a>
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white transition-colors"
-              title="Back to Top"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </footer>
-  );
-}
-
 // ─────────────────────── PAGE ASSEMBLY ───────────────────────────────────────
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#F0F2F5]">
       <HeroSection />
-      <TrustBar />
       <CategoriesSection />
       <FlashSaleSection />
       <TopProductsSection />
       <PromoBanners />
       <NewArrivalsSection />
       <BrandsSection />
-      <Footer />
     </div>
   );
 }

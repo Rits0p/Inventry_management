@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import Footer from './Footer';
 
 export default function Layout({ role = 'Customer' }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,6 +34,9 @@ export default function Layout({ role = 'Customer' }) {
           </div>
         </main>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

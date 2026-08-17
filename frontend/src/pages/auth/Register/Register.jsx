@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../../../context/ThemeContext';
+ import { useTheme } from '../../../context/ThemeContext';
 
 export default function Register() {
   const { brandConfig } = useTheme();
