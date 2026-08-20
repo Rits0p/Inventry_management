@@ -14,27 +14,27 @@ export default function CartSummary({ itemCount = 0, subtotal = 0, delivery = 0,
   const total = subtotal + delivery;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-sm shadow-sm p-5 sticky top-24">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Price Details</h2>
+    <div className="bg-white dark:bg-[#1a1a24] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm p-5 sticky top-24">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Price Details</h2>
 
       <div className="space-y-3 text-sm">
         <div className="flex justify-between">
-          <span className="text-gray-600">
+          <span className="text-gray-600 dark:text-gray-400">
             Price ({itemCount} item{itemCount !== 1 ? 's' : ''})
           </span>
-          <span className="font-medium">₹{subtotal.toLocaleString('en-IN')}</span>
+          <span className="font-medium dark:text-white">₹{subtotal.toLocaleString('en-IN')}</span>
         </div>
 
         <div className="flex justify-between">
-          <span className="text-gray-600">Delivery Charges</span>
+          <span className="text-gray-600 dark:text-gray-400">Delivery Charges</span>
           <span className={delivery === 0 ? 'text-green-600 font-medium' : 'font-medium'}>
             {delivery === 0 ? 'FREE' : `₹${delivery}`}
           </span>
         </div>
 
-        <div className="border-t border-gray-200 pt-3 flex justify-between text-base font-bold">
-          <span>Total Amount</span>
-          <span>₹{total.toLocaleString('en-IN')}</span>
+        <div className="border-t border-gray-200 dark:border-white/10 pt-3 flex justify-between text-base font-bold">
+          <span className="dark:text-white">Total Amount</span>
+          <span className="dark:text-white">₹{total.toLocaleString('en-IN')}</span>
         </div>
       </div>
 

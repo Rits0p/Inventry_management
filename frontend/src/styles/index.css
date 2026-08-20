@@ -1,6 +1,6 @@
-@import "tailwindcss";
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap');
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-flipkart-blue: #2874F0;
@@ -12,6 +12,35 @@
   --font-display: 'Outfit', system-ui, sans-serif;
 }
 
+:root {
+  --page-bg: #F0F2F5;
+  --page-bg-secondary: #F1F3F6;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(0, 0, 0, 0.06);
+  --text-primary: #212121;
+  --text-secondary: #878787;
+}
+
+html.dark {
+  --page-bg: #0e0e14;
+  --page-bg-secondary: #0e0e14;
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #e5e7eb;
+  --text-secondary: #9ca3af;
+}
+
+html {
+  background-color: var(--page-bg);
+  transition: background-color 0.3s ease;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--page-bg);
+  color: var(--text-primary);
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -21,6 +50,35 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-15px, 15px) scale(0.95); }
+}
+
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-25px, 20px) scale(1.08); }
+  66% { transform: translate(20px, -10px) scale(0.92); }
+}
+
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(15px, -25px) scale(1.04); }
+}
+
+.auth-orb-1 {
+  animation: orbFloat1 20s ease-in-out infinite;
+}
+
+.auth-orb-2 {
+  animation: orbFloat2 25s ease-in-out infinite;
+}
+
+.auth-orb-3 {
+  animation: orbFloat3 18s ease-in-out infinite;
 }
 
 @media (min-width: 1024px) {

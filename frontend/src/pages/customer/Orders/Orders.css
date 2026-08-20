@@ -1,0 +1,391 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Orders Page — Modern Light Theme
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.orders-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  font-family: var(--font-sans);
+  padding: 2rem 1.5rem;
+}
+
+.orders-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.orders-header {
+  margin-bottom: 1.5rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.orders-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111;
+  font-family: var(--font-display);
+}
+
+.orders-subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* ── Filter Tabs ── */
+.orders-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  animation: fadeIn 0.5s ease-out 0.1s both;
+}
+
+.orders-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: white;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.orders-filter-btn:hover {
+  border-color: #e5e7eb;
+  color: #374151;
+}
+
+.orders-filter-btn.active {
+  background: linear-gradient(135deg, var(--color-flipkart-blue), #4a9af5);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(40, 116, 240, 0.3);
+}
+
+.orders-filter-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 9999px;
+}
+
+.orders-filter-btn.active .orders-filter-count {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Orders List ── */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── Empty State ── */
+.orders-empty {
+  background: white;
+  border-radius: 1rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.orders-empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+}
+
+.orders-empty-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111;
+  font-family: var(--font-display);
+}
+
+.orders-empty-desc {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.orders-empty-btn {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.75rem;
+  background: linear-gradient(135deg, var(--color-flipkart-orange), #ff8c42);
+  color: white;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s;
+  box-shadow: 0 4px 16px rgba(251, 100, 27, 0.3);
+}
+
+.orders-empty-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(251, 100, 27, 0.4);
+}
+
+/* ── Order Card ── */
+.orders-card {
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.orders-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.orders-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.orders-card-header:hover {
+  background: #f9fafb;
+}
+
+.orders-card-main {
+  flex: 1;
+}
+
+.orders-card-id {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-flipkart-blue);
+}
+
+.orders-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.125rem;
+}
+
+.orders-card-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.orders-card-amount {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+  font-family: var(--font-display);
+}
+
+.orders-status-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.orders-status-badge.delivered {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.orders-status-badge.shipped {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.orders-status-badge.processing {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.orders-status-badge.cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.orders-expand-icon {
+  font-size: 1.25rem;
+  color: #d1d5db;
+  transition: transform 0.3s;
+}
+
+.orders-card.expanded .orders-expand-icon {
+  color: var(--color-flipkart-blue);
+}
+
+/* ── Order Body (Expanded) ── */
+.orders-card-body {
+  padding: 0 1.5rem 1.5rem;
+  border-top: 1px solid #f3f4f6;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.orders-items {
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.orders-item {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.orders-item-icon {
+  font-size: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: white;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.orders-item-details {
+  flex: 1;
+}
+
+.orders-item-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.orders-item-meta {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.125rem;
+}
+
+/* ── Card Footer ── */
+.orders-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid #f3f4f6;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.orders-delivery-info {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.orders-cancelled-text {
+  color: #dc2626;
+}
+
+.orders-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.orders-btn-primary {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, var(--color-flipkart-blue), #4a9af5);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.orders-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 116, 240, 0.3);
+}
+
+.orders-btn-secondary {
+  padding: 0.5rem 1rem;
+  background: white;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.orders-btn-secondary:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+}
+
+/* ── Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.orders-card:nth-child(1) { animation-delay: 0s; }
+.orders-card:nth-child(2) { animation-delay: 0.1s; }
+.orders-card:nth-child(3) { animation-delay: 0.2s; }
+.orders-card:nth-child(4) { animation-delay: 0.3s; }
+
+/* ═══ Dark Mode ═══ */
+.dark .orders-page { background: #0e0e14; }
+.dark .orders-title { color: #fff; }
+.dark .orders-subtitle { color: #9ca3af; }
+.dark .orders-filter-btn { background: #1a1a24; color: #9ca3af; border-color: rgba(255,255,255,0.1); }
+.dark .orders-filter-btn:hover { border-color: rgba(255,255,255,0.2); color: #d1d5db; }
+.dark .orders-empty { background: #1a1a24; }
+.dark .orders-empty-title { color: #fff; }
+.dark .orders-empty-desc { color: #9ca3af; }
+.dark .orders-card { background: #1a1a24; }
+.dark .orders-card-header:hover { background: rgba(255,255,255,0.05); }
+.dark .orders-card-meta { color: #6b7280; }
+.dark .orders-card-amount { color: #fff; }
+.dark .orders-expand-icon { color: #6b7280; }
+.dark .orders-card-body { border-top-color: rgba(255,255,255,0.1); }
+.dark .orders-item { background: rgba(255,255,255,0.05); }
+.dark .orders-item-icon { background: rgba(255,255,255,0.05); }
+.dark .orders-item-name { color: #e5e7eb; }
+.dark .orders-item-meta { color: #6b7280; }
+.dark .orders-card-footer { border-top-color: rgba(255,255,255,0.1); }
+.dark .orders-delivery-info { color: #9ca3af; }
+.dark .orders-btn-secondary { background: #1a1a24; color: #d1d5db; border-color: rgba(255,255,255,0.1); }
+.dark .orders-btn-secondary:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }

@@ -1,182 +1,101 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import './Dashboard.css';
 
 export default function CustomerDashboard() {
-  // Mock data – replace with real API later
   const stats = [
-    {
-      title: 'Total Orders',
-      value: '12',
-      icon: '📦',
-      color: 'bg-blue-50 text-[#2874F0]',
-    },
-    {
-      title: 'Pending Orders',
-      value: '2',
-      icon: '⏳',
-      color: 'bg-yellow-50 text-yellow-700',
-    },
-    {
-      title: 'Delivered',
-      value: '9',
-      icon: '✅',
-      color: 'bg-green-50 text-green-700',
-    },
-    {
-      title: 'Cart Items',
-      value: '3',
-      icon: '🛒',
-      color: 'bg-orange-50 text-[#FB641B]',
-    },
+    { title: 'Total Orders', value: '12', icon: '📦', trend: '+2 this month' },
+    { title: 'Pending', value: '2', icon: '⏳', trend: '2 shipping' },
+    { title: 'Delivered', value: '9', icon: '✅', trend: '95% success' },
+    { title: 'Cart Items', value: '3', icon: '🛒', trend: '₹12,450 total' },
   ];
 
   const recentOrders = [
-    {
-      id: 'ORD-7845',
-      date: '15 Aug 2026',
-      amount: 4299,
-      status: 'Delivered',
-      items: 3,
-    },
-    {
-      id: 'ORD-7839',
-      date: '12 Aug 2026',
-      amount: 1899,
-      status: 'Shipped',
-      items: 1,
-    },
-    {
-      id: 'ORD-7821',
-      date: '05 Aug 2026',
-      amount: 3150,
-      status: 'Delivered',
-      items: 2,
-    },
+    { id: 'ORD-7845', date: '15 Aug 2026', amount: 4299, status: 'Delivered', items: 3, product: 'Sony WH-1000XM5' },
+    { id: 'ORD-7839', date: '12 Aug 2026', amount: 1899, status: 'Shipped', items: 1, product: 'Logitech MX Master 3S' },
+    { id: 'ORD-7821', date: '05 Aug 2026', amount: 3150, status: 'Delivered', items: 2, product: 'JBL Flip 6 Speaker' },
   ];
 
-  const getStatusBadge = (status) => {
-    const styles = {
-      Delivered: 'bg-green-100 text-green-700',
-      Shipped: 'bg-blue-100 text-blue-700',
-      Processing: 'bg-yellow-100 text-yellow-700',
-      Pending: 'bg-orange-100 text-orange-700',
-      Cancelled: 'bg-red-100 text-red-700',
-    };
-    return (
-      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-700'}`}>
-        {status}
-      </span>
-    );
-  };
+  const quickLinks = [
+    { title: 'Continue Shopping', desc: 'Browse latest products', icon: '🛍️', link: '/', color: 'purple' },
+    { title: 'My Cart', desc: '3 items ready to checkout', icon: '🛒', link: '/cart', color: 'orange' },
+    { title: 'My Orders', desc: 'Track your orders', icon: '📦', link: '/orders', color: 'green' },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Welcome */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">My Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Welcome back, John! Here’s an overview of your account.
-        </p>
-      </div>
+    <main className="dash-page">
+      <div className="dash-container">
+        {/* Header */}
+        <header className="dash-header">
+          <div>
+            <h1 className="dash-title">My Dashboard</h1>
+            <p className="dash-subtitle">Welcome back, John! Here's your account overview.</p>
+          </div>
+          <Link to="/shop" className="dash-shop-btn">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            Shop Now
+          </Link>
+        </header>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <div
-            key={stat.title}
-            className="bg-white border border-gray-200 rounded-sm shadow-sm p-5 hover:shadow-md transition"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-gray-500 font-medium">{stat.title}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+        {/* Stats Grid */}
+        <div className="dash-stats">
+          {stats.map((stat, idx) => (
+            <div key={stat.title} className="dash-stat-card" style={{'--delay': `${idx * 0.1}s`}}>
+              <div className="dash-stat-icon">{stat.icon}</div>
+              <div className="dash-stat-info">
+                <p className="dash-stat-value">{stat.value}</p>
+                <p className="dash-stat-title">{stat.title}</p>
               </div>
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center text-xl ${stat.color}`}>
-                {stat.icon}
-              </div>
+              <p className="dash-stat-trend">{stat.trend}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Main Content */}
+        <div className="dash-content">
+          {/* Quick Links */}
+          <div className="dash-card dash-quick-links">
+            <h2 className="dash-card-title">Quick Links</h2>
+            <div className="dash-links-list">
+              {quickLinks.map(link => (
+                <Link key={link.title} to={link.link} className={`dash-link-item ${link.color}`}>
+                  <span className="dash-link-icon">{link.icon}</span>
+                  <div>
+                    <p className="dash-link-title">{link.title}</p>
+                    <p className="dash-link-desc">{link.desc}</p>
+                  </div>
+                  <span className="dash-link-arrow">→</span>
+                </Link>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Quick Links */}
-        <div className="bg-white border border-gray-200 rounded-sm shadow-sm p-5">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Links</h2>
-          <div className="space-y-3">
-            <Link
-              to="/"
-              className="flex items-center gap-3 p-3 rounded-sm border border-gray-200 hover:border-[#2874F0] hover:bg-blue-50 transition"
-            >
-              <div className="w-10 h-10 rounded-full bg-blue-50 text-[#2874F0] flex items-center justify-center text-lg">
-                🛍️
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Continue Shopping</p>
-                <p className="text-xs text-gray-500">Browse latest products</p>
-              </div>
-            </Link>
-
-            <Link
-              to="/cart"
-              className="flex items-center gap-3 p-3 rounded-sm border border-gray-200 hover:border-[#2874F0] hover:bg-blue-50 transition"
-            >
-              <div className="w-10 h-10 rounded-full bg-orange-50 text-[#FB641B] flex items-center justify-center text-lg">
-                🛒
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">My Cart</p>
-                <p className="text-xs text-gray-500">3 items ready to checkout</p>
-              </div>
-            </Link>
-
-            <Link
-              to="/orders"
-              className="flex items-center gap-3 p-3 rounded-sm border border-gray-200 hover:border-[#2874F0] hover:bg-blue-50 transition"
-            >
-              <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-lg">
-                📦
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">My Orders</p>
-                <p className="text-xs text-gray-500">Track your orders</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Recent Orders */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
-            <Link to="/orders" className="text-sm font-medium text-[#2874F0] hover:underline">
-              View all
-            </Link>
-          </div>
-
-          <div className="divide-y divide-gray-100">
-            {recentOrders.map((order) => (
-              <div
-                key={order.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 hover:bg-gray-50 transition"
-              >
-                <div>
-                  <p className="font-medium text-[#2874F0]">{order.id}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">
-                    {order.date} • {order.items} item{order.items > 1 ? 's' : ''}
-                  </p>
+          {/* Recent Orders */}
+          <div className="dash-card dash-orders-card">
+            <div className="dash-card-header">
+              <h2 className="dash-card-title">Recent Orders</h2>
+              <Link to="/orders" className="dash-view-all">View All →</Link>
+            </div>
+            <div className="dash-orders-list">
+              {recentOrders.map(order => (
+                <div key={order.id} className="dash-order-item">
+                  <div className="dash-order-main">
+                    <p className="dash-order-id">{order.id}</p>
+                    <p className="dash-order-product">{order.product}</p>
+                    <p className="dash-order-date">{order.date} • {order.items} item{order.items > 1 ? 's' : ''}</p>
+                  </div>
+                  <div className="dash-order-meta">
+                    <p className="dash-order-amount">₹{order.amount.toLocaleString('en-IN')}</p>
+                    <span className={`dash-order-status ${order.status.toLowerCase()}`}>{order.status}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <p className="font-semibold text-gray-900">
-                    ₹{order.amount.toLocaleString('en-IN')}
-                  </p>
-                  {getStatusBadge(order.status)}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

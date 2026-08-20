@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Mail, Lock, ArrowRight, Package, Eye, EyeOff } from 'lucide-react';
 import ForgotPassword from './ForgotPassword';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -7,6 +8,7 @@ export default function Login() {
   const { brandConfig } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [showForgot, setShowForgot] = useState(false);
@@ -33,128 +35,214 @@ export default function Login() {
     if (!validate()) return;
 
     setIsLoading(true);
-    // TODO: call your Django JWT auth service
     console.log({ email, password });
     setTimeout(() => setIsLoading(false), 1200);
   };
 
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-flipkart-bg font-sans px-4">
-      
-      <div className="w-full max-w-[850px] bg-white rounded-sm shadow-[0_2px_4px_0_rgba(0,0,0,.08)] flex md:min-h-[528px] animate-[slideUp_0.4s_ease-out]">
-        
-        {/* Left Side (Brand Panel) */}
-        <div className="hidden md:flex flex-col justify-between w-[40%] bg-flipkart-blue px-8 py-10 text-white relative">
-          <div className="relative z-10">
-            <h2 className="text-[28px] font-semibold mb-4 tracking-tight">Login</h2>
-            <p className="text-[18px] text-white/80 leading-relaxed font-medium">
-              Get access to your Orders, Stock updates, and Recommendations
-            </p>
-          </div>
-          {/* Logo / Illustration */}
-          <div className="flex justify-center mt-auto relative z-10 pb-4">
-             <div className="text-8xl drop-shadow-lg">🛒</div>
-          </div>
+    <div
+      className="min-h-dvh flex items-center justify-center relative overflow-hidden font-sans px-4 transition-colors duration-300"
+      style={{ background: 'var(--page-bg)' }}
+    >
+      {/* ── Animated Background ── */}
+      <div className="absolute inset-0 -z-10">
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(135deg, rgba(40,116,240,0.07) 0%, var(--page-bg) 50%, rgba(251,100,27,0.05) 100%)',
+          }}
+        />
+        <div className="auth-orb-1 absolute w-[500px] h-[500px] rounded-full blur-[120px] top-[-10%] left-[-5%]"
+          style={{ background: 'rgba(40,116,240,0.12)' }} />
+        <div className="auth-orb-2 absolute w-[400px] h-[400px] rounded-full blur-[100px] bottom-[-8%] right-[-5%]"
+          style={{ background: 'rgba(251,100,27,0.10)' }} />
+        <div className="auth-orb-3 absolute w-[300px] h-[300px] rounded-full blur-[100px] top-[40%] right-[20%]"
+          style={{ background: 'rgba(139,92,246,0.06)' }} />
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, #2874F0 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+          }}
+        />
+      </div>
+
+      {/* ── Login Card ── */}
+      <div className="w-full max-w-[440px] animate-[slideUp_0.5s_ease-out]">
+
+        {/* Brand Header */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FB641B] to-[#e55a1a] flex items-center justify-center shadow-lg shadow-[#FB641B]/25 group-hover:scale-105 transition-transform duration-200">
+              <Package className="w-6 h-6 text-white" strokeWidth={2.2} />
+            </div>
+            <div className="text-left leading-none">
+              <span className="font-bold text-2xl tracking-tight font-[var(--font-display)]" style={{ color: 'var(--text-primary)' }}>
+                RPD<span className="text-[#FB641B]">.</span>
+              </span>
+              <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                Store
+              </span>
+            </div>
+          </Link>
+          <h1 className="text-2xl font-bold font-[var(--font-display)]" style={{ color: 'var(--text-primary)' }}>
+            Welcome back
+          </h1>
+          <p className="text-sm mt-1.5" style={{ color: 'var(--text-secondary)' }}>
+            Sign in to your account to continue
+          </p>
         </div>
 
-        {/* Right Side (Form Panel) */}
-        <div className="flex-1 px-8 py-12 md:px-12 flex flex-col relative">
-          
-          <form onSubmit={handleSubmit} noValidate className="flex-1 flex flex-col">
-            {/* Email Input */}
-            <div className="mb-6 relative">
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="peer w-full pt-4 pb-2 text-flipkart-text bg-transparent border-b border-[#e0e0e0] focus:border-flipkart-blue focus:outline-none transition-colors"
-                placeholder=" "
-              />
-              <label 
+        {/* Glass Card */}
+        <div
+          className="backdrop-blur-xl rounded-3xl p-8 md:p-10 transition-colors duration-300"
+          style={{
+            background: 'var(--card-bg)',
+            border: '1px solid var(--card-border)',
+            boxShadow: '0 8px 40px -12px rgba(0,0,0,0.1)',
+          }}
+        >
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+
+            {/* Email */}
+            <div>
+              <label
                 htmlFor="email"
-                className={`absolute left-0 transition-all duration-200 pointer-events-none text-[#878787] ${
-                  email ? '-top-2 text-[12px]' : 'top-3 text-[15px] peer-focus:-top-2 peer-focus:text-[12px]'
-                }`}
+                className="block text-xs font-semibold uppercase tracking-wider mb-2"
+                style={{ color: 'var(--text-secondary)' }}
               >
-                Enter Email/Mobile number
+                Email Address
               </label>
-              {emailError && <p className="mt-1 text-xs text-red-500">{emailError}</p>}
+              <div className="relative">
+                <Mail
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px]"
+                  style={{ color: 'var(--text-secondary)' }}
+                />
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2874F0]/30 focus:border-[#2874F0]/50 placeholder:opacity-40 transition-all duration-200"
+                  style={{
+                    color: 'var(--text-primary)',
+                    background: 'rgba(128,128,128,0.06)',
+                    border: '1px solid var(--card-border)',
+                  }}
+                  placeholder="you@example.com"
+                />
+              </div>
+              {emailError && (
+                <p className="mt-1.5 text-xs text-red-500 font-medium">{emailError}</p>
+              )}
             </div>
 
-            {/* Password Input */}
-            <div className="mb-2 relative">
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="peer w-full pt-4 pb-2 text-flipkart-text bg-transparent border-b border-[#e0e0e0] focus:border-flipkart-blue focus:outline-none transition-colors"
-                placeholder=" "
-              />
-              <label 
-                htmlFor="password"
-                className={`absolute left-0 transition-all duration-200 pointer-events-none text-[#878787] ${
-                  password ? '-top-2 text-[12px]' : 'top-3 text-[15px] peer-focus:-top-2 peer-focus:text-[12px]'
-                }`}
-              >
-                Enter Password
-              </label>
-              {passwordError && <p className="mt-1 text-xs text-red-500">{passwordError}</p>}
+            {/* Password */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-xs font-semibold uppercase tracking-wider"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowForgot(true)}
+                  className="text-xs font-medium text-[#2874F0] hover:underline transition-colors"
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <div className="relative">
+                <Lock
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px]"
+                  style={{ color: 'var(--text-secondary)' }}
+                />
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-11 pr-11 py-3.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2874F0]/30 focus:border-[#2874F0]/50 placeholder:opacity-40 transition-all duration-200"
+                  style={{
+                    color: 'var(--text-primary)',
+                    background: 'rgba(128,128,128,0.06)',
+                    border: '1px solid var(--card-border)',
+                  }}
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: 'var(--text-secondary)' }}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
+                </button>
+              </div>
+              {passwordError && (
+                <p className="mt-1.5 text-xs text-red-500 font-medium">{passwordError}</p>
+              )}
             </div>
 
-            {/* Forgot Password */}
-            <div className="flex justify-end mb-8">
-              <button
-                type="button"
-                onClick={() => setShowForgot(true)}
-                className="text-[14px] text-flipkart-blue hover:underline font-medium"
-              >
-                Forgot?
-              </button>
-            </div>
-
-            {/* Terms text */}
-            <p className="text-[12px] text-[#878787] mb-4 leading-relaxed">
-              By continuing, you agree to {brandConfig.companyName}'s <a href="#" className="text-flipkart-blue">Terms of Use</a> and <a href="#" className="text-flipkart-blue">Privacy Policy</a>.
+            {/* Terms */}
+            <p className="text-[11px] leading-relaxed -mt-1" style={{ color: 'var(--text-secondary)' }}>
+              By continuing, you agree to {brandConfig.companyName}'s{' '}
+              <a href="#" className="text-[#2874F0] hover:underline">Terms of Use</a> and{' '}
+              <a href="#" className="text-[#2874F0] hover:underline">Privacy Policy</a>.
             </p>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 bg-flipkart-orange text-white font-medium shadow-[0_1px_2px_0_rgba(0,0,0,.2)] hover:shadow-[0_2px_4px_0_rgba(0,0,0,.2)] transition-shadow flex justify-center items-center rounded-sm min-h-[48px]"
+              className="w-full py-3.5 bg-gradient-to-r from-[#FB641B] to-[#e55a1a] text-white font-semibold text-sm rounded-xl shadow-lg shadow-[#FB641B]/20 hover:shadow-[#FB641B]/30 hover:brightness-110 active:scale-[0.98] transition-all duration-200 flex justify-center items-center gap-2 min-h-[48px] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                'Login'
+                <>
+                  Sign In
+                  <ArrowRight className="w-4 h-4" />
+                </>
               )}
             </button>
-
-            {/* Divider */}
-            <div className="flex items-center justify-center my-4">
-              <span className="text-[#878787] text-[15px]">OR</span>
-            </div>
-
-            {/* Request OTP (Alternative Action) */}
-            <button
-              type="button"
-              className="w-full py-3.5 bg-white text-flipkart-blue font-medium shadow-[0_1px_2px_0_rgba(0,0,0,.2)] border border-[#e0e0e0] hover:shadow-[0_2px_4px_0_rgba(0,0,0,.2)] transition-shadow rounded-sm"
-            >
-              Request OTP
-            </button>
-            
-            {/* Create Account link */}
-            <div className="mt-auto pt-8 text-center">
-              <Link to="/register" className="text-flipkart-blue font-medium text-[14px] hover:underline">
-                New to {brandConfig.companyName}? Create an account
-              </Link>
-            </div>
-
           </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-6">
+            <div className="flex-1 h-px" style={{ background: 'var(--card-border)' }} />
+            <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>or</span>
+            <div className="flex-1 h-px" style={{ background: 'var(--card-border)' }} />
+          </div>
+
+          {/* Request OTP */}
+          <button
+            type="button"
+            className="w-full py-3.5 backdrop-blur-sm font-medium text-sm rounded-xl transition-all duration-200 cursor-pointer hover:brightness-95"
+            style={{
+              color: 'var(--text-primary)',
+              background: 'rgba(128,128,128,0.06)',
+              border: '1px solid var(--card-border)',
+            }}
+          >
+            Request OTP
+          </button>
+        </div>
+
+        {/* Footer Link */}
+        <div className="text-center mt-6">
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            New to {brandConfig.companyName}?{' '}
+            <Link to="/register" className="font-semibold text-[#2874F0] hover:underline transition-colors">
+              Create an account
+            </Link>
+          </p>
         </div>
       </div>
 

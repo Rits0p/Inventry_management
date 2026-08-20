@@ -19,7 +19,6 @@ const CATEGORIES = [
 const ACCOUNT_LINKS = [
   { label: 'Sign In', to: '/login' },
   { label: 'Create Account', to: '/register' },
-  { label: 'Admin Portal', to: '/admin/dashboard' },
 ];
 
 export default function Footer() {
@@ -132,7 +131,7 @@ export default function Footer() {
               {CATEGORIES.map((cat) => (
                 <li key={cat.slug}>
                   <Link
-                    to={`/shop?category=${cat.slug}`}
+                    to={`/categories/${cat.slug}`}
                     className="text-sm text-gray-500 hover:text-white transition-colors duration-200 inline-flex items-center justify-between w-full group/cat"
                   >
                     <span>{cat.name}</span>
@@ -156,9 +155,6 @@ export default function Footer() {
                     className="text-sm text-gray-500 hover:text-white transition-colors duration-200 inline-flex items-center gap-1.5"
                   >
                     {link.label}
-                    {link.to === '/admin/dashboard' && (
-                      <span className="text-[#FB641B] text-xs">&rarr;</span>
-                    )}
                   </Link>
                 </li>
               ))}

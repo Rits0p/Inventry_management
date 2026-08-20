@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import './Orders.css';
 
 const initialOrders = [
   {
@@ -8,7 +9,7 @@ const initialOrders = [
     amount: 4299,
     status: 'Delivered',
     items: [
-      { name: 'Sony WH-1000XM5 Headphones', qty: 1, price: 29990, image: 'https://via.placeholder.com/60' },
+      { name: 'Sony WH-1000XM5 Headphones', qty: 1, price: 29990, icon: '🎧' },
     ],
     deliveryDate: '18 Aug 2026',
   },
@@ -18,7 +19,7 @@ const initialOrders = [
     amount: 1899,
     status: 'Shipped',
     items: [
-      { name: 'Logitech MX Master 3S', qty: 1, price: 8995, image: 'https://via.placeholder.com/60' },
+      { name: 'Logitech MX Master 3S', qty: 1, price: 8995, icon: '🖱️' },
     ],
     deliveryDate: 'Expected by 17 Aug 2026',
   },
@@ -28,8 +29,8 @@ const initialOrders = [
     amount: 3150,
     status: 'Delivered',
     items: [
-      { name: 'Stainless Steel Water Bottle', qty: 2, price: 599, image: 'https://via.placeholder.com/60' },
-      { name: 'Cotton T-Shirt Pack', qty: 1, price: 899, image: 'https://via.placeholder.com/60' },
+      { name: 'Stainless Steel Water Bottle', qty: 2, price: 599, icon: '🧴' },
+      { name: 'Cotton T-Shirt Pack', qty: 1, price: 899, icon: '👕' },
     ],
     deliveryDate: '09 Aug 2026',
   },
@@ -39,7 +40,7 @@ const initialOrders = [
     amount: 7495,
     status: 'Cancelled',
     items: [
-      { name: 'Nike Air Force 1 Low', qty: 1, price: 7495, image: 'https://via.placeholder.com/60' },
+      { name: 'Nike Air Force 1 Low', qty: 1, price: 7495, icon: '👟' },
     ],
     deliveryDate: null,
   },
@@ -48,140 +49,107 @@ const initialOrders = [
 export default function CustomerOrders() {
   const [orders] = useState(initialOrders);
   const [statusFilter, setStatusFilter] = useState('All');
+  const [expandedOrder, setExpandedOrder] = useState(null);
 
-  const filtered = statusFilter === 'All'
-    ? orders
-    : orders.filter((o) => o.status === statusFilter);
+  const filtered = statusFilter === 'All' ? orders : orders.filter(o => o.status === statusFilter);
 
-  const getStatusBadge = (status) => {
-    const styles = {
-      Delivered: 'bg-green-100 text-green-700',
-      Shipped: 'bg-blue-100 text-blue-700',
-      Processing: 'bg-yellow-100 text-yellow-700',
-      Pending: 'bg-orange-100 text-orange-700',
-      Cancelled: 'bg-red-100 text-red-700',
-    };
-    return (
-      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-700'}`}>
-        {status}
-      </span>
-    );
+  const toggleExpand = (id) => {
+    setExpandedOrder(expandedOrder === id ? null : id);
+  };
+
+  const statusCounts = {
+    All: orders.length,
+    Delivered: orders.filter(o => o.status === 'Delivered').length,
+    Shipped: orders.filter(o => o.status === 'Shipped').length,
+    Cancelled: orders.filter(o => o.status === 'Cancelled').length,
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
-        <p className="text-sm text-gray-500 mt-1">Track and manage your orders</p>
-      </div>
+    <main className="orders-page">
+      <div className="orders-container">
+        {/* Header */}
+        <header className="orders-header">
+          <h1 className="orders-title">My Orders</h1>
+          <p className="orders-subtitle">Track and manage your orders</p>
+        </header>
 
-      {/* Status Filters */}
-      <div className="flex flex-wrap gap-2">
-        {['All', 'Delivered', 'Shipped', 'Processing', 'Cancelled'].map((status) => (
-          <button
-            key={status}
-            onClick={() => setStatusFilter(status)}
-            className={`px-4 py-2 rounded-sm text-sm font-medium transition ${
-              statusFilter === status
-                ? 'bg-[#2874F0] text-white'
-                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            {status}
-          </button>
-        ))}
-      </div>
-
-      {/* Orders List */}
-      <div className="space-y-4">
-        {filtered.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-sm shadow-sm p-12 text-center">
-            <div className="text-5xl mb-3">📦</div>
-            <h3 className="text-lg font-semibold text-gray-900">No orders found</h3>
-            <p className="text-gray-500 mt-1">You haven’t placed any orders yet.</p>
-            <Link
-              to="/"
-              className="inline-block mt-5 px-6 py-2.5 bg-[#FB641B] hover:bg-[#e55a15] text-white font-medium rounded-sm transition"
+        {/* Filter Tabs */}
+        <div className="orders-filters">
+          {['All', 'Delivered', 'Shipped', 'Cancelled'].map(status => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              className={`orders-filter-btn ${statusFilter === status ? 'active' : ''}`}
             >
-              Start Shopping
-            </Link>
-          </div>
-        ) : (
-          filtered.map((order) => (
-            <div
-              key={order.id}
-              className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden"
-            >
-              {/* Order Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 bg-gray-50 border-b border-gray-200">
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
-                  <div>
-                    <span className="text-gray-500">Order ID:</span>{' '}
-                    <span className="font-medium text-[#2874F0]">{order.id}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Ordered on:</span>{' '}
-                    <span className="font-medium text-gray-900">{order.date}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Total:</span>{' '}
-                    <span className="font-bold text-gray-900">
-                      ₹{order.amount.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-                </div>
-                <div>{getStatusBadge(order.status)}</div>
-              </div>
+              <span>{status}</span>
+              <span className="orders-filter-count">{statusCounts[status]}</span>
+            </button>
+          ))}
+        </div>
 
-              {/* Order Items */}
-              <div className="p-5 space-y-4">
-                {order.items.map((item, idx) => (
-                  <div key={idx} className="flex gap-4">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-16 h-16 object-cover rounded border border-gray-200 flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 line-clamp-2">{item.name}</p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Qty: {item.qty} • ₹{item.price.toLocaleString('en-IN')}
-                      </p>
+        {/* Orders List */}
+        <div className="orders-list">
+          {filtered.length === 0 ? (
+            <div className="orders-empty">
+              <div className="orders-empty-icon">📦</div>
+              <h3 className="orders-empty-title">No orders found</h3>
+              <p className="orders-empty-desc">You haven't placed any orders yet.</p>
+              <Link to="/" className="orders-empty-btn">Start Shopping</Link>
+            </div>
+          ) : (
+            filtered.map(order => (
+              <div key={order.id} className={`orders-card ${expandedOrder === order.id ? 'expanded' : ''}`}>
+                {/* Order Header */}
+                <div className="orders-card-header" onClick={() => toggleExpand(order.id)}>
+                  <div className="orders-card-main">
+                    <div className="orders-card-id">{order.id}</div>
+                    <div className="orders-card-meta">
+                      <span>{order.date}</span>
+                      <span>•</span>
+                      <span>{order.items.length} item{order.items.length > 1 ? 's' : ''}</span>
                     </div>
                   </div>
-                ))}
-
-                {/* Footer */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-gray-100">
-                  <p className="text-sm text-gray-600">
-                    {order.status === 'Delivered' && (
-                      <>Delivered on <span className="font-medium">{order.deliveryDate}</span></>
-                    )}
-                    {order.status === 'Shipped' && (
-                      <>{order.deliveryDate}</>
-                    )}
-                    {order.status === 'Cancelled' && (
-                      <span className="text-red-600">Order was cancelled</span>
-                    )}
-                  </p>
-
-                  <div className="flex gap-3">
-                    {order.status === 'Delivered' && (
-                      <button className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-sm hover:bg-gray-50 transition">
-                        Buy Again
-                      </button>
-                    )}
-                    <button className="px-4 py-2 text-sm font-medium text-[#2874F0] border border-[#2874F0] rounded-sm hover:bg-blue-50 transition">
-                      View Details
-                    </button>
+                  <div className="orders-card-right">
+                    <span className="orders-card-amount">₹{order.amount.toLocaleString('en-IN')}</span>
+                    <span className={`orders-status-badge ${order.status.toLowerCase()}`}>{order.status}</span>
                   </div>
+                  <span className="orders-expand-icon">{expandedOrder === order.id ? '−' : '+'}</span>
                 </div>
+
+                {/* Order Items (Expandable) */}
+                {expandedOrder === order.id && (
+                  <div className="orders-card-body">
+                    <div className="orders-items">
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="orders-item">
+                          <div className="orders-item-icon">{item.icon}</div>
+                          <div className="orders-item-details">
+                            <p className="orders-item-name">{item.name}</p>
+                            <p className="orders-item-meta">Qty: {item.qty} • ₹{item.price.toLocaleString('en-IN')}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="orders-card-footer">
+                      <p className="orders-delivery-info">
+                        {order.status === 'Delivered' && <>Delivered on <strong>{order.deliveryDate}</strong></>}
+                        {order.status === 'Shipped' && <>{order.deliveryDate}</>}
+                        {order.status === 'Cancelled' && <span className="orders-cancelled-text">Order was cancelled</span>}
+                      </p>
+                      <div className="orders-card-actions">
+                        {order.status === 'Delivered' && (
+                          <button className="orders-btn-secondary">Buy Again</button>
+                        )}
+                        <button className="orders-btn-primary">View Details</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          ))
-        )}
+            ))
+          )}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

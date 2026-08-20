@@ -49,3 +49,27 @@ Location: `/frontend`
 - Prioritize high-quality typography (Inter, Roboto, Outfit) over browser defaults.
 - No Tailwind CSS unless explicitly requested and version confirmed. Use Vanilla CSS by default.
 - Include SEO best practices on every page (Title Tags, Meta Descriptions, Semantic HTML).
+
+## Token Optimization Rules
+- **Do NOT read entire files** unless absolutely necessary. Use `CLAUDE.md` for project context.
+- **Use targeted searches** (grep, glob) to find specific code patterns before reading files.
+- **Read only relevant sections** — use offset/limit parameters when reading large files.
+- **Batch parallel reads** — read multiple small files simultaneously instead of sequentially.
+- **Prefer edit over write** — always edit existing files rather than rewriting them.
+
+## Skills Design Context
+- Skills live in `.opencode/skills/<name>/SKILL.md`
+- **Frontmatter required**: `name` (lowercase-hyphen, ≤64 chars), `description` (effectively required)
+- **Description must include**:
+  - What the skill does
+  - When to trigger it (front-load keywords/filenames)
+  - Gate with `"Use ONLY when..."` to prevent false triggers
+- **Token efficiency**: Skills without descriptions are filtered out and never sent to the model
+- **Write in third person**: "Use when..." not "I help with..."
+- **Example**:
+  ```markdown
+  ---
+  name: api-design
+  description: Use ONLY when designing new API endpoints or modifying route definitions in OpenAPI/Swagger files. Do not use for general backend code changes.
+  ---
+  ```

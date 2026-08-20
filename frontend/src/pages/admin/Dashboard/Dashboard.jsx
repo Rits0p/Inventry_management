@@ -1,41 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import './Dashboard.css';
 
 export default function Dashboard() {
-  // Mock stats – replace with real API later
   const stats = [
-    {
-      title: 'Total Products',
-      value: '1,248',
-      change: '+12%',
-      changeType: 'up',
-      icon: '📦',
-      color: 'bg-blue-50 text-[#2874F0]',
-    },
-    {
-      title: 'Total Orders',
-      value: '3,245',
-      change: '+8.2%',
-      changeType: 'up',
-      icon: '🛒',
-      color: 'bg-orange-50 text-[#FB641B]',
-    },
-    {
-      title: 'Low Stock Items',
-      value: '47',
-      change: 'Needs attention',
-      changeType: 'warning',
-      icon: '⚠️',
-      color: 'bg-yellow-50 text-yellow-700',
-    },
-    {
-      title: 'Revenue (This Month)',
-      value: '₹8,42,500',
-      change: '+18%',
-      changeType: 'up',
-      icon: '💰',
-      color: 'bg-green-50 text-green-700',
-    },
+    { title: 'Total Products', value: '1,248', change: '+12%', trend: 'up', icon: '📦' },
+    { title: 'Total Orders', value: '3,245', change: '+8.2%', trend: 'up', icon: '🛒' },
+    { title: 'Low Stock', value: '47', change: 'Needs attention', trend: 'warning', icon: '⚠️' },
+    { title: 'Revenue', value: '₹8,42,500', change: '+18%', trend: 'up', icon: '💰' },
   ];
 
   const recentOrders = [
@@ -46,154 +18,92 @@ export default function Dashboard() {
     { id: '#ORD-7821', customer: 'Vikram Singh', amount: '₹3,150', status: 'Cancelled', date: '13 Aug 2026' },
   ];
 
-  const getStatusColor = (status) => {
-    const map = {
-      Delivered: 'bg-green-100 text-green-700',
-      Shipped: 'bg-blue-100 text-blue-700',
-      Processing: 'bg-yellow-100 text-yellow-700',
-      Cancelled: 'bg-red-100 text-red-700',
-    };
-    return map[status] || 'bg-gray-100 text-gray-700';
-  };
+  const quickActions = [
+    { title: 'Add Product', desc: 'Create a new listing', icon: '+', link: '/admin/products/add', color: 'orange' },
+    { title: 'Manage Categories', desc: 'Add or edit categories', icon: '🗂️', link: '/admin/categories', color: 'blue' },
+    { title: 'View Orders', desc: 'Process pending orders', icon: '📦', link: '/admin/orders', color: 'green' },
+    { title: 'Check Low Stock', desc: '47 items need attention', icon: '📉', link: '/admin/stock', color: 'amber' },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Welcome back! Here's what's happening today.</p>
-      </div>
+    <main className="dash-page dark:bg-[#0e0e14]">
+      <div className="dash-container">
+        {/* Header */}
+        <header className="dash-header">
+          <div>
+            <h1 className="dash-title dark:text-white">Admin Dashboard</h1>
+            <p className="dash-subtitle dark:text-gray-400">Welcome back! Here's what's happening today.</p>
+          </div>
+        </header>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <div
-            key={stat.title}
-            className="bg-white border border-gray-200 rounded-sm shadow-sm p-5 hover:shadow-md transition"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-gray-500 font-medium">{stat.title}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                <p
-                  className={`text-xs mt-2 font-medium ${
-                    stat.changeType === 'up'
-                      ? 'text-green-600'
-                      : stat.changeType === 'warning'
-                      ? 'text-yellow-600'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  {stat.change}
-                </p>
+        {/* Stats Grid */}
+        <div className="dash-stats">
+          {stats.map((stat, idx) => (
+            <div key={stat.title} className="dash-stat-card dark:bg-[#1a1a24]" style={{'--delay': `${idx * 0.1}s`}}>
+              <div className="dash-stat-icon">{stat.icon}</div>
+              <div className="dash-stat-info">
+                <p className="dash-stat-value dark:text-white">{stat.value}</p>
+                <p className="dash-stat-title dark:text-gray-400">{stat.title}</p>
               </div>
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center text-xl ${stat.color}`}>
-                {stat.icon}
-              </div>
+              <p className={`dash-stat-change ${stat.trend}`}>{stat.change}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Main Content */}
+        <div className="dash-content">
+          {/* Quick Actions */}
+          <div className="dash-card dash-quick-links dark:bg-[#1a1a24]">
+            <h2 className="dash-card-title dark:text-white">Quick Actions</h2>
+            <div className="dash-links-list">
+              {quickActions.map(action => (
+                <Link key={action.title} to={action.link} className={`dash-link-item ${action.color}`}>
+                  <span className="dash-link-icon">{action.icon}</span>
+                  <div>
+                    <p className="dash-link-title dark:text-white">{action.title}</p>
+                    <p className="dash-link-desc dark:text-gray-400">{action.desc}</p>
+                  </div>
+                  <span className="dash-link-arrow">→</span>
+                </Link>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Quick Actions + Recent Orders */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Quick Actions */}
-        <div className="bg-white border border-gray-200 rounded-sm shadow-sm p-5">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="space-y-3">
-            <Link
-              to="/admin/products/add"
-              className="flex items-center gap-3 p-3 rounded-sm border border-gray-200 hover:border-[#2874F0] hover:bg-blue-50 transition group"
-            >
-              <div className="w-10 h-10 rounded-full bg-[#FB641B]/10 text-[#FB641B] flex items-center justify-center group-hover:bg-[#FB641B] group-hover:text-white transition">
-                +
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Add Product</p>
-                <p className="text-xs text-gray-500">Create a new product listing</p>
-              </div>
-            </Link>
-
-            <Link
-              to="/admin/categories"
-              className="flex items-center gap-3 p-3 rounded-sm border border-gray-200 hover:border-[#2874F0] hover:bg-blue-50 transition group"
-            >
-              <div className="w-10 h-10 rounded-full bg-blue-50 text-[#2874F0] flex items-center justify-center">
-                🗂️
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Manage Categories</p>
-                <p className="text-xs text-gray-500">Add or edit categories</p>
-              </div>
-            </Link>
-
-            <Link
-              to="/admin/orders"
-              className="flex items-center gap-3 p-3 rounded-sm border border-gray-200 hover:border-[#2874F0] hover:bg-blue-50 transition group"
-            >
-              <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
-                📦
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">View Orders</p>
-                <p className="text-xs text-gray-500">Process pending orders</p>
-              </div>
-            </Link>
-
-            <Link
-              to="/admin/stock"
-              className="flex items-center gap-3 p-3 rounded-sm border border-gray-200 hover:border-[#2874F0] hover:bg-blue-50 transition group"
-            >
-              <div className="w-10 h-10 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center">
-                📉
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Check Low Stock</p>
-                <p className="text-xs text-gray-500">47 items need attention</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Recent Orders */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
-            <Link to="/admin/orders" className="text-sm font-medium text-[#2874F0] hover:underline">
-              View all
-            </Link>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left">
-                <tr>
-                  <th className="px-5 py-3 font-medium text-gray-600">Order ID</th>
-                  <th className="px-5 py-3 font-medium text-gray-600">Customer</th>
-                  <th className="px-5 py-3 font-medium text-gray-600">Amount</th>
-                  <th className="px-5 py-3 font-medium text-gray-600">Status</th>
-                  <th className="px-5 py-3 font-medium text-gray-600">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-5 py-3.5 font-medium text-[#2874F0]">{order.id}</td>
-                    <td className="px-5 py-3.5 text-gray-900">{order.customer}</td>
-                    <td className="px-5 py-3.5 font-medium">{order.amount}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 text-gray-500">{order.date}</td>
+          {/* Recent Orders Table */}
+          <div className="dash-card dash-table-card dark:bg-[#1a1a24]">
+            <div className="dash-card-header">
+              <h2 className="dash-card-title dark:text-white">Recent Orders</h2>
+              <Link to="/admin/orders" className="dash-view-all">View All →</Link>
+            </div>
+            <div className="dash-table-wrapper">
+              <table className="dash-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {recentOrders.map(order => (
+                    <tr key={order.id}>
+                      <td className="dash-table-id">{order.id}</td>
+                      <td>{order.customer}</td>
+                      <td className="dash-table-amount">{order.amount}</td>
+                      <td>
+                        <span className={`dash-table-status ${order.status.toLowerCase()}`}>{order.status}</span>
+                      </td>
+                      <td className="dash-table-date">{order.date}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

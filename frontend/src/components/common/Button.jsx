@@ -19,11 +19,11 @@ const variants = {
   secondary:
     'bg-[#FB641B] hover:bg-[#e55a15] text-white border border-transparent',
   outline:
-    'bg-white border border-[#2874F0] text-[#2874F0] hover:bg-blue-50',
+    'bg-white dark:bg-transparent border border-[#2874F0] text-[#2874F0] hover:bg-blue-50 dark:hover:bg-blue-500/10',
   danger:
     'bg-red-600 hover:bg-red-700 text-white border border-transparent',
   ghost:
-    'bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50',
+    'bg-transparent border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5',
 };
 
 const sizes = {

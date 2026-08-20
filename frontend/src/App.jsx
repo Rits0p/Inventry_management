@@ -19,10 +19,16 @@ import AdminStock from './pages/admin/Stock/Stock';
 // Customer pages
 import Home from './pages/customer/Home/Home';
 import Shop from './pages/customer/Shop/Shop';
+import Categories from './pages/customer/Categories/Categories';
+import CategoryDetail from './pages/customer/CategoryDetail/CategoryDetail';
+import FlashDeals from './pages/customer/FlashDeals/FlashDeals';
+import TopSelling from './pages/customer/TopSelling/TopSelling';
+import NewArrivals from './pages/customer/NewArrivals/NewArrivals';
 import CustomerDashboard from './pages/customer/Dashboard/Dashboard';
 import Cart from './pages/customer/Cart/Cart';
 import CustomerOrders from './pages/customer/Orders/Orders';
 import ProductDetail from './pages/customer/ProductDetail/ProductDetail';
+import Profile from './pages/customer/Profile/Profile';
 
 // Error pages
 import NotFound from './pages/errors/NotFound';
@@ -57,10 +63,16 @@ function App() {
               <Route path="/" element={<Layout role="Customer" />}>
                 <Route index element={<Home />} />
                 <Route path="shop" element={<Shop />} />
+                <Route path="flash-deals" element={<FlashDeals />} />
+                <Route path="top-selling" element={<TopSelling />} />
+                <Route path="new-arrivals" element={<NewArrivals />} />
+                <Route path="categories" element={<Categories />} />
+                <Route path="categories/:slug" element={<CategoryDetail />} />
                 <Route path="product/:id" element={<ProductDetail />} />
                 <Route path="dashboard" element={<CustomerDashboard />} />
                 <Route path="cart" element={<Cart />} />
                 <Route path="orders" element={<CustomerOrders />} />
+                <Route path="profile" element={<Profile />} />
               </Route>
 
               {/* 404 – catch all */}

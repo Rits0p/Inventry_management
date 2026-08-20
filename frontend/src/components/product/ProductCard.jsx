@@ -10,10 +10,10 @@ import { Link } from 'react-router-dom';
  */
 export default function ProductCard({ product, onAddToCart }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-sm shadow-sm hover:shadow-md transition group overflow-hidden">
+    <div className="bg-white dark:bg-[#1a1a24] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm hover:shadow-md transition group overflow-hidden">
       {/* Image */}
       <Link to={`/product/${product.id}`} className="block relative">
-        <div className="aspect-square bg-gray-50 flex items-center justify-center p-4">
+        <div className="aspect-square bg-gray-50 dark:bg-white/5 flex items-center justify-center p-4">
           <img
             src={product.image}
             alt={product.name}
@@ -29,10 +29,10 @@ export default function ProductCard({ product, onAddToCart }) {
 
       {/* Info */}
       <div className="p-3 space-y-1.5">
-        <p className="text-xs text-gray-500 font-medium">{product.brand}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{product.brand}</p>
 
         <Link to={`/product/${product.id}`}>
-          <h3 className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug hover:text-[#2874F0] transition">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 leading-snug hover:text-[#2874F0] transition">
             {product.name}
           </h3>
         </Link>
@@ -42,18 +42,18 @@ export default function ProductCard({ product, onAddToCart }) {
           <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-green-600 text-white text-[11px] font-medium rounded">
             {product.rating} ★
           </span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             ({product.reviews?.toLocaleString()})
           </span>
         </div>
 
         {/* Price */}
         <div className="flex items-baseline gap-2 pt-1">
-          <span className="text-base font-bold text-gray-900">
+          <span className="text-base font-bold text-gray-900 dark:text-white">
             ₹{Number(product.price).toLocaleString('en-IN')}
           </span>
           {product.originalPrice && (
-            <span className="text-xs text-gray-500 line-through">
+            <span className="text-xs text-gray-500 dark:text-gray-400 line-through">
               ₹{Number(product.originalPrice).toLocaleString('en-IN')}
             </span>
           )}

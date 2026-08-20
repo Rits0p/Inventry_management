@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
- import { useTheme } from '../../../context/ThemeContext';
+import { User, Mail, Lock, ArrowRight, Package } from 'lucide-react';
+import { useTheme } from '../../../context/ThemeContext';
 
 export default function Register() {
   const { brandConfig } = useTheme();
@@ -8,7 +9,6 @@ export default function Register() {
     fullName: '',
     email: '',
     password: '',
-    role: 'Customer', // default role
   });
 
   const [errors, setErrors] = useState({});
@@ -35,150 +35,148 @@ export default function Register() {
     if (!validate()) return;
 
     setIsLoading(true);
-    // TODO: call your Django register endpoint
     console.log(formData);
     setTimeout(() => setIsLoading(false), 1200);
   };
 
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-flipkart-bg font-sans px-4">
-      
-      <div className="w-full max-w-[850px] bg-white rounded-sm shadow-[0_2px_4px_0_rgba(0,0,0,.08)] flex md:min-h-[528px] animate-[slideUp_0.4s_ease-out]">
-        
-        {/* Left Side (Brand Panel) */}
-        <div className="hidden md:flex flex-col justify-between w-[40%] bg-flipkart-blue px-8 py-10 text-white relative">
-          <div className="relative z-10">
-            <h2 className="text-[28px] font-semibold mb-4 tracking-tight">Looks like you're new here!</h2>
-            <p className="text-[18px] text-white/80 leading-relaxed font-medium">
-              Sign up with your details to get started
-            </p>
-          </div>
-          <div className="flex justify-center mt-auto relative z-10 pb-4">
-             <div className="text-8xl drop-shadow-lg">🚀</div>
-          </div>
+    <div className="min-h-dvh flex items-center justify-center relative overflow-hidden bg-[var(--page-bg)] font-sans px-4 transition-colors duration-300">
+
+      {/* ── Animated Background ── */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#2874F0]/8 to-[#FB641B]/6 transition-colors duration-300" style={{ background: 'linear-gradient(to bottom right, rgba(40,116,240,0.08), var(--page-bg), rgba(251,100,27,0.06))' }} />
+        <div className="auth-orb-1 absolute w-[500px] h-[500px] rounded-full bg-[#2874F0]/15 dark:bg-[#2874F0]/10 blur-[120px] top-[-10%] left-[-5%]" />
+        <div className="auth-orb-2 absolute w-[400px] h-[400px] rounded-full bg-[#FB641B]/12 dark:bg-[#FB641B]/8 blur-[100px] bottom-[-8%] right-[-5%]" />
+        <div className="auth-orb-3 absolute w-[300px] h-[300px] rounded-full bg-emerald-400/8 dark:bg-emerald-500/5 blur-[100px] top-[35%] left-[20%]" />
+        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.04]" style={{
+          backgroundImage: 'radial-gradient(circle, #2874F0 1px, transparent 1px)',
+          backgroundSize: '40px 40px'
+        }} />
+      </div>
+
+      {/* ── Glass Card ── */}
+      <div className="w-full max-w-[440px] animate-[slideUp_0.5s_ease-out]">
+
+        {/* Brand Header */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FB641B] to-[#e55a1a] flex items-center justify-center shadow-lg shadow-[#FB641B]/25 dark:shadow-[#FB641B]/15">
+              <Package className="w-6 h-6 text-white" strokeWidth={2.2} />
+            </div>
+            <div className="text-left leading-none">
+              <span className="font-bold text-flipkart-text dark:text-white tracking-tight text-2xl font-[var(--font-display)]">
+                RPD<span className="text-[#FB641B]">.</span>
+              </span>
+              <span className="block text-[10px] uppercase tracking-[0.2em] text-flipkart-muted dark:text-gray-500 font-semibold mt-0.5">
+                Store
+              </span>
+            </div>
+          </Link>
+          <h1 className="text-2xl font-bold text-flipkart-text dark:text-white font-[var(--font-display)]">
+            Create your account
+          </h1>
+          <p className="text-sm text-flipkart-muted dark:text-gray-400 mt-1.5">
+            Join {brandConfig.companyName} to start shopping
+          </p>
         </div>
 
-        {/* Right Side (Form Panel) */}
-        <div className="flex-1 px-8 py-12 md:px-12 flex flex-col relative">
+        {/* Card */}
+        <div className="bg-white/70 dark:bg-white/[0.04] backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] rounded-3xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.5)] p-8 md:p-10">
           
-          <form onSubmit={handleSubmit} noValidate className="flex-1 flex flex-col">
-            
-            {/* Full Name Input */}
-            <div className="mb-6 relative">
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={handleChange}
-                className="peer w-full pt-4 pb-2 text-flipkart-text bg-transparent border-b border-[#e0e0e0] focus:border-flipkart-blue focus:outline-none transition-colors"
-                placeholder=" "
-              />
-              <label 
-                htmlFor="fullName"
-                className={`absolute left-0 transition-all duration-200 pointer-events-none text-[#878787] ${
-                  formData.fullName ? '-top-2 text-[12px]' : 'top-3 text-[15px] peer-focus:-top-2 peer-focus:text-[12px]'
-                }`}
-              >
-                Enter your full name
-              </label>
-              {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>}
-            </div>
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
 
-            {/* Email Input */}
-            <div className="mb-6 relative">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="peer w-full pt-4 pb-2 text-flipkart-text bg-transparent border-b border-[#e0e0e0] focus:border-flipkart-blue focus:outline-none transition-colors"
-                placeholder=" "
-              />
-              <label 
-                htmlFor="email"
-                className={`absolute left-0 transition-all duration-200 pointer-events-none text-[#878787] ${
-                  formData.email ? '-top-2 text-[12px]' : 'top-3 text-[15px] peer-focus:-top-2 peer-focus:text-[12px]'
-                }`}
-              >
-                Enter Email ID
+            {/* Full Name */}
+            <div>
+              <label htmlFor="fullName" className="block text-xs font-semibold text-flipkart-muted dark:text-gray-400 uppercase tracking-wider mb-2">
+                Full Name
               </label>
-              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
-            </div>
-
-            {/* Password Input */}
-            <div className="mb-8 relative">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="peer w-full pt-4 pb-2 text-flipkart-text bg-transparent border-b border-[#e0e0e0] focus:border-flipkart-blue focus:outline-none transition-colors"
-                placeholder=" "
-              />
-              <label 
-                htmlFor="password"
-                className={`absolute left-0 transition-all duration-200 pointer-events-none text-[#878787] ${
-                  formData.password ? '-top-2 text-[12px]' : 'top-3 text-[15px] peer-focus:-top-2 peer-focus:text-[12px]'
-                }`}
-              >
-                Enter Password
-              </label>
-              {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
-            </div>
-
-            {/* Role Selection (Minimalist design) */}
-            <div className="mb-10">
-              <p className="text-[13px] text-[#878787] mb-2">Account Type</p>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="Customer"
-                    checked={formData.role === 'Customer'}
-                    onChange={handleChange}
-                    className="accent-flipkart-blue w-4 h-4"
-                  />
-                  <span className="text-[14px] text-flipkart-text font-medium">Customer</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="Admin"
-                    checked={formData.role === 'Admin'}
-                    onChange={handleChange}
-                    className="accent-flipkart-blue w-4 h-4"
-                  />
-                  <span className="text-[14px] text-flipkart-text font-medium">Admin</span>
-                </label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-flipkart-muted/60 dark:text-gray-500" />
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  className="w-full pl-11 pr-4 py-3.5 text-sm text-flipkart-text dark:text-white bg-white/60 dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2874F0]/30 dark:focus:ring-[#2874F0]/25 focus:border-[#2874F0]/50 dark:focus:border-[#2874F0]/30 placeholder:text-flipkart-muted/50 dark:placeholder:text-gray-500 transition-all duration-200"
+                  placeholder="John Doe"
+                />
               </div>
+              {errors.fullName && (
+                <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.fullName}</p>
+              )}
             </div>
 
-            {/* Submit Button */}
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-xs font-semibold text-flipkart-muted dark:text-gray-400 uppercase tracking-wider mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-flipkart-muted/60 dark:text-gray-500" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full pl-11 pr-4 py-3.5 text-sm text-flipkart-text dark:text-white bg-white/60 dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2874F0]/30 dark:focus:ring-[#2874F0]/25 focus:border-[#2874F0]/50 dark:focus:border-[#2874F0]/30 placeholder:text-flipkart-muted/50 dark:placeholder:text-gray-500 transition-all duration-200"
+                  placeholder="you@example.com"
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.email}</p>
+              )}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="block text-xs font-semibold text-flipkart-muted dark:text-gray-400 uppercase tracking-wider mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-flipkart-muted/60 dark:text-gray-500" />
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full pl-11 pr-4 py-3.5 text-sm text-flipkart-text dark:text-white bg-white/60 dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2874F0]/30 dark:focus:ring-[#2874F0]/25 focus:border-[#2874F0]/50 dark:focus:border-[#2874F0]/30 placeholder:text-flipkart-muted/50 dark:placeholder:text-gray-500 transition-all duration-200"
+                  placeholder="Min. 6 characters"
+                />
+              </div>
+              {errors.password && (
+                <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.password}</p>
+              )}
+            </div>
+
+            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 bg-flipkart-orange text-white font-medium shadow-[0_1px_2px_0_rgba(0,0,0,.2)] hover:shadow-[0_2px_4px_0_rgba(0,0,0,.2)] transition-shadow flex justify-center items-center rounded-sm min-h-[48px]"
+              className="w-full py-3.5 bg-gradient-to-r from-[#FB641B] to-[#e55a1a] text-white font-semibold text-sm rounded-xl shadow-lg shadow-[#FB641B]/20 hover:shadow-[#FB641B]/30 hover:from-[#e55a1a] hover:to-[#d14e14] active:scale-[0.98] transition-all duration-200 flex justify-center items-center gap-2 min-h-[48px] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                'Continue'
+                <>
+                  Create Account
+                  <ArrowRight className="w-4 h-4" />
+                </>
               )}
             </button>
-
-            {/* Login link */}
-            <div className="mt-auto pt-8 text-center">
-              <Link to="/login" className="text-flipkart-blue font-medium shadow-[0_1px_2px_0_rgba(0,0,0,.2)] bg-white border border-[#e0e0e0] block w-full py-3 hover:shadow-[0_2px_4px_0_rgba(0,0,0,.2)] transition-shadow rounded-sm">
-                Existing User? Log in
-              </Link>
-            </div>
-
           </form>
+        </div>
+
+        {/* Footer Link */}
+        <div className="text-center mt-6">
+          <p className="text-sm text-flipkart-muted dark:text-gray-400">
+            Already have an account?{' '}
+            <Link to="/login" className="font-semibold text-[#2874F0] hover:text-[#1e5bc0] dark:text-[#5a9cf8] dark:hover:text-[#7db4ff] transition-colors">
+              Sign in
+            </Link>
+          </p>
         </div>
       </div>
     </div>

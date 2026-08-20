@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Mail, X, CheckCircle } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 
 export default function ForgotPassword({ open, onClose }) {
@@ -15,63 +16,94 @@ export default function ForgotPassword({ open, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
+      {/* Backdrop */}
       <div
-        className="w-full max-w-[400px] bg-white rounded-sm p-8 shadow-2xl relative animate-[slideUp_0.25s_ease-out]"
+        className="absolute inset-0 backdrop-blur-sm"
+        style={{ background: 'rgba(0,0,0,0.4)' }}
+      />
+
+      {/* Modal */}
+      <div
+        className="relative w-full max-w-[400px] backdrop-blur-2xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] p-8 animate-[slideUp_0.25s_ease-out] transition-colors duration-300"
+        style={{
+          background: 'var(--card-bg)',
+          border: '1px solid var(--card-border)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-5 text-gray-400 hover:text-gray-700 text-2xl leading-none"
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:brightness-90"
+          style={{
+            background: 'rgba(128,128,128,0.1)',
+            color: 'var(--text-secondary)',
+          }}
         >
-          ×
+          <X className="w-4 h-4" />
         </button>
 
-        <h3 className="text-xl font-medium text-flipkart-text mb-2">Forgot Password?</h3>
-        
+        <h3
+          className="text-xl font-bold font-[var(--font-display)] mb-1"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Forgot Password?
+        </h3>
+
         {sent ? (
           <div className="text-center py-6">
-            <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-              ✓
+            <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-emerald-500" />
             </div>
-            <p className="text-[14px] text-flipkart-muted leading-relaxed">
-              We've sent a password reset link to <br/>
-              <strong className="text-flipkart-text">{email}</strong>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              We've sent a password reset link to<br />
+              <strong className="font-semibold" style={{ color: 'var(--text-primary)' }}>{email}</strong>
             </p>
           </div>
         ) : (
           <>
-            <p className="text-[14px] text-flipkart-muted mb-8">
+            <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
               Enter your email address associated with your {brandConfig.companyName} account.
             </p>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="relative">
-                <input
-                  id="reset-email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="peer w-full pt-4 pb-2 text-flipkart-text bg-transparent border-b border-[#e0e0e0] focus:border-flipkart-blue focus:outline-none transition-colors"
-                  placeholder=" "
-                />
-                <label 
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <div>
+                <label
                   htmlFor="reset-email"
-                  className={`absolute left-0 transition-all duration-200 pointer-events-none text-[#878787] ${
-                    email ? '-top-2 text-[12px]' : 'top-3 text-[15px] peer-focus:-top-2 peer-focus:text-[12px]'
-                  }`}
+                  className="block text-xs font-semibold uppercase tracking-wider mb-2"
+                  style={{ color: 'var(--text-secondary)' }}
                 >
                   Email Address
                 </label>
+                <div className="relative">
+                  <Mail
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px]"
+                    style={{ color: 'var(--text-secondary)' }}
+                  />
+                  <input
+                    id="reset-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-11 pr-4 py-3.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2874F0]/30 focus:border-[#2874F0]/50 placeholder:opacity-40 transition-all duration-200"
+                    style={{
+                      color: 'var(--text-primary)',
+                      background: 'rgba(128,128,128,0.06)',
+                      border: '1px solid var(--card-border)',
+                    }}
+                    placeholder="you@example.com"
+                  />
+                </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-flipkart-orange text-white font-medium shadow-[0_1px_2px_0_rgba(0,0,0,.2)] hover:shadow-[0_2px_4px_0_rgba(0,0,0,.2)] transition-shadow rounded-sm"
+                className="w-full py-3.5 bg-gradient-to-r from-[#FB641B] to-[#e55a1a] text-white font-semibold text-sm rounded-xl shadow-lg shadow-[#FB641B]/20 hover:shadow-[#FB641B]/30 hover:brightness-110 active:scale-[0.98] transition-all duration-200"
               >
-                Continue
+                Send Reset Link
               </button>
             </form>
           </>

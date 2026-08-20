@@ -61,7 +61,7 @@ export default function Navbar({ role, onMenuClick }) {
 
   return (
     <>
-      <header className="bg-[#111118] sticky top-0 z-50">
+      <header className="bg-white dark:bg-[#111118] border-b border-gray-200 dark:border-white/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
 
@@ -70,7 +70,7 @@ export default function Navbar({ role, onMenuClick }) {
               {/* Mobile hamburger */}
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="md:hidden p-2 rounded-lg hover:bg-white/10 transition text-gray-300"
+                className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition text-gray-600 dark:text-gray-300"
                 aria-label="Open menu"
               >
                 <Menu className="w-5 h-5" />
@@ -99,7 +99,7 @@ export default function Navbar({ role, onMenuClick }) {
             </div>
 
             {/* ── CENTER: Nav Links (Desktop) ── */}
-            <nav className="hidden md:flex items-center gap-1 mx-6">
+            <nav className="hidden md:flex items-center gap-1 mx-4">
               {navLinks.map(({ to, label, icon: Icon }) => {
                 const active = location.pathname === to;
                 return (
@@ -108,8 +108,8 @@ export default function Navbar({ role, onMenuClick }) {
                     to={to}
                     className={`flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition-all duration-200
                       ${active
-                        ? 'bg-white/10 text-[#FF6B35] border border-white/10'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                        ? 'bg-orange-50 dark:bg-white/10 text-[#FF6B35] border border-orange-100 dark:border-white/10'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent'
                       }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -118,7 +118,6 @@ export default function Navbar({ role, onMenuClick }) {
                 );
               })}
 
-              {/* Admin badge */}
               {isAdmin && (
                 <span className="ml-2 px-3 py-1.5 bg-amber-500/15 text-amber-400 text-xs font-bold rounded-full tracking-widest uppercase border border-amber-500/20">
                   Admin Panel
@@ -126,13 +125,31 @@ export default function Navbar({ role, onMenuClick }) {
               )}
             </nav>
 
+            {/* ── Search Bar (always visible) ── */}
+            {!isAdmin && (
+              <form onSubmit={handleSearch} className="flex items-center w-64 ml-auto mr-4">
+                <div className="flex items-center w-full border border-gray-200 dark:border-white/10 rounded-full bg-gray-100 dark:bg-white/5 focus-within:border-[#FF6B35]/50 focus-within:bg-gray-50 dark:focus-within:bg-white/[0.07] transition-all duration-200">
+                  <span className="pl-3 text-gray-400 dark:text-gray-500">
+                    <Search className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Search products..."
+                    className="flex-1 px-2 py-2 text-sm bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
+                  />
+                </div>
+              </form>
+            )}
+
             {/* ── RIGHT: Theme, Cart, Auth ── */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
 
               {/* Theme toggle pill */}
               <button
                 onClick={toggleTheme}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/10 border border-white/10 text-sm font-medium transition-all duration-200 hover:bg-white/15"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 text-sm font-medium transition-all duration-200 hover:bg-gray-200 dark:hover:bg-white/15"
               >
                 {isDark ? (
                   <>
@@ -151,11 +168,11 @@ export default function Navbar({ role, onMenuClick }) {
               {!isAdmin && (
                 <Link
                   to="/cart"
-                  className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                  className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200"
                   aria-label="Cart"
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  <span className="hidden sm:inline text-xs font-medium">Cart</span>
+                  <span className="hidden sm:inline text-xs font-medium text-gray-600 dark:text-gray-300">Cart</span>
                   {cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-[#FF4444] text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 shadow-lg shadow-red-500/30">
                       {cartCount > 99 ? '99+' : cartCount}
@@ -169,7 +186,7 @@ export default function Navbar({ role, onMenuClick }) {
                 <div className="flex items-center gap-2">
                   <Link
                     to="/login"
-                    className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-gray-300 hover:text-white transition px-2 py-1.5"
+                    className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition px-2 py-1.5"
                   >
                     Sign In
                   </Link>
@@ -185,54 +202,54 @@ export default function Navbar({ role, onMenuClick }) {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setDropdownOpen(o => !o)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-white/10 transition"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition"
                     aria-expanded={dropdownOpen}
                   >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF6B35] to-[#FF4444] flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-orange-500/20">
                       {displayName.charAt(0).toUpperCase()}
                     </div>
-                    <span className="hidden sm:inline text-sm font-medium text-gray-300 max-w-[90px] truncate">
+                    <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[90px] truncate">
                       {displayName}
                     </span>
                     <ChevronDown
-                      className={`w-4 h-4 text-gray-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+                      className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
                     />
                   </button>
 
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-[#1a1a24] rounded-2xl shadow-2xl z-50 border border-white/10 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-white/10 bg-white/5">
-                        <p className="text-sm font-semibold text-white truncate">{displayName}</p>
-                        <p className="text-xs text-gray-500 truncate mt-0.5">{displayEmail}</p>
+                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a1a24] rounded-2xl shadow-2xl z-50 border border-gray-200 dark:border-white/10 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{displayName}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{displayEmail}</p>
                       </div>
                       <div className="py-1">
                         {!isAdmin && (
                           <>
                             <Link to="/dashboard" onClick={() => setDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition">
-                              <LayoutDashboard className="w-4 h-4 text-gray-500" />
+                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
+                              <LayoutDashboard className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                               My Dashboard
                             </Link>
                             <Link to="/orders" onClick={() => setDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition">
-                              <Package className="w-4 h-4 text-gray-500" />
+                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
+                              <Package className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                               My Orders
                             </Link>
                             <Link to="/profile" onClick={() => setDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition">
-                              <User className="w-4 h-4 text-gray-500" />
+                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
+                              <User className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                               Profile
                             </Link>
                           </>
                         )}
                         {isAdmin && (
                           <Link to="/admin/dashboard" onClick={() => setDropdownOpen(false)}
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition">
-                            <LayoutDashboard className="w-4 h-4 text-gray-500" />
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
+                            <LayoutDashboard className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                             Dashboard
                           </Link>
                         )}
-                        <hr className="my-1 border-white/10" />
+                        <hr className="my-1 border-gray-100 dark:border-white/10" />
                         <button onClick={handleLogout}
                           className="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition">
                           <LogOut className="w-4 h-4" />
@@ -248,7 +265,7 @@ export default function Navbar({ role, onMenuClick }) {
         </div>
 
         {/* Bottom gradient line */}
-        <div className="h-[2px] bg-gradient-to-r from-transparent via-[#FF6B35]/40 to-transparent" />
+        <div className="h-[1px] bg-gradient-to-r from-transparent via-[#FF6B35]/40 dark:via-[#FF6B35]/40 to-transparent" />
       </header>
 
       {/* ── Mobile slide-out menu ── */}
@@ -260,9 +277,9 @@ export default function Navbar({ role, onMenuClick }) {
             onClick={() => setMobileMenuOpen(false)}
           />
           {/* Drawer */}
-          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#111118] border-r border-white/10 shadow-2xl flex flex-col animate-slide-in">
+          <div className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-[#111118] border-r border-gray-200 dark:border-white/10 shadow-2xl flex flex-col animate-slide-in">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-white/10">
               <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileMenuOpen(false)}>
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#FF4444] flex items-center justify-center shadow">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -271,13 +288,13 @@ export default function Navbar({ role, onMenuClick }) {
                   </svg>
                 </div>
                 <div className="flex flex-col leading-none">
-                  <span className="font-extrabold text-[15px] text-white">RPD<span className="text-[#FF6B35]">.</span></span>
+                  <span className="font-extrabold text-[15px] text-gray-900 dark:text-white">RPD<span className="text-[#FF6B35]">.</span></span>
                   <span className="text-[8px] font-bold text-[#FF6B35] tracking-[0.2em] uppercase">Store</span>
                 </div>
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-lg hover:bg-white/10 transition text-gray-400"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition text-gray-500 dark:text-gray-400"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -286,13 +303,13 @@ export default function Navbar({ role, onMenuClick }) {
             {/* Search */}
             {!isAdmin && (
               <form onSubmit={(e) => { handleSearch(e); setMobileMenuOpen(false); }} className="px-4 py-3">
-                <div className="flex border border-white/10 rounded-xl overflow-hidden bg-white/5">
+                <div className="flex border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5">
                   <input
                     type="text"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search products..."
-                    className="flex-1 pl-4 pr-2 py-2.5 text-sm bg-transparent text-white placeholder-gray-500 focus:outline-none"
+                    className="flex-1 pl-4 pr-2 py-2.5 text-sm bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
                   />
                   <button type="submit" className="px-3 py-2.5 text-[#FF6B35]">
                     <Search className="w-4 h-4" />
@@ -312,8 +329,8 @@ export default function Navbar({ role, onMenuClick }) {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
                       ${active
-                        ? 'bg-white/10 text-[#FF6B35]'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-orange-50 dark:bg-white/10 text-[#FF6B35]'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
                       }`}
                   >
                     <Icon className="w-4.5 h-4.5" />
@@ -326,7 +343,7 @@ export default function Navbar({ role, onMenuClick }) {
                 <Link
                   to="/cart"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all"
                 >
                   <ShoppingCart className="w-4.5 h-4.5" />
                   Cart
@@ -340,13 +357,13 @@ export default function Navbar({ role, onMenuClick }) {
             </nav>
 
             {/* Bottom auth */}
-            <div className="px-3 py-4 border-t border-white/10 space-y-2">
+            <div className="px-3 py-4 border-t border-gray-200 dark:border-white/10 space-y-2">
               {!user ? (
                 <>
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-gray-300 border border-white/10 hover:bg-white/5 transition"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 transition"
                   >
                     <LogIn className="w-4 h-4" />
                     Sign In

@@ -8,11 +8,16 @@ export default function Layout({ role = 'Customer' }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
-  // Remove constraints for home page so sections can go full width
+  // Remove constraints for home page and category pages so sections can go full width
   const isHome = location.pathname === '/';
+  const isCategoryPage = /^\/categories/.test(location.pathname);
+  const isFlashDeals = location.pathname === '/flash-deals';
+  const isTopSelling = location.pathname === '/top-selling';
+  const isNewArrivals = location.pathname === '/new-arrivals';
+  const fullWidth = isHome || isCategoryPage || isFlashDeals || isTopSelling || isNewArrivals;
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] flex flex-col">
+    <div className="min-h-screen bg-[var(--page-bg)] flex flex-col transition-colors duration-300">
       {/* Navbar */}
       <Navbar
         role={role}
@@ -28,8 +33,8 @@ export default function Layout({ role = 'Customer' }) {
         />
 
         {/* Main Content */}
-        <main className={`flex-1 overflow-y-auto flex flex-col ${isHome ? '' : 'p-4 md:p-6 lg:p-8'}`}>
-          <div className={isHome ? 'flex-1' : 'w-full max-w-7xl mx-auto flex-1'}>
+        <main className={`flex-1 overflow-y-auto flex flex-col ${fullWidth ? '' : 'p-4 md:p-6 lg:p-8'}`}>
+          <div className={fullWidth ? 'flex-1' : 'w-full max-w-7xl mx-auto flex-1'}>
             <Outlet />
           </div>
         </main>

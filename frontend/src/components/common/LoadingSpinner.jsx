@@ -26,13 +26,13 @@ export default function LoadingSpinner({
         role="status"
         aria-label={label}
       />
-      {label && <p className="text-sm text-gray-500">{label}</p>}
+      {label && <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>}
     </div>
   );
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-[#0e0e14]/80">
         {spinner}
       </div>
     );

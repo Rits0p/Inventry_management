@@ -1,0 +1,214 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Admin Add/Edit Product — Form Theme
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.add-product-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ── Breadcrumb ── */
+.add-product-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.breadcrumb-link {
+  color: #2874f0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+  color: #1a5dc8;
+  text-decoration: underline;
+}
+
+.breadcrumb-sep {
+  color: #d1d5db;
+}
+
+.breadcrumb-current {
+  color: #6b7280;
+}
+
+/* ── Header ── */
+.add-product-header {
+  margin-bottom: 1.5rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* ── Form Layout ── */
+.add-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Image Card ── */
+.add-product-image-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  animation: fadeInUp 0.5s ease-out 0.1s both;
+}
+
+.image-upload-area {
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #f9fafb;
+  overflow: hidden;
+}
+
+.image-upload-area:hover {
+  border-color: #2874f0;
+  background: #f0f4ff;
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-placeholder {
+  text-align: center;
+  color: #9ca3af;
+}
+
+.image-placeholder-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.image-placeholder p {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.image-placeholder-hint {
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
+}
+
+/* ── Form Fields ── */
+.add-product-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-section {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  animation: fadeInUp 0.5s ease-out 0.2s both;
+}
+
+.form-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+  font-family: var(--font-display);
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.admin-form-group.full {
+  grid-column: 1 / -1;
+}
+
+.admin-textarea {
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.3s;
+}
+
+.admin-textarea:focus {
+  outline: none;
+  border-color: #2874f0;
+}
+
+/* ── Actions ── */
+.add-product-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  animation: fadeInUp 0.5s ease-out 0.3s both;
+}
+
+.add-product-cancel {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.add-product-cancel:hover {
+  background: #f9fafb;
+}
+
+.add-product-submit {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, var(--color-flipkart-orange), #ff8c42);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 16px rgba(251, 100, 27, 0.3);
+}
+
+.add-product-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(251, 100, 27, 0.4);
+}
+
+/* ── Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
