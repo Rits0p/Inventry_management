@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * Input – styled form input with optional label and error.

@@ -1,38 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import './Shop.css';
+import { productService } from '../../../services/productService';
+import { categoryService } from '../../../services/categoryService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
-const allProducts = [
-  { id: 1, name: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones', brand: 'Sony', price: 29990, originalPrice: 34990, discount: 14, rating: 4.7, reviews: 2841, category: 'Electronics', badge: 'Best Seller', icon: '🎧' },
-  { id: 2, name: 'Apple Watch Series 9 GPS 45mm Midnight Aluminium', brand: 'Apple', price: 41900, originalPrice: 44900, discount: 7, rating: 4.8, reviews: 1520, category: 'Electronics', badge: null, icon: '⌚' },
-  { id: 3, name: 'Nike Air Force 1 Low White Sneakers', brand: 'Nike', price: 7495, originalPrice: 7995, discount: 6, rating: 4.5, reviews: 932, category: 'Fashion', badge: null, icon: '👟' },
-  { id: 4, name: 'Logitech MX Master 3S Wireless Mouse', brand: 'Logitech', price: 8995, originalPrice: 10995, discount: 18, rating: 4.6, reviews: 2103, category: 'Electronics', badge: 'Top Rated', icon: '🖱️' },
-  { id: 5, name: 'Instant Pot Duo 7-in-1 Electric Pressure Cooker 6L', brand: 'Instant Pot', price: 8999, originalPrice: 12999, discount: 31, rating: 4.4, reviews: 1876, category: 'Home & Kitchen', badge: null, icon: '🍲' },
-  { id: 6, name: 'Samsung 25W PD Power Adapter Type-C', brand: 'Samsung', price: 1499, originalPrice: 1999, discount: 25, rating: 4.3, reviews: 5402, category: 'Electronics', badge: null, icon: '🔌' },
-  { id: 7, name: 'Cotton Crew Neck T-Shirt (Pack of 3)', brand: 'Roadster', price: 899, originalPrice: 1499, discount: 40, rating: 4.2, reviews: 3201, category: 'Fashion', badge: 'Deal of the Day', icon: '👕' },
-  { id: 8, name: 'Milton Thermosteel Water Bottle 1 Litre', brand: 'Milton', price: 599, originalPrice: 799, discount: 25, rating: 4.5, reviews: 8900, category: 'Home & Kitchen', badge: null, icon: '🍶' },
-];
+const SORT_PARAMS = {
+  popularity: '',
+  'price-low': 'price',
+  'price-high': '-price',
+  discount: '-discount',
+  rating: '-rating',
+};
 
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const initialCategory = searchParams.get('category') || 'All';
-  const initialBrand = searchParams.get('brand') || '';
-  const initialSort = searchParams.get('sort') || 'popularity';
-  const initialQ = searchParams.get('q') || '';
+  const category = searchParams.get('category') || 'All';
+  const sortBy = searchParams.get('sort') || 'popularity';
+  const search = searchParams.get('q') || '';
+  const activeBrand = searchParams.get('brand') || '';
 
-  const [category, setCategory] = useState(initialCategory);
-  const [sortBy, setSortBy] = useState(initialSort);
-  const [search, setSearch] = useState(initialQ);
-  const [activeBrand, setActiveBrand] = useState(initialBrand);
   const [viewMode, setViewMode] = useState('grid');
 
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
   useEffect(() => {
-    setCategory(searchParams.get('category') || 'All');
-    setActiveBrand(searchParams.get('brand') || '');
-    setSortBy(searchParams.get('sort') || 'popularity');
-    setSearch(searchParams.get('q') || '');
-  }, [searchParams]);
+    let cancelled = false;
+    const loadProducts = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const params = {};
+        if (category && category !== 'All') params.category = category;
+        if (activeBrand) params.brand = activeBrand;
+        if (search) params.search = search;
+        const ordering = SORT_PARAMS[sortBy];
+        if (ordering) params.ordering = ordering;
+        params.page_size = 24;
+        const data = await productService.getProducts(params);
+        if (!cancelled) setProducts(unwrapList(data));
+      } catch (err) {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load products.'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, [category, activeBrand, search, sortBy]);
+
+  useEffect(() => {
+    let cancelled = false;
+    categoryService
+      .getCategories()
+      .then((data) => {
+        if (!cancelled) setCategories(unwrapList(data).map((c) => c.name));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const updateFilter = (key, value) => {
     const params = new URLSearchParams(searchParams);
@@ -42,28 +78,12 @@ export default function Shop() {
   };
 
   const handleCategoryChange = (cat) => {
-    setCategory(cat);
     updateFilter('category', cat);
   };
 
   const handleSortChange = (sort) => {
-    setSortBy(sort);
     updateFilter('sort', sort);
   };
-
-  let products = allProducts.filter(p => {
-    const matchCategory = category === 'All' || p.category === category;
-    const matchBrand = !activeBrand || p.brand.toLowerCase() === activeBrand.toLowerCase();
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase());
-    return matchCategory && matchBrand && matchSearch;
-  });
-
-  if (sortBy === 'price-low') products = [...products].sort((a, b) => a.price - b.price);
-  else if (sortBy === 'price-high') products = [...products].sort((a, b) => b.price - a.price);
-  else if (sortBy === 'discount') products = [...products].sort((a, b) => b.discount - a.discount);
-  else if (sortBy === 'rating') products = [...products].sort((a, b) => b.rating - a.rating);
-
-  const categories = ['All', 'Electronics', 'Fashion', 'Home & Kitchen'];
 
   return (
     <main className="shop-page">
@@ -75,9 +95,9 @@ export default function Shop() {
               {activeBrand ? `${activeBrand} Products` : 'Product Catalogue'}
             </h1>
             <p className="shop-subtitle">
-              {products.length} product{products.length !== 1 ? 's' : ''} available
+              {!loading && `${products.length} product${products.length !== 1 ? 's' : ''} available`}
               {activeBrand && (
-                <button onClick={() => { setActiveBrand(''); updateFilter('brand', ''); }} className="shop-clear-brand">
+                <button onClick={() => updateFilter('brand', '')} className="shop-clear-brand">
                   Clear filter ×
                 </button>
               )}
@@ -89,7 +109,7 @@ export default function Shop() {
         <div className="shop-filters-card">
           <div className="shop-filters-row">
             <div className="shop-category-pills">
-              {categories.map(cat => (
+              {['All', ...categories].map(cat => (
                 <button key={cat} onClick={() => handleCategoryChange(cat)} className={`shop-pill ${category === cat ? 'active' : ''}`}>
                   {cat}
                 </button>
@@ -116,7 +136,15 @@ export default function Shop() {
         </div>
 
         {/* Product Grid / List */}
-        {products.length === 0 ? (
+        {loading ? (
+          <LoadingSpinner label="Loading products..." />
+        ) : error ? (
+          <div className="shop-empty">
+            <span className="shop-empty-icon">⚠️</span>
+            <h3>Could not load products</h3>
+            <p>{error}</p>
+          </div>
+        ) : products.length === 0 ? (
           <div className="shop-empty">
             <span className="shop-empty-icon">🔍</span>
             <h3>No products found</h3>
@@ -129,7 +157,11 @@ export default function Shop() {
                 /* ── Grid Card ── */
                 <div key={product.id} className="shop-card">
                   <Link to={`/product/${product.id}`} className="shop-card-image">
-                    <span className="shop-card-icon">{product.icon}</span>
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} loading="lazy" />
+                    ) : (
+                      <span className="shop-card-icon">{(product.name || '🛍️').charAt(0)}</span>
+                    )}
                     {product.badge && <span className="shop-badge">{product.badge}</span>}
                   </Link>
                   <div className="shop-card-body">
@@ -138,13 +170,17 @@ export default function Shop() {
                       <h3 className="shop-card-name">{product.name}</h3>
                     </Link>
                     <div className="shop-card-rating">
-                      <span className="shop-rating-badge">{product.rating} ★</span>
-                      <span className="shop-rating-count">({product.reviews.toLocaleString()})</span>
+                      <span className="shop-rating-badge">{Number(product.rating ?? 0).toFixed(1)} ★</span>
+                      <span className="shop-rating-count">({(product.review_count ?? 0).toLocaleString()})</span>
                     </div>
                     <div className="shop-card-price">
                       <span className="shop-price-current">₹{product.price.toLocaleString('en-IN')}</span>
-                      <span className="shop-price-original">₹{product.originalPrice.toLocaleString('en-IN')}</span>
-                      <span className="shop-price-discount">{product.discount}% off</span>
+                      {product.original_price > product.price && (
+                        <>
+                          <span className="shop-price-original">₹{product.original_price.toLocaleString('en-IN')}</span>
+                          <span className="shop-price-discount">{product.discount}% off</span>
+                        </>
+                      )}
                     </div>
                     <Link to={`/product/${product.id}`} className="shop-card-btn">View Details</Link>
                   </div>
@@ -153,7 +189,11 @@ export default function Shop() {
                 /* ── List Row ── */
                 <div key={product.id} className="shop-list-item">
                   <Link to={`/product/${product.id}`} className="shop-list-image">
-                    <span className="shop-card-icon">{product.icon}</span>
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} loading="lazy" />
+                    ) : (
+                      <span className="shop-card-icon">{(product.name || '🛍️').charAt(0)}</span>
+                    )}
                     {product.badge && <span className="shop-badge">{product.badge}</span>}
                   </Link>
                   <div className="shop-list-body">
@@ -162,16 +202,20 @@ export default function Shop() {
                       <h3 className="shop-card-name">{product.name}</h3>
                     </Link>
                     <div className="shop-card-rating">
-                      <span className="shop-rating-badge">{product.rating} ★</span>
-                      <span className="shop-rating-count">({product.reviews.toLocaleString()} reviews)</span>
+                      <span className="shop-rating-badge">{Number(product.rating ?? 0).toFixed(1)} ★</span>
+                      <span className="shop-rating-count">({(product.review_count ?? 0).toLocaleString()} reviews)</span>
                     </div>
-                    <p className="shop-list-category">{product.category}</p>
+                    <p className="shop-list-category">{product.category_name || ''}</p>
                   </div>
                   <div className="shop-list-right">
                     <div className="shop-card-price">
                       <span className="shop-price-current">₹{product.price.toLocaleString('en-IN')}</span>
-                      <span className="shop-price-original">₹{product.originalPrice.toLocaleString('en-IN')}</span>
-                      <span className="shop-price-discount">{product.discount}% off</span>
+                      {product.original_price > product.price && (
+                        <>
+                          <span className="shop-price-original">₹{product.original_price.toLocaleString('en-IN')}</span>
+                          <span className="shop-price-discount">{product.discount}% off</span>
+                        </>
+                      )}
                     </div>
                     <Link to={`/product/${product.id}`} className="shop-card-btn">View Details</Link>
                   </div>

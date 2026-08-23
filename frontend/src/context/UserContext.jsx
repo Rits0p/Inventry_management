@@ -1,20 +1,30 @@
-import React, { useState } from 'react';
-
-// UserContext – manages authenticated user state globally
-// Replace mock with real JWT auth later
+import React, { useEffect, useState } from 'react';
+import { authService } from '../services/authService';
 
 const UserContext = React.createContext(null);
 
-const mockUser = {
-  id: 1,
-  fullName: 'John Doe',
-  email: 'john.doe@email.com',
-  role: 'Customer', // 'Admin' | 'Customer'
-  avatar: null,
-};
-
 export function UserProvider({ children }) {
-  const [user, setUser] = useState(mockUser); // null when logged out
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const restoreSession = async () => {
+      if (!localStorage.getItem('access_token')) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const userData = await authService.getProfile();
+        setUser(userData);
+      } catch {
+        authService.logout();
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    restoreSession();
+  }, []);
 
   const login = (userData) => {
     setUser(userData);
@@ -22,15 +32,17 @@ export function UserProvider({ children }) {
 
   const logout = () => {
     setUser(null);
+    Promise.resolve(authService.logout());
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, isLoading, login, logout }}>
       {children}
     </UserContext.Provider>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useUser() {
   const context = React.useContext(UserContext);
   if (!context) {

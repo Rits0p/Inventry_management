@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import { useCart } from '../../context/CartContext';
@@ -8,7 +8,7 @@ import {
   Search, ChevronDown, LayoutDashboard, Package, User, LogOut
 } from 'lucide-react';
 
-export default function Navbar({ role, onMenuClick }) {
+export default function Navbar({ role }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useUser();
@@ -18,6 +18,7 @@ export default function Navbar({ role, onMenuClick }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [search, setSearch] = useState('');
   const dropdownRef = useRef(null);
+  const [prevPath, setPrevPath] = useState(location.pathname);
 
   useEffect(() => {
     const handler = (e) => {
@@ -30,9 +31,10 @@ export default function Navbar({ role, onMenuClick }) {
   }, []);
 
   // Close mobile menu on route change
-  useEffect(() => {
+  if (prevPath !== location.pathname) {
+    setPrevPath(location.pathname);
     setMobileMenuOpen(false);
-  }, [location.pathname]);
+  }
 
   const handleLogout = () => {
     logout();

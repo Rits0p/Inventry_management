@@ -1,9 +1,6 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export default function ServerError() {
-  const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center p-4 transition-colors duration-300">
       <div className="text-center max-w-lg">

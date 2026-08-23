@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * StatsCard – metric card used in admin & customer dashboards.

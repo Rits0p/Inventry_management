@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/common/Layout';
+import ProtectedRoute from './components/common/ProtectedRoute';
 import { ThemeProvider } from './context/ThemeContext';
 import { UserProvider } from './context/UserContext';
 import { CartProvider } from './context/CartContext';
@@ -51,7 +52,14 @@ function App() {
               <Route path="/500" element={<ServerError />} />
 
               {/* Admin Routes */}
-              <Route path="/admin" element={<Layout role="Admin" />}>
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute role="Admin">
+                    <Layout role="Admin" />
+                  </ProtectedRoute>
+                }
+              >
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="products" element={<AdminProducts />} />
                 <Route path="categories" element={<AdminCategories />} />
@@ -59,7 +67,7 @@ function App() {
                 <Route path="stock" element={<AdminStock />} />
               </Route>
 
-              {/* Customer Routes */}
+              {/* Customer Routes – public browsing */}
               <Route path="/" element={<Layout role="Customer" />}>
                 <Route index element={<Home />} />
                 <Route path="shop" element={<Shop />} />
@@ -69,10 +77,38 @@ function App() {
                 <Route path="categories" element={<Categories />} />
                 <Route path="categories/:slug" element={<CategoryDetail />} />
                 <Route path="product/:id" element={<ProductDetail />} />
-                <Route path="dashboard" element={<CustomerDashboard />} />
-                <Route path="cart" element={<Cart />} />
-                <Route path="orders" element={<CustomerOrders />} />
-                <Route path="profile" element={<Profile />} />
+                <Route
+                  path="dashboard"
+                  element={
+                    <ProtectedRoute role="Customer">
+                      <CustomerDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="cart"
+                  element={
+                    <ProtectedRoute role="Customer">
+                      <Cart />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="orders"
+                  element={
+                    <ProtectedRoute role="Customer">
+                      <CustomerOrders />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="profile"
+                  element={
+                    <ProtectedRoute role="Customer">
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
               </Route>
 
               {/* 404 – catch all */}

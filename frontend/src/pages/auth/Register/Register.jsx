@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, ArrowRight, Package } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
+import { useAuth } from '../../../hooks/useAuth';
+import { authService } from '../../../services/authService';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
 
 export default function Register() {
   const { brandConfig } = useTheme();
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -12,6 +17,7 @@ export default function Register() {
   });
 
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -35,8 +41,21 @@ export default function Register() {
     if (!validate()) return;
 
     setIsLoading(true);
-    console.log(formData);
-    setTimeout(() => setIsLoading(false), 1200);
+    setApiError('');
+    try {
+      await authService.register({
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+      const data = await authService.login(formData.email.trim(), formData.password);
+      login(data.user);
+      navigate(data.user.role === 'Admin' ? '/admin/dashboard' : '/', { replace: true });
+    } catch (err) {
+      setApiError(getApiErrorMessage(err, 'Registration failed. Please try again.'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -150,6 +169,13 @@ export default function Register() {
                 <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.password}</p>
               )}
             </div>
+
+            {/* API Error */}
+            {apiError && (
+              <div className="text-xs font-medium text-red-500 bg-red-500/[0.06] border border-red-500/20 rounded-lg px-3.5 py-2.5">
+                {apiError}
+              </div>
+            )}
 
             {/* Submit */}
             <button

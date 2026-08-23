@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import './AddProduct.css';
 
@@ -15,23 +15,21 @@ export default function AddProduct() {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    sku: '',
-    category: '',
-    price: '',
-    stock: '',
-    description: '',
-    status: 'Active',
-  });
+  const [formData, setFormData] = useState(
+    isEdit && mockProduct[id]
+      ? mockProduct[id]
+      : {
+          name: '',
+          sku: '',
+          category: '',
+          price: '',
+          stock: '',
+          description: '',
+          status: 'Active',
+        }
+  );
 
   const [imagePreview, setImagePreview] = useState(null);
-
-  useEffect(() => {
-    if (isEdit && mockProduct[id]) {
-      setFormData(mockProduct[id]);
-    }
-  }, [id, isEdit]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

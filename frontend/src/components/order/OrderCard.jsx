@@ -1,4 +1,3 @@
-import React from 'react';
 import Badge from '../common/Badge';
 
 // Map order status → Badge variant
@@ -8,12 +7,6 @@ const statusVariant = {
   Shipped:    'indigo',
   Delivered:  'green',
   Cancelled:  'red',
-};
-
-const paymentVariant = {
-  Paid:     'green',
-  Pending:  'yellow',
-  Refunded: 'red',
 };
 
 /**

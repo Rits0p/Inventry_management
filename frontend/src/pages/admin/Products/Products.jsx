@@ -1,32 +1,64 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Products.css';
-
-const initialProducts = [
-  { id: 1, name: 'Sony WH-1000XM5 Wireless Headphones', sku: 'SNY-WH1000XM5', category: 'Electronics', price: 29990, stock: 48, status: 'Active', icon: '🎧' },
-  { id: 2, name: 'Apple Watch Series 9 GPS 45mm', sku: 'APL-WATCH-S9', category: 'Electronics', price: 41900, stock: 15, status: 'Active', icon: '⌚' },
-  { id: 3, name: 'Nike Air Force 1 Low White', sku: 'NK-AF1-WHT', category: 'Fashion', price: 7495, stock: 0, status: 'Inactive', icon: '👟' },
-  { id: 4, name: 'Instant Pot Duo 7-in-1 Pressure Cooker', sku: 'IP-DUO-7IN1', category: 'Home & Kitchen', price: 8999, stock: 32, status: 'Active', icon: '🍲' },
-  { id: 5, name: 'Logitech MX Master 3S Wireless Mouse', sku: 'LOG-MX3S', category: 'Electronics', price: 8995, stock: 7, status: 'Active', icon: '🖱️' },
-];
+import { productService } from '../../../services/productService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 export default function Products() {
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [status, setStatus] = useState('All');
   const [showDeleteModal, setShowDeleteModal] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadProducts = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await productService.getProducts({ page_size: 100 });
+        if (!cancelled) setProducts(unwrapList(data));
+      } catch (err) {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load products.'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
 
   const filtered = products.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
-    const matchCategory = category === 'All' || p.category === category;
-    const matchStatus = status === 'All' || p.status === status;
+    const q = search.toLowerCase();
+    const matchSearch = (p.name || '').toLowerCase().includes(q) || (p.brand || '').toLowerCase().includes(q);
+    const matchCategory = category === 'All' || p.category_name === category;
+    const matchStatus = status === 'All' || p.is_active === (status === 'Active');
     return matchSearch && matchCategory && matchStatus;
   });
 
-  const handleDelete = () => {
-    setProducts(products.filter(p => p.id !== showDeleteModal));
-    setShowDeleteModal(null);
+  const handleDelete = async () => {
+    if (!showDeleteModal || deleting) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await productService.deleteProduct(showDeleteModal);
+      setShowDeleteModal(null);
+      setReloadKey(key => key + 1);
+    } catch (err) {
+      setDeleteError(getApiErrorMessage(err, 'Failed to delete product.'));
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -80,7 +112,20 @@ export default function Products() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan="7">
+                      <LoadingSpinner label="Loading products..." />
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan="7" className="admin-empty">
+                      <span className="admin-empty-icon">⚠️</span>
+                      <p>{error}</p>
+                    </td>
+                  </tr>
+                ) : filtered.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="admin-empty">
                       <span className="admin-empty-icon">📦</span>
@@ -88,33 +133,41 @@ export default function Products() {
                     </td>
                   </tr>
                 ) : (
-                  filtered.map(product => (
-                    <tr key={product.id}>
-                      <td>
-                        <div className="admin-product-cell">
-                          <span className="admin-product-icon">{product.icon}</span>
-                          <span className="admin-product-name">{product.name}</span>
-                        </div>
-                      </td>
-                      <td className="admin-sku">{product.sku}</td>
-                      <td>{product.category}</td>
-                      <td className="admin-price">₹{product.price.toLocaleString('en-IN')}</td>
-                      <td>
-                        <span className={`admin-stock ${product.stock === 0 ? 'out' : product.stock <= 10 ? 'low' : 'in'}`}>
-                          {product.stock}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`admin-status ${product.status.toLowerCase()}`}>{product.status}</span>
-                      </td>
-                      <td>
-                        <div className="admin-actions">
-                          <Link to={`/admin/products/edit/${product.id}`} className="admin-action-btn edit">Edit</Link>
-                          <button onClick={() => setShowDeleteModal(product.id)} className="admin-action-btn delete">Delete</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  filtered.map(product => {
+                    const statusLabel = product.is_active ? 'Active' : 'Inactive';
+                    return (
+                      <tr key={product.id}>
+                        <td>
+                          <div className="admin-product-cell">
+                            <span className="admin-product-icon">
+                              {product.image ? (
+                                <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+                              ) : (
+                                (product.name || '📦').charAt(0)
+                              )}
+                            </span>
+                            <span className="admin-product-name">{product.name}</span>
+                          </div>
+                        </td>
+                        <td className="admin-sku">{product.sku || '—'}</td>
+                        <td>{product.category_name || '—'}</td>
+                        <td className="admin-price">₹{Number(product.price ?? 0).toLocaleString('en-IN')}</td>
+                        <td>
+                          <span className={`admin-stock ${product.stock === 0 ? 'out' : product.stock <= 10 ? 'low' : 'in'}`}>
+                            {product.stock ?? 0}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`admin-status ${statusLabel.toLowerCase()}`}>{statusLabel}</span>
+                        </td>
+                        <td>
+                          <div className="admin-actions">
+                            <Link to={`/admin/products/edit/${product.id}`} className="admin-action-btn edit">Edit</Link>
+                            <button onClick={() => { setDeleteError(''); setShowDeleteModal(product.id); }} className="admin-action-btn delete">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    );                  })
                 )}
               </tbody>
             </table>
@@ -123,13 +176,14 @@ export default function Products() {
 
         {/* Delete Modal */}
         {showDeleteModal && (
-          <div className="admin-modal-overlay" onClick={() => setShowDeleteModal(null)}>
+          <div className="admin-modal-overlay" onClick={() => { if (!deleting) setShowDeleteModal(null); }}>
             <div className="admin-modal" onClick={e => e.stopPropagation()}>
               <h3 className="admin-modal-title">Delete Product</h3>
               <p className="admin-modal-text">Are you sure you want to delete this product? This action cannot be undone.</p>
+              {deleteError && <p className="admin-modal-text">{deleteError}</p>}
               <div className="admin-modal-actions">
-                <button onClick={() => setShowDeleteModal(null)} className="admin-modal-btn cancel">Cancel</button>
-                <button onClick={handleDelete} className="admin-modal-btn delete">Delete</button>
+                <button onClick={() => setShowDeleteModal(null)} disabled={deleting} className="admin-modal-btn cancel">Cancel</button>
+                <button onClick={handleDelete} disabled={deleting} className="admin-modal-btn delete">Delete</button>
               </div>
             </div>
           </div>

@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * Button – themed button with variants and sizes.

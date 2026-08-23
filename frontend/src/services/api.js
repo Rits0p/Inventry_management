@@ -38,6 +38,9 @@ api.interceptors.response.use(
           refresh: refreshToken,
         });
         localStorage.setItem('access_token', data.access);
+        if (data.refresh) {
+          localStorage.setItem('refresh_token', data.refresh);
+        }
         api.defaults.headers.common['Authorization'] = `Bearer ${data.access}`;
         return api(originalRequest);
       } catch (refreshError) {
@@ -54,3 +57,6 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+// Normalizes paginated ({count, results}) and plain array responses
+export const unwrapList = (data) => (Array.isArray(data) ? data : data?.results ?? []);

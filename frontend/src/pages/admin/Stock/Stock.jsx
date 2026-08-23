@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Stock.css';
+import { productService } from '../../../services/productService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
-const allProducts = [
-  { id: 1, name: 'Sony WH-1000XM5 Wireless Headphones', brand: 'Sony', sku: 'WH-1000XM5', category: 'Electronics', stock: 12, lowStockThreshold: 15, icon: '🎧' },
-  { id: 2, name: 'Apple Watch Series 9 GPS 45mm', brand: 'Apple', sku: 'AW-S9-45', category: 'Electronics', stock: 4, lowStockThreshold: 10, icon: '⌚' },
-  { id: 3, name: 'Nike Air Force 1 Low White', brand: 'Nike', sku: 'NK-AF1-WHT', category: 'Fashion', stock: 0, lowStockThreshold: 8, icon: '👟' },
-  { id: 4, name: 'Logitech MX Master 3S Mouse', brand: 'Logitech', sku: 'LG-MX3S', category: 'Electronics', stock: 28, lowStockThreshold: 12, icon: '🖱️' },
-  { id: 5, name: 'Instant Pot Duo 7-in-1 Cooker', brand: 'Instant Pot', sku: 'IP-DUO-6L', category: 'Home & Kitchen', stock: 7, lowStockThreshold: 10, icon: '🍲' },
-  { id: 6, name: 'Samsung 25W PD Power Adapter', brand: 'Samsung', sku: 'SS-25W-PD', category: 'Electronics', stock: 45, lowStockThreshold: 20, icon: '🔌' },
-  { id: 7, name: 'Cotton Crew Neck T-Shirt Pack', brand: 'Roadster', sku: 'RD-TS-3PK', category: 'Fashion', stock: 2, lowStockThreshold: 15, icon: '👕' },
-  { id: 8, name: 'Milton Thermosteel Bottle 1L', brand: 'Milton', sku: 'ML-TS-1L', category: 'Home & Kitchen', stock: 63, lowStockThreshold: 25, icon: '🍶' },
-];
+const LOW_STOCK_THRESHOLD = 10;
 
 export default function Stock() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
   const [category, setCategory] = useState('All');
   const [status, setStatus] = useState('All');
   const [sortBy, setSortBy] = useState('name');
@@ -20,40 +19,75 @@ export default function Stock() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [adjustType, setAdjustType] = useState('add');
   const [adjustQty, setAdjustQty] = useState('');
+  const [adjusting, setAdjusting] = useState(false);
+  const [adjustError, setAdjustError] = useState('');
 
-  let products = allProducts.filter(p => {
-    const matchCategory = category === 'All' || p.category === category;
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase());
+  useEffect(() => {
+    let cancelled = false;
+    const loadProducts = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await productService.getProducts({ page_size: 50 });
+        if (!cancelled) setProducts(unwrapList(data));
+      } catch (err) {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load products.'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
+
+  const getStockLevel = (p) => {
+    if ((p.stock ?? 0) === 0) return 'out';
+    if (p.stock <= LOW_STOCK_THRESHOLD) return 'low';
+    return 'in';
+  };
+
+  let filteredProducts = products.filter(p => {
+    const q = search.toLowerCase();
+    const matchCategory = category === 'All' || p.category_name === category;
+    const matchSearch = (p.name || '').toLowerCase().includes(q) || (p.brand || '').toLowerCase().includes(q);
     let matchStatus = true;
-    if (status === 'In Stock') matchStatus = p.stock > p.lowStockThreshold;
-    else if (status === 'Low Stock') matchStatus = p.stock > 0 && p.stock <= p.lowStockThreshold;
-    else if (status === 'Out of Stock') matchStatus = p.stock === 0;
+    const level = getStockLevel(p);
+    if (status === 'In Stock') matchStatus = level === 'in';
+    else if (status === 'Low Stock') matchStatus = level === 'low';
+    else if (status === 'Out of Stock') matchStatus = level === 'out';
     return matchCategory && matchSearch && matchStatus;
   });
 
-  if (sortBy === 'stock-low') products = [...products].sort((a, b) => a.stock - b.stock);
-  else if (sortBy === 'stock-high') products = [...products].sort((a, b) => b.stock - a.stock);
-  else products = [...products].sort((a, b) => a.name.localeCompare(b.name));
+  if (sortBy === 'stock-low') filteredProducts = [...filteredProducts].sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0));
+  else if (sortBy === 'stock-high') filteredProducts = [...filteredProducts].sort((a, b) => (b.stock ?? 0) - (a.stock ?? 0));
+  else filteredProducts = [...filteredProducts].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-  const totalProducts = allProducts.length;
-  const lowStockCount = allProducts.filter(p => p.stock > 0 && p.stock <= p.lowStockThreshold).length;
-  const outOfStockCount = allProducts.filter(p => p.stock === 0).length;
-
-  const getStockLevel = (p) => {
-    if (p.stock === 0) return 'out';
-    if (p.stock <= p.lowStockThreshold) return 'low';
-    return 'in';
-  };
+  const totalProducts = products.length;
+  const lowStockCount = products.filter(p => getStockLevel(p) === 'low').length;
+  const outOfStockCount = products.filter(p => getStockLevel(p) === 'out').length;
 
   const openAdjust = (product) => {
     setSelectedProduct(product);
     setAdjustType('add');
     setAdjustQty('');
+    setAdjustError('');
   };
 
-  const handleAdjust = () => {
-    console.log({ productId: selectedProduct.id, type: adjustType, quantity: Number(adjustQty) });
-    setSelectedProduct(null);
+  const handleAdjust = async () => {
+    if (!selectedProduct || adjusting) return;
+    setAdjusting(true);
+    setAdjustError('');
+    try {
+      await productService.adjustStock(selectedProduct.id, adjustType, Number(adjustQty));
+      setSelectedProduct(null);
+      setReloadKey(key => key + 1);
+    } catch (err) {
+      setAdjustError(getApiErrorMessage(err, 'Failed to adjust stock.'));
+    } finally {
+      setAdjusting(false);
+    }
   };
 
   return (
@@ -63,7 +97,7 @@ export default function Stock() {
         <header className="admin-header">
           <div>
             <h1 className="admin-title dark:text-white">Stock Management</h1>
-            <p className="admin-subtitle dark:text-gray-400">{products.length} product{products.length !== 1 ? 's' : ''} found</p>
+            <p className="admin-subtitle dark:text-gray-400">{filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found</p>
           </div>
         </header>
 
@@ -135,7 +169,20 @@ export default function Stock() {
                 </tr>
               </thead>
               <tbody>
-                {products.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan="6">
+                      <LoadingSpinner label="Loading products..." />
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan="6" className="admin-empty">
+                      <span className="admin-empty-icon">⚠️</span>
+                      <p>{error}</p>
+                    </td>
+                  </tr>
+                ) : filteredProducts.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="admin-empty">
                       <span className="admin-empty-icon">📦</span>
@@ -143,21 +190,27 @@ export default function Stock() {
                     </td>
                   </tr>
                 ) : (
-                  products.map(product => (
+                  filteredProducts.map(product => (
                     <tr key={product.id}>
                       <td>
                         <div className="admin-product-cell">
-                          <span className="admin-product-icon">{product.icon}</span>
+                          <span className="admin-product-icon">
+                            {product.image ? (
+                              <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+                            ) : (
+                              (product.name || '📦').charAt(0)
+                            )}
+                          </span>
                           <div>
                             <span className="admin-product-name">{product.name}</span>
-                            <span className="admin-product-brand">{product.brand}</span>
+                            <span className="admin-product-brand">{product.brand || ''}</span>
                           </div>
                         </div>
                       </td>
-                      <td className="admin-sku">{product.sku}</td>
-                      <td>{product.category}</td>
+                      <td className="admin-sku">{product.sku || '—'}</td>
+                      <td>{product.category_name || '—'}</td>
                       <td>
-                        <span className={`stock-qty ${getStockLevel(product)}`}>{product.stock}</span>
+                        <span className={`stock-qty ${getStockLevel(product)}`}>{product.stock ?? 0}</span>
                       </td>
                       <td>
                         <span className={`stock-badge ${getStockLevel(product)}`}>
@@ -177,19 +230,25 @@ export default function Stock() {
 
         {/* Adjust Modal */}
         {selectedProduct && (
-          <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)}>
+          <div className="admin-modal-overlay" onClick={() => { if (!adjusting) setSelectedProduct(null); }}>
             <div className="admin-modal" onClick={e => e.stopPropagation()}>
               <h3 className="admin-modal-title">Adjust Stock</h3>
               <div className="stock-adjust-preview">
-                <span className="stock-adjust-preview-icon">{selectedProduct.icon}</span>
+                <span className="stock-adjust-preview-icon">
+                  {selectedProduct.image ? (
+                    <img src={selectedProduct.image} alt={selectedProduct.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+                  ) : (
+                    (selectedProduct.name || '📦').charAt(0)
+                  )}
+                </span>
                 <div>
                   <p className="stock-adjust-preview-name">{selectedProduct.name}</p>
-                  <p className="stock-adjust-preview-current">Current stock: <strong>{selectedProduct.stock}</strong></p>
+                  <p className="stock-adjust-preview-current">Current stock: <strong>{selectedProduct.stock ?? 0}</strong></p>
                 </div>
               </div>
               <div className="stock-adjust-types">
                 {['add', 'remove', 'set'].map(type => (
-                  <button key={type} onClick={() => setAdjustType(type)} className={`stock-adjust-type ${adjustType === type ? 'active' : ''}`}>
+                  <button key={type} onClick={() => setAdjustType(type)} disabled={adjusting} className={`stock-adjust-type ${adjustType === type ? 'active' : ''}`}>
                     {type === 'add' ? '+ Add' : type === 'remove' ? '- Remove' : '= Set'}
                   </button>
                 ))}
@@ -198,9 +257,10 @@ export default function Stock() {
                 <label className="admin-label">Quantity</label>
                 <input type="number" min="0" value={adjustQty} onChange={e => setAdjustQty(e.target.value)} placeholder="Enter quantity" className="admin-input" autoFocus />
               </div>
+              {adjustError && <p className="admin-modal-text">{adjustError}</p>}
               <div className="admin-modal-actions">
-                <button onClick={() => setSelectedProduct(null)} className="admin-modal-btn cancel">Cancel</button>
-                <button onClick={handleAdjust} disabled={!adjustQty || Number(adjustQty) < 0} className="admin-modal-btn confirm">Confirm</button>
+                <button onClick={() => setSelectedProduct(null)} disabled={adjusting} className="admin-modal-btn cancel">Cancel</button>
+                <button onClick={handleAdjust} disabled={!adjustQty || Number(adjustQty) < 0 || adjusting} className="admin-modal-btn confirm">Confirm</button>
               </div>
             </div>
           </div>

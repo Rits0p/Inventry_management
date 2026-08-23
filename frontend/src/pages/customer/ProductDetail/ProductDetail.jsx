@@ -1,40 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useCart } from '../../../context/CartContext';
+import { productService } from '../../../services/productService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 import './ProductDetail.css';
-
-const ALL_PRODUCTS = [
-  { id: 1, name: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones', brand: 'Sony', price: 20994, originalPrice: 34990, discount: 40, rating: 4.7, reviews: 2841, stock: 48, sku: 'SNY-WH1000XM5', cat: 'Audio', icon: '🎧',
-    highlights: ['Industry-leading noise cancellation', 'Up to 30 hours battery life', 'Multipoint connection', 'Speak-to-Chat technology', 'Lightweight design (250g)'],
-    description: 'The WH-1000XM5 headphones rewrite the rules for distraction-free listening. With eight microphones, Auto NC Optimizer and specially developed driver units, they offer an unprecedented level of noise cancellation and call quality.',
-    specifications: [{ label: 'Brand', value: 'Sony' }, { label: 'Model', value: 'WH-1000XM5' }, { label: 'Color', value: 'Black' }, { label: 'Connectivity', value: 'Bluetooth 5.2' }, { label: 'Battery Life', value: 'Up to 30 hours' }, { label: 'Weight', value: '250 g' }] },
-  { id: 2, name: 'Apple MacBook Air M2', brand: 'Apple', price: 91920, originalPrice: 114900, discount: 20, rating: 4.9, reviews: 3241, stock: 25, sku: 'APL-MBA-M2', cat: 'Laptops', icon: '💻',
-    highlights: ['Apple M2 chip', '15.3" Liquid Retina Display', '18-hour battery life', '8GB Unified Memory', 'Fanless design'],
-    description: 'The remarkably thin MacBook Air with the powerful M2 chip. Built around our next-generation M2 chip, MacBook Air brings an outstanding combination of performance and portability.',
-    specifications: [{ label: 'Brand', value: 'Apple' }, { label: 'Processor', value: 'Apple M2' }, { label: 'RAM', value: '8 GB' }, { label: 'Storage', value: '256 GB SSD' }, { label: 'Display', value: '15.3" Retina' }, { label: 'Weight', value: '1.24 kg' }] },
-  { id: 3, name: 'Samsung Galaxy S24 Ultra', brand: 'Samsung', price: 99999, originalPrice: 129999, discount: 23, rating: 4.8, reviews: 2104, stock: 35, sku: 'SMG-S24U', cat: 'Smartphones', icon: '📱',
-    highlights: ['Snapdragon 8 Gen 3', '200MP Camera', 'S Pen included', 'Titanium frame', 'Galaxy AI built-in'],
-    description: 'Galaxy AI is here. Search like never before, effortlessly translate calls and texts, and get smart organization with S Pen and Note Assist.',
-    specifications: [{ label: 'Brand', value: 'Samsung' }, { label: 'Processor', value: 'Snapdragon 8 Gen 3' }, { label: 'RAM', value: '12 GB' }, { label: 'Storage', value: '256 GB' }, { label: 'Display', value: '6.8" QHD+ AMOLED' }, { label: 'Battery', value: '5000 mAh' }] },
-  { id: 4, name: 'ASUS ROG Zephyrus G14', brand: 'ASUS', price: 119999, originalPrice: 149999, discount: 20, rating: 4.7, reviews: 892, stock: 15, sku: 'ASUS-ROG-G14', cat: 'Gaming', icon: '🎮',
-    highlights: ['AMD Ryzen 9 7940HS', 'NVIDIA RTX 4060', '14" QHD 165Hz display', 'AniMe Matrix LED', '1TB SSD'],
-    description: 'The ROG Zephyrus G14 is an ultra-slim gaming laptop powered by AMD Ryzen 9 processor and NVIDIA GeForce RTX 4060 GPU.',
-    specifications: [{ label: 'Brand', value: 'ASUS' }, { label: 'Processor', value: 'AMD Ryzen 9 7940HS' }, { label: 'GPU', value: 'RTX 4060' }, { label: 'RAM', value: '16 GB' }, { label: 'Display', value: '14" QHD 165Hz' }, { label: 'Weight', value: '1.72 kg' }] },
-  { id: 5, name: 'iPad Pro 12.9" M2', brand: 'Apple', price: 89900, originalPrice: 112900, discount: 20, rating: 4.8, reviews: 1567, stock: 20, sku: 'APL-IPDPRO-M2', cat: 'Tablets', icon: '📱',
-    highlights: ['Apple M2 chip', '12.9" Liquid Retina XDR', 'Apple Pencil hover', 'Thunderbolt port', 'Face ID'],
-    description: 'iPad Pro with M2 is an incredibly advanced tablet with the powerful M2 chip, a stunning Liquid Retina XDR display, and pro workflows.',
-    specifications: [{ label: 'Brand', value: 'Apple' }, { label: 'Processor', value: 'Apple M2' }, { label: 'Storage', value: '256 GB' }, { label: 'Display', value: '12.9" XDR' }, { label: 'Camera', value: '12MP Wide + Ultra Wide' }, { label: 'Weight', value: '682 g' }] },
-  { id: 6, name: 'Dell XPS 15 OLED', brand: 'Dell', price: 151999, originalPrice: 189999, discount: 20, rating: 4.7, reviews: 724, stock: 12, sku: 'DLL-XPS15', cat: 'Laptops', icon: '💻',
-    highlights: ['13th Gen Intel Core i7', '15.6" 3.5K OLED', 'NVIDIA RTX 4050', '16GB DDR5', 'Fingerprint reader'],
-    description: 'The Dell XPS 15 features a stunning 3.5K OLED display and powerful Intel 13th Gen processors for creative professionals.',
-    specifications: [{ label: 'Brand', value: 'Dell' }, { label: 'Processor', value: 'Intel Core i7-13700H' }, { label: 'RAM', value: '16 GB DDR5' }, { label: 'Storage', value: '512 GB SSD' }, { label: 'Display', value: '15.6" 3.5K OLED' }, { label: 'Weight', value: '1.86 kg' }] },
-];
-
-const RELATED_PRODUCTS = [
-  { id: 9, name: 'Keychron Q1 Pro Keyboard', brand: 'Keychron', price: 13599, originalPrice: 16999, discount: 20, rating: 4.8, reviews: 643, icon: '🖱️' },
-  { id: 10, name: 'LG 27" 4K IPS Monitor', brand: 'LG', price: 25794, originalPrice: 42990, discount: 40, rating: 4.7, reviews: 1203, icon: '🖥️' },
-  { id: 11, name: 'Logitech MX Master 3S', brand: 'Logitech', price: 5397, originalPrice: 8995, discount: 40, rating: 4.8, reviews: 932, icon: '🖱️' },
-  { id: 12, name: 'JBL Flip 6 Speaker', brand: 'JBL', price: 7199, originalPrice: 11999, discount: 40, rating: 4.6, reviews: 1540, icon: '🎧' },
-];
 
 function Stars({ rating }) {
   return (
@@ -50,17 +21,76 @@ function Stars({ rating }) {
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState('highlights');
   const [addedToCart, setAddedToCart] = useState(false);
   const [addedToWishlist, setAddedToWishlist] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  const product = ALL_PRODUCTS.find(p => p.id === Number(id)) || ALL_PRODUCTS[0];
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [relatedProducts, setRelatedProducts] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadProduct = async () => {
+      window.scrollTo(0, 0);
+      setLoading(true);
+      setError('');
+      try {
+        const data = await productService.getProduct(id);
+        if (!cancelled) {
+          setProduct(data);
+          setQuantity(1);
+        }
+      } catch (err) {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load product.'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadProduct();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!product?.category_name) return undefined;
+    let cancelled = false;
+    productService
+      .getProducts({ category: product.category_name, page_size: 9 })
+      .then((data) => {
+        if (!cancelled) {
+          setRelatedProducts(
+            unwrapList(data).filter((p) => p.id !== product.id).slice(0, 8)
+          );
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setRelatedProducts([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [product]);
+
+  const soldOut = (product?.stock ?? 0) === 0;
 
   const handleAddToCart = () => {
+    if (soldOut) return;
+    addToCart(product, quantity);
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    if (soldOut) return;
+    addToCart(product, quantity);
+    navigate('/cart');
   };
 
   const handleWishlist = () => {
@@ -71,9 +101,29 @@ export default function ProductDetail() {
     setOpenSection(openSection === section ? null : section);
   };
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [id]);
+  if (loading) {
+    return (
+      <main className="pd-page">
+        <LoadingSpinner label="Loading..." />
+      </main>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <main className="pd-page">
+        <div className="flex flex-col items-center justify-center py-24 text-center px-4">
+          <span className="text-6xl mb-4">⚠️</span>
+          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load product</h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">{error}</p>
+          <Link to="/shop"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#2874F0] text-white font-bold rounded-full hover:shadow-lg transition">
+            ← Back to Shop
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="pd-page">
@@ -91,9 +141,17 @@ export default function ProductDetail() {
       <section className="pd-hero">
         <div className="pd-hero-bg" style={{background: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`}}></div>
         <div className="pd-hero-content">
-          <div className="pd-hero-badge">{product.cat}</div>
-          <div className="pd-hero-icon">{product.icon}</div>
-          <div className="pd-hero-discount">-{product.discount}% OFF</div>
+          <div className="pd-hero-badge">{product.category_name}</div>
+          <div className="pd-hero-icon">
+            {product.image ? (
+              <img src={product.image} alt={product.name} loading="lazy" style={{ maxHeight: '10rem', maxWidth: '18rem', borderRadius: '1.5rem' }} />
+            ) : (
+              '🛍️'
+            )}
+          </div>
+          {product.discount > 0 && (
+            <div className="pd-hero-discount">-{product.discount}% OFF</div>
+          )}
         </div>
         <div className="pd-hero-thumbs">
           {[0, 1, 2].map(idx => (
@@ -110,9 +168,9 @@ export default function ProductDetail() {
             <p className="pd-brand-tag">{product.brand}</p>
             <h1 className="pd-main-title">{product.name}</h1>
             <div className="pd-rating-inline">
-              <span className="pd-rating-score">{product.rating}</span>
+              <span className="pd-rating-score">{Number(product.rating ?? 0).toFixed(1)}</span>
               <Stars rating={product.rating} />
-              <span className="pd-rating-text">{product.reviews.toLocaleString()} reviews</span>
+              <span className="pd-rating-text">{(product.review_count ?? 0).toLocaleString()} reviews</span>
             </div>
           </div>
 
@@ -120,17 +178,21 @@ export default function ProductDetail() {
           <div className="pd-price-block">
             <div className="pd-price-row">
               <span className="pd-price-big">₹{product.price.toLocaleString('en-IN')}</span>
-              <span className="pd-price-old">₹{product.originalPrice.toLocaleString('en-IN')}</span>
+              {product.original_price > product.price && (
+                <span className="pd-price-old">₹{product.original_price.toLocaleString('en-IN')}</span>
+              )}
             </div>
-            <div className="pd-savings-badge">
-              Save ₹{(product.originalPrice - product.price).toLocaleString('en-IN')}
-            </div>
+            {product.original_price > product.price && (
+              <div className="pd-savings-badge">
+                Save ₹{(product.original_price - product.price).toLocaleString('en-IN')}
+              </div>
+            )}
           </div>
 
           {/* Stock */}
           <div className={`pd-stock-indicator ${product.stock > 10 ? 'available' : 'low'}`}>
             <span className="pd-stock-dot"></span>
-            {product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`}
+            {soldOut ? 'Out of Stock' : product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`}
           </div>
 
           {/* Quantity + Actions */}
@@ -140,10 +202,10 @@ export default function ProductDetail() {
               <span>{quantity}</span>
               <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}>+</button>
             </div>
-            <button onClick={handleAddToCart} className={`pd-add-cart ${addedToCart ? 'added' : ''}`}>
-              {addedToCart ? '✓ Added' : 'Add to Cart'}
+            <button onClick={handleAddToCart} disabled={soldOut} className={`pd-add-cart ${addedToCart ? 'added' : ''}`}>
+              {addedToCart ? '✓ Added' : soldOut ? 'Out of Stock' : 'Add to Cart'}
             </button>
-            <button className="pd-buy-now">Buy Now</button>
+            <button className="pd-buy-now" onClick={handleBuyNow} disabled={soldOut}>Buy Now</button>
           </div>
 
           {/* Wishlist */}
@@ -165,7 +227,7 @@ export default function ProductDetail() {
               {openSection === 'highlights' && (
                 <div className="pd-accordion-content">
                   <ul className="pd-highlight-list">
-                    {product.highlights.map((item, idx) => (
+                    {(product.highlights ?? []).map((item, idx) => (
                       <li key={idx}>{item}</li>
                     ))}
                   </ul>
@@ -195,7 +257,7 @@ export default function ProductDetail() {
               {openSection === 'specifications' && (
                 <div className="pd-accordion-content">
                   <div className="pd-spec-grid">
-                    {product.specifications.map((spec, idx) => (
+                    {(product.specifications ?? []).map((spec, idx) => (
                       <div key={idx} className="pd-spec-item">
                         <span className="pd-spec-label">{spec.label}</span>
                         <span className="pd-spec-value">{spec.value}</span>
@@ -235,33 +297,41 @@ export default function ProductDetail() {
       </section>
 
       {/* Related Products - Horizontal Scroll */}
-      <section className="pd-related">
-        <div className="pd-container">
-          <h2 className="pd-related-heading">You Might Also Like</h2>
-          <div className="pd-related-scroll">
-            {RELATED_PRODUCTS.map(p => (
-              <Link key={p.id} to={`/product/${p.id}`} className="pd-related-card">
-                <div className="pd-related-img">
-                  {p.icon}
-                  {p.discount > 0 && <span className="pd-related-badge">-{p.discount}%</span>}
-                </div>
-                <div className="pd-related-info">
-                  <p className="pd-related-brand">{p.brand}</p>
-                  <h3 className="pd-related-name">{p.name}</h3>
-                  <div className="pd-related-rating">
-                    <Stars rating={p.rating} />
-                    <span>({p.reviews.toLocaleString()})</span>
+      {relatedProducts.length > 0 && (
+        <section className="pd-related">
+          <div className="pd-container">
+            <h2 className="pd-related-heading">You Might Also Like</h2>
+            <div className="pd-related-scroll">
+              {relatedProducts.map(p => (
+                <Link key={p.id} to={`/product/${p.id}`} className="pd-related-card">
+                  <div className="pd-related-img">
+                    {p.image ? (
+                      <img src={p.image} alt={p.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      '🛍️'
+                    )}
+                    {p.discount > 0 && <span className="pd-related-badge">-{p.discount}%</span>}
                   </div>
-                  <div className="pd-related-price">
-                    <span className="pd-related-current">₹{p.price.toLocaleString('en-IN')}</span>
-                    <span className="pd-related-old">₹{p.originalPrice.toLocaleString('en-IN')}</span>
+                  <div className="pd-related-info">
+                    <p className="pd-related-brand">{p.brand}</p>
+                    <h3 className="pd-related-name">{p.name}</h3>
+                    <div className="pd-related-rating">
+                      <Stars rating={p.rating} />
+                      <span>({(p.review_count ?? 0).toLocaleString()})</span>
+                    </div>
+                    <div className="pd-related-price">
+                      <span className="pd-related-current">₹{p.price.toLocaleString('en-IN')}</span>
+                      {p.original_price > p.price && (
+                        <span className="pd-related-old">₹{p.original_price.toLocaleString('en-IN')}</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }

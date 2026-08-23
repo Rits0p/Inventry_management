@@ -1,65 +1,99 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Categories.css';
+import { categoryService } from '../../../services/categoryService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
-const initialCategories = [
-  { id: 1, name: 'Electronics', slug: 'electronics', products: 342, status: 'Active', color: '#3b82f6', icon: '💻' },
-  { id: 2, name: 'Fashion', slug: 'fashion', products: 218, status: 'Active', color: '#8b5cf6', icon: '👗' },
-  { id: 3, name: 'Home & Kitchen', slug: 'home-kitchen', products: 156, status: 'Active', color: '#f59e0b', icon: '🏠' },
-  { id: 4, name: 'Books', slug: 'books', products: 89, status: 'Active', color: '#10b981', icon: '📚' },
-  { id: 5, name: 'Sports & Fitness', slug: 'sports-fitness', products: 64, status: 'Inactive', color: '#ef4444', icon: '⚽' },
-  { id: 6, name: 'Beauty & Personal Care', slug: 'beauty', products: 112, status: 'Active', color: '#ec4899', icon: '💄' },
-];
+const CARD_COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#ec4899'];
+const CARD_ICONS = ['📁', '🗂️', '🏷️'];
 
 export default function Categories() {
-  const [categories, setCategories] = useState(initialCategories);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({ name: '', status: 'Active' });
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadCategories = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await categoryService.getCategories({ page_size: 100 });
+        if (!cancelled) setCategories(unwrapList(data));
+      } catch (err) {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load categories.'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadCategories();
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
 
   const filtered = categories.filter(cat =>
-    cat.name.toLowerCase().includes(search.toLowerCase())
+    (cat.name || '').toLowerCase().includes(search.toLowerCase())
   );
 
   const openAddModal = () => {
     setEditingCategory(null);
     setFormData({ name: '', status: 'Active' });
+    setFormError('');
     setShowModal(true);
   };
 
   const openEditModal = (category) => {
     setEditingCategory(category);
-    setFormData({ name: category.name, status: category.status });
+    setFormData({ name: category.name || '', status: category.status || 'Active' });
+    setFormError('');
     setShowModal(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim()) return;
-
-    if (editingCategory) {
-      setCategories(categories.map(cat =>
-        cat.id === editingCategory.id ? { ...cat, name: formData.name, status: formData.status } : cat
-      ));
-    } else {
-      const newCategory = {
-        id: Date.now(),
-        name: formData.name,
-        slug: formData.name.toLowerCase().replace(/\s+/g, '-'),
-        products: 0,
-        status: formData.status,
-        color: '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'),
-        icon: '📁',
-      };
-      setCategories([newCategory, ...categories]);
+    if (!formData.name.trim() || submitting) return;
+    setSubmitting(true);
+    setFormError('');
+    try {
+      if (editingCategory) {
+        await categoryService.updateCategory(editingCategory.id, { name: formData.name.trim() });
+      } else {
+        await categoryService.createCategory({ name: formData.name.trim() });
+      }
+      setShowModal(false);
+      setReloadKey(key => key + 1);
+    } catch (err) {
+      setFormError(getApiErrorMessage(err, 'Failed to save category.'));
+    } finally {
+      setSubmitting(false);
     }
-    setShowModal(false);
   };
 
-  const handleDelete = () => {
-    setCategories(categories.filter(cat => cat.id !== showDeleteModal));
-    setShowDeleteModal(null);
+  const handleDelete = async () => {
+    if (!showDeleteModal || deleting) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await categoryService.deleteCategory(showDeleteModal);
+      setShowDeleteModal(null);
+      setReloadKey(key => key + 1);
+    } catch (err) {
+      setDeleteError(getApiErrorMessage(err, 'Failed to delete category.'));
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -88,33 +122,51 @@ export default function Categories() {
 
         {/* Grid */}
         <div className="categories-grid">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <LoadingSpinner label="Loading categories..." />
+          ) : error ? (
+            <div className="admin-empty-card">
+              <span className="admin-empty-icon">⚠️</span>
+              <p>{error}</p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="admin-empty-card">
               <span className="admin-empty-icon">📂</span>
               <p>No categories found</p>
             </div>
           ) : (
-            filtered.map(cat => (
-              <div key={cat.id} className="category-card" style={{ '--cat-color': cat.color }}>
-                <div className="category-card-header">
-                  <span className="category-icon">{cat.icon}</span>
-                  <span className={`category-status ${cat.status.toLowerCase()}`}>{cat.status}</span>
+            filtered.map(cat => {
+              const color = cat.color || CARD_COLORS[Math.abs(cat.id) % CARD_COLORS.length];
+              const icon = CARD_ICONS[Math.abs(cat.id) % CARD_ICONS.length];
+              const statusLabel = cat.status || 'Active';
+              return (
+                <div key={cat.id} className="category-card" style={{ '--cat-color': color }}>
+                  <div className="category-card-header">
+                    <span className="category-icon">
+                      {cat.image ? (
+                        <img src={cat.image} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+                      ) : (
+                        icon
+                      )}
+                    </span>
+                    <span className={`category-status ${statusLabel.toLowerCase()}`}>{statusLabel}</span>
+                  </div>
+                  <h3 className="category-name">{cat.name}</h3>
+                  <p className="category-slug">/{cat.slug || (cat.name || '').toLowerCase().replace(/\s+/g, '-')}</p>
+                  <p className="category-count">{cat.product_count ?? 0} products</p>
+                  <div className="category-actions">
+                    <button onClick={() => openEditModal(cat)} className="cat-action-btn edit">Edit</button>
+                    <button onClick={() => { setDeleteError(''); setShowDeleteModal(cat.id); }} className="cat-action-btn delete">Delete</button>
+                  </div>
                 </div>
-                <h3 className="category-name">{cat.name}</h3>
-                <p className="category-slug">/{cat.slug}</p>
-                <p className="category-count">{cat.products} products</p>
-                <div className="category-actions">
-                  <button onClick={() => openEditModal(cat)} className="cat-action-btn edit">Edit</button>
-                  <button onClick={() => setShowDeleteModal(cat.id)} className="cat-action-btn delete">Delete</button>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
         {/* Add/Edit Modal */}
         {showModal && (
-          <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="admin-modal-overlay" onClick={() => { if (!submitting) setShowModal(false); }}>
             <div className="admin-modal" onClick={e => e.stopPropagation()}>
               <h3 className="admin-modal-title">{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
               <form onSubmit={handleSubmit} className="admin-modal-form">
@@ -129,9 +181,10 @@ export default function Categories() {
                     <option value="Inactive">Inactive</option>
                   </select>
                 </div>
+                {formError && <p className="admin-modal-text">{formError}</p>}
                 <div className="admin-modal-actions">
-                  <button type="button" onClick={() => setShowModal(false)} className="admin-modal-btn cancel">Cancel</button>
-                  <button type="submit" className="admin-modal-btn confirm">{editingCategory ? 'Update' : 'Create'}</button>
+                  <button type="button" onClick={() => setShowModal(false)} disabled={submitting} className="admin-modal-btn cancel">Cancel</button>
+                  <button type="submit" disabled={submitting} className="admin-modal-btn confirm">{editingCategory ? 'Update' : 'Create'}</button>
                 </div>
               </form>
             </div>
@@ -140,13 +193,14 @@ export default function Categories() {
 
         {/* Delete Modal */}
         {showDeleteModal && (
-          <div className="admin-modal-overlay" onClick={() => setShowDeleteModal(null)}>
+          <div className="admin-modal-overlay" onClick={() => { if (!deleting) setShowDeleteModal(null); }}>
             <div className="admin-modal" onClick={e => e.stopPropagation()}>
               <h3 className="admin-modal-title">Delete Category</h3>
               <p className="admin-modal-text">Are you sure you want to delete this category? This action cannot be undone.</p>
+              {deleteError && <p className="admin-modal-text">{deleteError}</p>}
               <div className="admin-modal-actions">
-                <button onClick={() => setShowDeleteModal(null)} className="admin-modal-btn cancel">Cancel</button>
-                <button onClick={handleDelete} className="admin-modal-btn delete">Delete</button>
+                <button onClick={() => setShowDeleteModal(null)} disabled={deleting} className="admin-modal-btn cancel">Cancel</button>
+                <button onClick={handleDelete} disabled={deleting} className="admin-modal-btn delete">Delete</button>
               </div>
             </div>
           </div>

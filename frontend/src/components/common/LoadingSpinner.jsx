@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * LoadingSpinner – full-page or inline loading indicator.

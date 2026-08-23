@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * CartItem – a single row in the cart.

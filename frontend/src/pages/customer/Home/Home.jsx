@@ -1,5 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { productService } from '../../../services/productService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 // ─────────────────────────── DATA ─────────────────────────────────────────────
 
@@ -53,34 +57,6 @@ const CATEGORIES = [
   { id: 8, name: 'Accessories', slug: 'accessories', icon: '🖱️', count: 234, gradient: 'from-slate-500 to-gray-700' },
 ];
 
-const FLASH_DEALS = [
-  { id: 1, name: 'Sony WH-1000XM5 Headphones', cat: 'Audio', mrp: 34990, price: 20994, discount: 40, rating: 4.9, reviews: 2841 },
-  { id: 2, name: 'LG 27" 4K IPS Monitor', cat: 'Monitors', mrp: 42990, price: 25794, discount: 40, rating: 4.7, reviews: 1203 },
-  { id: 3, name: 'Logitech MX Master 3S', cat: 'Accessories', mrp: 8995, price: 5397, discount: 40, rating: 4.8, reviews: 932 },
-  { id: 4, name: 'JBL Flip 6 Speaker', cat: 'Audio', mrp: 11999, price: 7199, discount: 40, rating: 4.6, reviews: 1540 },
-  { id: 5, name: 'Samsung T7 1TB SSD', cat: 'Storage', mrp: 9999, price: 5999, discount: 40, rating: 4.8, reviews: 876 },
-];
-
-const TOP_PRODUCTS = [
-  { id: 1, name: 'Apple MacBook Air M2', cat: 'Laptops', mrp: 114900, price: 91920, discount: 20, rating: 4.9, reviews: 3241, badge: 'Best Seller', badgeColor: 'bg-amber-500' },
-  { id: 2, name: 'Samsung Galaxy S24 Ultra', cat: 'Smartphones', mrp: 129999, price: 99999, discount: 23, rating: 4.8, reviews: 2104, badge: 'Top Rated', badgeColor: 'bg-blue-500' },
-  { id: 3, name: 'ASUS ROG Zephyrus G14', cat: 'Gaming', mrp: 149999, price: 119999, discount: 20, rating: 4.7, reviews: 892, badge: 'Gaming Pick', badgeColor: 'bg-red-500' },
-  { id: 4, name: 'iPad Pro 12.9" M2', cat: 'Tablets', mrp: 112900, price: 89900, discount: 20, rating: 4.8, reviews: 1567, badge: 'Editor\'s Choice', badgeColor: 'bg-purple-500' },
-  { id: 5, name: 'Dell XPS 15 OLED', cat: 'Laptops', mrp: 189999, price: 151999, discount: 20, rating: 4.7, reviews: 724, badge: 'Premium', badgeColor: 'bg-slate-600' },
-  { id: 6, name: 'Sony A7 IV Camera', cat: 'Cameras', mrp: 249999, price: 199999, discount: 20, rating: 4.9, reviews: 431, badge: 'Pro Choice', badgeColor: 'bg-orange-500' },
-  { id: 7, name: 'Dyson V15 Detect', cat: 'Home', mrp: 64900, price: 51920, discount: 20, rating: 4.6, reviews: 2109, badge: 'Popular', badgeColor: 'bg-teal-500' },
-  { id: 8, name: 'Keychron Q1 Pro Keyboard', cat: 'Accessories', mrp: 16999, price: 13599, discount: 20, rating: 4.8, reviews: 643, badge: 'Trending', badgeColor: 'bg-pink-500' },
-];
-
-const NEW_ARRIVALS = [
-  { id: 1, name: 'ASUS ROG Flow Z13 Gaming Tablet', cat: 'Gaming', price: 129999, discount: 13, rating: 4.7 },
-  { id: 2, name: 'Xiaomi 14 Ultra 5G', cat: 'Smartphones', price: 99999, discount: 10, rating: 4.8 },
-  { id: 3, name: 'Apple Vision Pro', cat: 'Wearables', price: 299999, discount: 0, rating: 4.9 },
-  { id: 4, name: 'Samsung Neo QLED 8K 75"', cat: 'TVs', price: 549999, discount: 15, rating: 4.8 },
-  { id: 5, name: 'Bose QuietComfort Ultra', cat: 'Audio', price: 34990, discount: 8, rating: 4.7 },
-  { id: 6, name: 'Corsair iCUE H170i Elite', cat: 'PC Components', price: 22999, discount: 12, rating: 4.6 },
-];
-
 const BRANDS = ['Apple', 'Samsung', 'Sony', 'LG', 'Dell', 'ASUS', 'Logitech', 'JBL'];
 
 const PROMO_BANNERS = [
@@ -125,6 +101,17 @@ function ImgPlaceholder({ className = '', icon = '📦' }) {
   );
 }
 
+function TimeBox({ v, label }) {
+  return (
+    <div className="flex flex-col items-center">
+      <div className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xl md:text-2xl font-extrabold w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center tabular-nums shadow">
+        {v}
+      </div>
+      <span className="text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase mt-1 tracking-widest">{label}</span>
+    </div>
+  );
+}
+
 function AddToCartBtn({ small = false }) {
   const [state, setState] = useState('idle');
   const handle = () => {
@@ -147,9 +134,8 @@ function AddToCartBtn({ small = false }) {
 // ─────────────────────── SECTION: HERO ───────────────────────────────────────
 
 function HeroSection() {
-  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
-  const [search, setSearch] = useState('');
+  const [featuredDeal, setFeaturedDeal] = useState(null);
 
   const next = useCallback(() => setCurrent(c => (c + 1) % HERO_SLIDES.length), []);
   const prev = () => setCurrent(c => (c - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
@@ -158,6 +144,19 @@ function HeroSection() {
     const t = setInterval(next, 5000);
     return () => clearInterval(t);
   }, [next]);
+
+  useEffect(() => {
+    let cancelled = false;
+    productService
+      .getProducts({ ordering: '-discount', page_size: 1 })
+      .then((data) => {
+        if (!cancelled) setFeaturedDeal(unwrapList(data)[0] ?? null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const slide = HERO_SLIDES[current];
 
@@ -197,24 +196,32 @@ function HeroSection() {
           </div>
 
           {/* Right card placeholder */}
-          <div className="relative z-10 flex-shrink-0 w-[45%] md:w-80">
-            <Link to="/product/1" className="block">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-4 hover:bg-white/15 transition-all duration-200">
-                <div className="relative rounded-2xl overflow-hidden mb-4">
-                  <ImgPlaceholder className="h-52 w-full" icon="💻" />
-                  <span className="absolute top-3 right-3 bg-[#FB641B] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
-                    {slide.badge}
-                  </span>
+          {featuredDeal && (
+            <div className="relative z-10 flex-shrink-0 w-[45%] md:w-80">
+              <Link to={`/product/${featuredDeal.id}`} className="block">
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-4 hover:bg-white/15 transition-all duration-200">
+                  <div className="relative rounded-2xl overflow-hidden mb-4">
+                    {featuredDeal.image ? (
+                      <img src={featuredDeal.image} alt={featuredDeal.name} loading="lazy" className="h-52 w-full object-cover" />
+                    ) : (
+                      <ImgPlaceholder className="h-52 w-full" icon="💻" />
+                    )}
+                    <span className="absolute top-3 right-3 bg-[#FB641B] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
+                      {slide.badge}
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-1">Featured Deal</p>
+                  <p className="font-bold text-white text-sm line-clamp-1">{featuredDeal.name}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xl font-extrabold text-[#FB641B]">₹{featuredDeal.price.toLocaleString('en-IN')}</span>
+                    {featuredDeal.original_price > featuredDeal.price && (
+                      <span className="text-xs text-white/50 line-through">₹{featuredDeal.original_price.toLocaleString('en-IN')}</span>
+                    )}
+                  </div>
                 </div>
-                <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-1">Featured Deal</p>
-                <p className="font-bold text-white text-sm line-clamp-1">Sony WH-1000XM5 Headphones</p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-xl font-extrabold text-[#FB641B]">₹20,994</span>
-                  <span className="text-xs text-white/50 line-through">₹34,990</span>
-                </div>
-              </div>
-            </Link>
-          </div>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Slide controls */}
@@ -268,30 +275,41 @@ function CategoriesSection() {
 // ─────────────────────── SECTION: FLASH SALE ─────────────────────────────────
 
 function FlashSaleSection() {
-  const TARGET = Date.now() + 8 * 3600 * 1000; // 8h from now
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState({ h: '08', m: '00', s: '00' });
 
   useEffect(() => {
+    let cancelled = false;
+    productService
+      .getProducts({ ordering: '-discount', page_size: 5 })
+      .then((data) => {
+        if (!cancelled) setProducts(unwrapList(data));
+      })
+      .catch((err) => {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load products.'));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const target = Date.now() + 8 * 3600 * 1000; // 8h from now
     const tick = () => {
-      const diff = Math.max(0, TARGET - Date.now());
+      const diff = Math.max(0, target - Date.now());
       const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
       const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
       const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
       setTimeLeft({ h, m, s });
     };
-    tick();
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
   }, []);
-
-  const TimeBox = ({ v, label }) => (
-    <div className="flex flex-col items-center">
-      <div className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xl md:text-2xl font-extrabold w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center tabular-nums shadow">
-        {v}
-      </div>
-      <span className="text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase mt-1 tracking-widest">{label}</span>
-    </div>
-  );
 
   return (
     <section className="bg-gray-100 dark:bg-gradient-to-r dark:from-gray-900 dark:to-gray-800 py-10 transition-colors duration-300" style={{ backgroundColor: 'var(--page-bg-secondary)' }}>
@@ -320,34 +338,58 @@ function FlashSaleSection() {
         </div>
 
         {/* Flash deal cards — horizontal scroll */}
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-          {FLASH_DEALS.map(p => (
-            <Link key={p.id} to={`/product/${p.id}`}
-              className="flex-shrink-0 w-52 bg-white dark:bg-[#1a1a24] rounded-2xl overflow-hidden shadow hover:shadow-lg transition-all duration-200 flex flex-col hover:-translate-y-1">
-              <div className="relative">
-                <ImgPlaceholder className="h-36 w-full" icon="🛒" />
-                <span className="absolute top-2 left-2 bg-[#FB641B] text-white text-[11px] font-extrabold px-2 py-0.5 rounded-full">
-                  -{p.discount}%
-                </span>
-              </div>
-              <div className="p-3 flex-1 flex flex-col bg-white dark:bg-[#1a1a24]">
-                <p className="text-[10px] font-bold text-[#FB641B] uppercase mb-1">{p.cat}</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 mb-1 flex-1">{p.name}</p>
-                <div className="flex items-center gap-1 mb-2">
-                  <Stars rating={p.rating} />
-                  <span className="text-[10px] text-gray-400">({p.reviews})</span>
+        {loading ? (
+          <LoadingSpinner label="Loading flash deals..." />
+        ) : error ? (
+          <div className="text-center py-10">
+            <span className="text-6xl mb-4 block">⚠️</span>
+            <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load flash deals</h3>
+            <p className="text-gray-500 dark:text-gray-400">{error}</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-10">
+            <span className="text-6xl mb-4 block">⚡</span>
+            <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No flash deals right now</h3>
+            <p className="text-gray-500 dark:text-gray-400">Check back soon — new deals drop every day!</p>
+          </div>
+        ) : (
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            {products.map(p => (
+              <Link key={p.id} to={`/product/${p.id}`}
+                className="flex-shrink-0 w-52 bg-white dark:bg-[#1a1a24] rounded-2xl overflow-hidden shadow hover:shadow-lg transition-all duration-200 flex flex-col hover:-translate-y-1">
+                <div className="relative">
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} loading="lazy" className="h-36 w-full object-cover" />
+                  ) : (
+                    <ImgPlaceholder className="h-36 w-full" icon="🛒" />
+                  )}
+                  {p.discount > 0 && (
+                    <span className="absolute top-2 left-2 bg-[#FB641B] text-white text-[11px] font-extrabold px-2 py-0.5 rounded-full">
+                      -{p.discount}%
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-400 line-through">₹{p.mrp.toLocaleString('en-IN')}</p>
-                    <p className="text-sm font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
+                <div className="p-3 flex-1 flex flex-col bg-white dark:bg-[#1a1a24]">
+                  <p className="text-[10px] font-bold text-[#FB641B] uppercase mb-1">{p.category_name}</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 mb-1 flex-1">{p.name}</p>
+                  <div className="flex items-center gap-1 mb-2">
+                    <Stars rating={p.rating ?? 0} />
+                    <span className="text-[10px] text-gray-400">({p.review_count ?? 0})</span>
                   </div>
-                  <AddToCartBtn small />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      {p.original_price > p.price && (
+                        <p className="text-xs text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
+                      )}
+                      <p className="text-sm font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
+                    </div>
+                    <AddToCartBtn small />
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
 
         <div className="mt-5 text-center">
           <Link to="/flash-deals" className="inline-flex items-center gap-2 text-sm font-semibold text-[#FB641B] hover:underline">
@@ -362,6 +404,28 @@ function FlashSaleSection() {
 // ─────────────────────── SECTION: TOP PRODUCTS ───────────────────────────────
 
 function TopProductsSection() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    productService
+      .getProducts({ ordering: '-rating', page_size: 8 })
+      .then((data) => {
+        if (!cancelled) setProducts(unwrapList(data));
+      })
+      .catch((err) => {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load products.'));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
       <div className="flex items-end justify-between mb-7">
@@ -372,41 +436,65 @@ function TopProductsSection() {
         <Link to="/top-selling" className="text-sm font-semibold text-[#2874F0] hover:underline">View Full Ranking →</Link>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {TOP_PRODUCTS.map(p => (
-          <Link key={p.id} to={`/product/${p.id}`}
-            className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
-            {/* Image */}
-            <div className="relative">
-              <ImgPlaceholder className="h-44 w-full" icon="📦" />
-              <span className={`absolute top-2.5 left-2.5 ${p.badgeColor} text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow`}>
-                {p.badge}
-              </span>
-              {p.discount > 0 && (
-                <span className="absolute top-2.5 right-2.5 bg-[#FB641B] text-white text-[10px] font-extrabold px-2 py-1 rounded-full">
-                  -{p.discount}%
-                </span>
-              )}
-            </div>
-            {/* Info */}
-            <div className="p-4 flex flex-col flex-1">
-              <p className="text-[10px] font-bold text-[#2874F0] uppercase tracking-wide mb-1">{p.cat}</p>
-              <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 mb-2 flex-1">{p.name}</p>
-              <div className="flex items-center gap-1.5 mb-3">
-                <Stars rating={p.rating} />
-                <span className="text-[10px] text-gray-400">({p.reviews.toLocaleString()})</span>
+      {loading ? (
+        <LoadingSpinner label="Loading top products..." />
+      ) : error ? (
+        <div className="text-center py-10">
+          <span className="text-6xl mb-4 block">⚠️</span>
+          <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load top products</h3>
+          <p className="text-gray-500 dark:text-gray-400">{error}</p>
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-10">
+          <span className="text-6xl mb-4 block">📦</span>
+          <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No products found</h3>
+          <p className="text-gray-500 dark:text-gray-400">Check back soon — our catalogue is growing!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {products.map(p => (
+            <Link key={p.id} to={`/product/${p.id}`}
+              className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+              {/* Image */}
+              <div className="relative">
+                {p.image ? (
+                  <img src={p.image} alt={p.name} loading="lazy" className="h-44 w-full object-cover" />
+                ) : (
+                  <ImgPlaceholder className="h-44 w-full" icon="📦" />
+                )}
+                {p.badge && (
+                  <span className="absolute top-2.5 left-2.5 bg-amber-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow">
+                    {p.badge}
+                  </span>
+                )}
+                {p.discount > 0 && (
+                  <span className="absolute top-2.5 right-2.5 bg-[#FB641B] text-white text-[10px] font-extrabold px-2 py-1 rounded-full">
+                    -{p.discount}%
+                  </span>
+                )}
               </div>
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <p className="text-xs text-gray-400 line-through">₹{p.mrp.toLocaleString('en-IN')}</p>
-                  <p className="text-base font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
+              {/* Info */}
+              <div className="p-4 flex flex-col flex-1">
+                <p className="text-[10px] font-bold text-[#2874F0] uppercase tracking-wide mb-1">{p.category_name}</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 mb-2 flex-1">{p.name}</p>
+                <div className="flex items-center gap-1.5 mb-3">
+                  <Stars rating={p.rating ?? 0} />
+                  <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()})</span>
                 </div>
-                <AddToCartBtn small />
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    {p.original_price > p.price && (
+                      <p className="text-xs text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
+                    )}
+                    <p className="text-base font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
+                  </div>
+                  <AddToCartBtn small />
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -444,6 +532,28 @@ function PromoBanners() {
 // ─────────────────────── SECTION: NEW ARRIVALS ───────────────────────────────
 
 function NewArrivalsSection() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    productService
+      .getProducts({ ordering: '-created_at', page_size: 6 })
+      .then((data) => {
+        if (!cancelled) setProducts(unwrapList(data));
+      })
+      .catch((err) => {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load products.'));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section className="py-12 transition-colors duration-300" style={{ background: 'linear-gradient(to bottom, var(--page-bg), var(--page-bg-secondary))' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -455,26 +565,46 @@ function NewArrivalsSection() {
           <Link to="/new-arrivals" className="text-sm font-semibold text-[#2874F0] hover:underline">See All New →</Link>
         </div>
 
-        <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
-          {NEW_ARRIVALS.map(p => (
-            <Link key={p.id} to={`/product/${p.id}`}
-              className="group flex-shrink-0 w-48 bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 overflow-hidden">
-              <div className="relative">
-                <ImgPlaceholder className="h-36 w-full" icon="✨" />
-                <span className="absolute top-2 left-2 bg-[#2874F0] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">NEW</span>
-                {p.discount > 0 && (
-                  <span className="absolute top-2 right-2 bg-[#FB641B] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-{p.discount}%</span>
-                )}
-              </div>
-              <div className="p-3">
-                <p className="text-[10px] font-bold text-[#FB641B] uppercase mb-1">{p.cat}</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 mb-2">{p.name}</p>
-                <Stars rating={p.rating} />
-                <p className="text-sm font-extrabold text-gray-900 dark:text-white mt-1.5">₹{p.price.toLocaleString('en-IN')}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {loading ? (
+          <LoadingSpinner label="Loading new arrivals..." />
+        ) : error ? (
+          <div className="text-center py-10">
+            <span className="text-6xl mb-4 block">⚠️</span>
+            <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load new arrivals</h3>
+            <p className="text-gray-500 dark:text-gray-400">{error}</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-10">
+            <span className="text-6xl mb-4 block">✨</span>
+            <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No new arrivals yet</h3>
+            <p className="text-gray-500 dark:text-gray-400">Check back soon — fresh products land every week!</p>
+          </div>
+        ) : (
+          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
+            {products.map(p => (
+              <Link key={p.id} to={`/product/${p.id}`}
+                className="group flex-shrink-0 w-48 bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 overflow-hidden">
+                <div className="relative">
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} loading="lazy" className="h-36 w-full object-cover" />
+                  ) : (
+                    <ImgPlaceholder className="h-36 w-full" icon="✨" />
+                  )}
+                  <span className="absolute top-2 left-2 bg-[#2874F0] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">NEW</span>
+                  {p.discount > 0 && (
+                    <span className="absolute top-2 right-2 bg-[#FB641B] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-{p.discount}%</span>
+                  )}
+                </div>
+                <div className="p-3">
+                  <p className="text-[10px] font-bold text-[#FB641B] uppercase mb-1">{p.category_name}</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 mb-2">{p.name}</p>
+                  <Stars rating={p.rating ?? 0} />
+                  <p className="text-sm font-extrabold text-gray-900 dark:text-white mt-1.5">₹{p.price.toLocaleString('en-IN')}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

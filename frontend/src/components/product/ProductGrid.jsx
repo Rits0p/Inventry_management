@@ -1,4 +1,3 @@
-import React from 'react';
 import ProductCard from './ProductCard';
 import EmptyState from '../common/EmptyState';
 import LoadingSpinner from '../common/LoadingSpinner';

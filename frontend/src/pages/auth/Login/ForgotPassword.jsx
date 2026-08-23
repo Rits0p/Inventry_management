@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Mail, X, CheckCircle } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 

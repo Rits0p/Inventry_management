@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
@@ -6,7 +6,9 @@ function getInitialTheme() {
   try {
     const stored = localStorage.getItem('theme');
     if (stored === 'light' || stored === 'dark') return stored;
-  } catch {}
+  } catch {
+    // localStorage unavailable (private mode) — fall through to system preference
+  }
   if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
     return 'dark';
   }
@@ -29,7 +31,9 @@ export function ThemeProvider({ children }) {
     }
     try {
       localStorage.setItem('theme', theme);
-    } catch {}
+    } catch {
+      // localStorage unavailable — theme just won't persist
+    }
   }, [theme]);
 
   useEffect(() => {
@@ -39,7 +43,9 @@ export function ThemeProvider({ children }) {
         if (!localStorage.getItem('theme')) {
           setTheme(e.matches ? 'dark' : 'light');
         }
-      } catch {}
+      } catch {
+        // localStorage unavailable — ignore
+      }
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
@@ -63,6 +69,7 @@ export function ThemeProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTheme() {
   return useContext(ThemeContext);
 }

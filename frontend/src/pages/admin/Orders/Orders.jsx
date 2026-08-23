@@ -1,35 +1,126 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Orders.css';
+import { orderService } from '../../../services/orderService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
-const initialOrders = [
-  { id: 'ORD-7845', customer: 'Rahul Sharma', email: 'rahul.sharma@email.com', amount: 4299, items: 3, status: 'Delivered', payment: 'Paid', date: '15 Aug 2026', time: '10:24 AM' },
-  { id: 'ORD-7842', customer: 'Priya Patel', email: 'priya.patel@email.com', amount: 1899, items: 1, status: 'Shipped', payment: 'Paid', date: '15 Aug 2026', time: '09:12 AM' },
-  { id: 'ORD-7839', customer: 'Amit Kumar', email: 'amit.k@email.com', amount: 12450, items: 5, status: 'Processing', payment: 'Paid', date: '14 Aug 2026', time: '06:45 PM' },
-  { id: 'ORD-7835', customer: 'Sneha Reddy', email: 'sneha.r@email.com', amount: 699, items: 2, status: 'Delivered', payment: 'Paid', date: '14 Aug 2026', time: '02:30 PM' },
-  { id: 'ORD-7831', customer: 'Vikram Singh', email: 'vikram.s@email.com', amount: 3150, items: 2, status: 'Cancelled', payment: 'Refunded', date: '13 Aug 2026', time: '11:18 AM' },
-  { id: 'ORD-7828', customer: 'Ananya Gupta', email: 'ananya.g@email.com', amount: 8999, items: 1, status: 'Pending', payment: 'Pending', date: '13 Aug 2026', time: '08:55 AM' },
-  { id: 'ORD-7824', customer: 'Rohit Verma', email: 'rohit.v@email.com', amount: 2450, items: 4, status: 'Shipped', payment: 'Paid', date: '12 Aug 2026', time: '04:20 PM' },
-];
+const ORDER_STATUSES = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+
+const formatDate = (value) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
+const formatTime = (value) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+};
+
+const getCustomerName = (order) => order.customer_name || order.customer || order.user_name || 'Guest';
+const getCustomerEmail = (order) => order.customer_email || order.user_email || '';
+const getPaymentLabel = (order) => order.payment_status || order.payment || '—';
 
 export default function Orders() {
-  const [orders] = useState(initialOrders);
+  const [orders, setOrders] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [newStatus, setNewStatus] = useState('Pending');
+  const [modalError, setModalError] = useState('');
+  const [updating, setUpdating] = useState(false);
 
-  const filtered = orders.filter(order => {
-    const matchSearch = order.id.toLowerCase().includes(search.toLowerCase()) || order.customer.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === 'All' || order.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadOrders = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const params = { page_size: 50 };
+        if (statusFilter !== 'All') params.status = statusFilter;
+        if (debouncedSearch) params.search = debouncedSearch;
+        const data = await orderService.getOrders(params);
+        if (!cancelled) setOrders(unwrapList(data));
+      } catch (err) {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load orders.'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadOrders();
+    return () => {
+      cancelled = true;
+    };
+  }, [statusFilter, debouncedSearch, reloadKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+    orderService
+      .getOrders({ page_size: 100 })
+      .then((data) => {
+        if (!cancelled) setAllOrders(unwrapList(data));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
 
   const statusCounts = {
-    All: orders.length,
-    Pending: orders.filter(o => o.status === 'Pending').length,
-    Processing: orders.filter(o => o.status === 'Processing').length,
-    Shipped: orders.filter(o => o.status === 'Shipped').length,
-    Delivered: orders.filter(o => o.status === 'Delivered').length,
-    Cancelled: orders.filter(o => o.status === 'Cancelled').length,
+    All: allOrders.length,
+    Pending: allOrders.filter(o => o.status === 'Pending').length,
+    Processing: allOrders.filter(o => o.status === 'Processing').length,
+    Shipped: allOrders.filter(o => o.status === 'Shipped').length,
+    Delivered: allOrders.filter(o => o.status === 'Delivered').length,
+    Cancelled: allOrders.filter(o => o.status === 'Cancelled').length,
+  };
+
+  const openDetail = (order) => {
+    setSelectedOrder(order);
+    setNewStatus(order.status || 'Pending');
+    setModalError('');
+  };
+
+  const handleStatusUpdate = async () => {
+    if (!selectedOrder || updating) return;
+    setUpdating(true);
+    setModalError('');
+    try {
+      await orderService.updateStatus(selectedOrder.id, newStatus);
+      setSelectedOrder(null);
+      setReloadKey(key => key + 1);
+    } catch (err) {
+      setModalError(getApiErrorMessage(err, 'Failed to update order status.'));
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!selectedOrder || updating) return;
+    setUpdating(true);
+    setModalError('');
+    try {
+      await orderService.cancelOrder(selectedOrder.id);
+      setSelectedOrder(null);
+      setReloadKey(key => key + 1);
+    } catch (err) {
+      setModalError(getApiErrorMessage(err, 'Failed to cancel order.'));
+    } finally {
+      setUpdating(false);
+    }
   };
 
   return (
@@ -79,7 +170,20 @@ export default function Orders() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan="8">
+                      <LoadingSpinner label="Loading orders..." />
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan="8" className="admin-empty">
+                      <span className="admin-empty-icon">⚠️</span>
+                      <p>{error}</p>
+                    </td>
+                  </tr>
+                ) : orders.length === 0 ? (
                   <tr>
                     <td colSpan="8" className="admin-empty">
                       <span className="admin-empty-icon">🛒</span>
@@ -87,34 +191,34 @@ export default function Orders() {
                     </td>
                   </tr>
                 ) : (
-                  filtered.map(order => (
+                  orders.map(order => (
                     <tr key={order.id}>
                       <td>
-                        <button onClick={() => setSelectedOrder(order)} className="order-id-btn">{order.id}</button>
+                        <button onClick={() => openDetail(order)} className="order-id-btn">{order.order_number ?? order.id}</button>
                       </td>
                       <td>
                         <div className="admin-product-cell">
-                          <span className="order-avatar">{order.customer.charAt(0)}</span>
+                          <span className="order-avatar">{getCustomerName(order).charAt(0)}</span>
                           <div>
-                            <span className="admin-product-name">{order.customer}</span>
-                            <span className="order-email">{order.email}</span>
+                            <span className="admin-product-name">{getCustomerName(order)}</span>
+                            <span className="order-email">{getCustomerEmail(order)}</span>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <div className="order-date">{order.date}</div>
-                        <div className="order-time">{order.time}</div>
+                        <div className="order-date">{formatDate(order.created_at)}</div>
+                        <div className="order-time">{formatTime(order.created_at)}</div>
                       </td>
-                      <td>{order.items}</td>
-                      <td className="admin-price">₹{order.amount.toLocaleString('en-IN')}</td>
+                      <td>{order.items_count ?? (order.items ? order.items.length : 0)}</td>
+                      <td className="admin-price">₹{Number(order.total_amount ?? 0).toLocaleString('en-IN')}</td>
                       <td>
-                        <span className={`order-payment ${order.payment.toLowerCase()}`}>{order.payment}</span>
-                      </td>
-                      <td>
-                        <span className={`order-status ${order.status.toLowerCase()}`}>{order.status}</span>
+                        <span className={`order-payment ${String(getPaymentLabel(order)).toLowerCase()}`}>{getPaymentLabel(order)}</span>
                       </td>
                       <td>
-                        <button onClick={() => setSelectedOrder(order)} className="order-view-btn">View</button>
+                        <span className={`order-status ${(order.status || '').toLowerCase()}`}>{order.status || '—'}</span>
+                      </td>
+                      <td>
+                        <button onClick={() => openDetail(order)} className="order-view-btn">View</button>
                       </td>
                     </tr>
                   ))
@@ -126,50 +230,52 @@ export default function Orders() {
 
         {/* Order Detail Modal */}
         {selectedOrder && (
-          <div className="admin-modal-overlay" onClick={() => setSelectedOrder(null)}>
+          <div className="admin-modal-overlay" onClick={() => { if (!updating) setSelectedOrder(null); }}>
             <div className="admin-modal order-modal" onClick={e => e.stopPropagation()}>
               <div className="order-modal-header">
-                <h3 className="admin-modal-title">Order {selectedOrder.id}</h3>
-                <span className={`order-status ${selectedOrder.status.toLowerCase()}`}>{selectedOrder.status}</span>
+                <h3 className="admin-modal-title">Order {selectedOrder.order_number ?? selectedOrder.id}</h3>
+                <span className={`order-status ${(selectedOrder.status || '').toLowerCase()}`}>{selectedOrder.status || '—'}</span>
               </div>
               <div className="order-modal-body">
                 <div className="order-modal-section">
                   <h4>Customer</h4>
-                  <p>{selectedOrder.customer}</p>
-                  <p className="order-email">{selectedOrder.email}</p>
+                  <p>{getCustomerName(selectedOrder)}</p>
+                  <p className="order-email">{getCustomerEmail(selectedOrder)}</p>
                 </div>
                 <div className="order-modal-grid">
                   <div>
                     <p className="order-modal-label">Date</p>
-                    <p className="order-modal-value">{selectedOrder.date} • {selectedOrder.time}</p>
+                    <p className="order-modal-value">{formatDate(selectedOrder.created_at)} • {formatTime(selectedOrder.created_at)}</p>
                   </div>
                   <div>
                     <p className="order-modal-label">Items</p>
-                    <p className="order-modal-value">{selectedOrder.items} items</p>
+                    <p className="order-modal-value">{selectedOrder.items_count ?? (selectedOrder.items ? selectedOrder.items.length : 0)} items</p>
                   </div>
                   <div>
                     <p className="order-modal-label">Payment</p>
-                    <span className={`order-payment ${selectedOrder.payment.toLowerCase()}`}>{selectedOrder.payment}</span>
+                    <span className={`order-payment ${String(getPaymentLabel(selectedOrder)).toLowerCase()}`}>{getPaymentLabel(selectedOrder)}</span>
                   </div>
                   <div>
                     <p className="order-modal-label">Total</p>
-                    <p className="order-modal-total">₹{selectedOrder.amount.toLocaleString('en-IN')}</p>
+                    <p className="order-modal-total">₹{Number(selectedOrder.total_amount ?? 0).toLocaleString('en-IN')}</p>
                   </div>
                 </div>
                 <div className="admin-form-group">
                   <label className="admin-label">Update Status</label>
-                  <select defaultValue={selectedOrder.status} className="admin-select-full">
-                    <option value="Pending">Pending</option>
-                    <option value="Processing">Processing</option>
-                    <option value="Shipped">Shipped</option>
-                    <option value="Delivered">Delivered</option>
-                    <option value="Cancelled">Cancelled</option>
+                  <select value={newStatus} onChange={e => setNewStatus(e.target.value)} disabled={updating} className="admin-select-full">
+                    {ORDER_STATUSES.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
                   </select>
                 </div>
+                {modalError && <p className="admin-modal-text">{modalError}</p>}
               </div>
               <div className="admin-modal-actions">
-                <button onClick={() => setSelectedOrder(null)} className="admin-modal-btn cancel">Close</button>
-                <button onClick={() => { alert('Status updated (demo)'); setSelectedOrder(null); }} className="admin-modal-btn confirm-orange">Update Status</button>
+                <button onClick={() => setSelectedOrder(null)} disabled={updating} className="admin-modal-btn cancel">Close</button>
+                {(selectedOrder.status === 'Pending' || selectedOrder.status === 'Processing') && (
+                  <button onClick={handleCancelOrder} disabled={updating} className="admin-modal-btn delete">Cancel Order</button>
+                )}
+                <button onClick={handleStatusUpdate} disabled={updating || newStatus === selectedOrder.status} className="admin-modal-btn confirm-orange">Update Status</button>
               </div>
             </div>
           </div>

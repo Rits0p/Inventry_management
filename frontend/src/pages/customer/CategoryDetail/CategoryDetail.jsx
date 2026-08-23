@@ -1,45 +1,48 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { productService } from '../../../services/productService';
+import { categoryService } from '../../../services/categoryService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
+import { useCart } from '../../../context/CartContext';
 
-// ─────────────────────────── DATA ─────────────────────────────────────────────
+// ─────────────────────── PRESENTATION HELPERS ────────────────────────────────
 
-const CATEGORIES = [
-  { id: 1, name: 'Laptops & Computers', slug: 'laptops', icon: '💻', count: 342, gradient: 'from-blue-500 to-blue-700', description: 'Powerful laptops, desktops, and workstations for every need.' },
-  { id: 2, name: 'Smartphones', slug: 'phones', icon: '📱', count: 218, gradient: 'from-violet-500 to-purple-700', description: 'Latest flagship and budget smartphones from top brands.' },
-  { id: 3, name: 'Audio & Headphones', slug: 'audio', icon: '🎧', count: 156, gradient: 'from-pink-500 to-rose-600', description: 'Premium headphones, earbuds, and speakers for immersive sound.' },
-  { id: 4, name: 'Monitors & Displays', slug: 'monitors', icon: '🖥️', count: 89, gradient: 'from-amber-500 to-orange-600', description: 'Stunning displays for gaming, productivity, and creative work.' },
-  { id: 5, name: 'Networking', slug: 'networking', icon: '🌐', count: 64, gradient: 'from-teal-500 to-cyan-700', description: 'Routers, mesh systems, and networking gear for seamless connectivity.' },
-  { id: 6, name: 'Gaming', slug: 'gaming', icon: '🎮', count: 112, gradient: 'from-red-500 to-red-700', description: 'Consoles, gaming PCs, accessories, and peripherals.' },
-  { id: 7, name: 'Smart Home', slug: 'smart-home', icon: '🏠', count: 78, gradient: 'from-emerald-500 to-green-700', description: 'Smart speakers, lights, cameras, and home automation devices.' },
-  { id: 8, name: 'Accessories', slug: 'accessories', icon: '🖱️', count: 234, gradient: 'from-slate-500 to-gray-700', description: 'Keyboards, mice, adapters, cables, and essential peripherals.' },
+const ORDERING_PARAMS = {
+  popular: '',
+  'price-low': 'price',
+  'price-high': '-price',
+  rating: '-rating',
+  newest: '-created_at',
+  discount: '-discount',
+};
+
+const CATEGORY_GRADIENTS = [
+  'from-blue-500 to-blue-700',
+  'from-violet-500 to-purple-700',
+  'from-pink-500 to-rose-600',
+  'from-amber-500 to-orange-600',
+  'from-teal-500 to-cyan-700',
+  'from-red-500 to-red-700',
+  'from-emerald-500 to-green-700',
+  'from-slate-500 to-gray-700',
 ];
 
-const PRODUCTS = [
-  { id: 1, name: 'Apple MacBook Air M2', cat: 'laptops', brand: 'Apple', mrp: 114900, price: 91920, discount: 20, rating: 4.9, reviews: 3241, badge: 'Best Seller', badgeColor: 'bg-amber-500' },
-  { id: 2, name: 'Samsung Galaxy S24 Ultra', cat: 'phones', brand: 'Samsung', mrp: 129999, price: 99999, discount: 23, rating: 4.8, reviews: 2104, badge: 'Top Rated', badgeColor: 'bg-blue-500' },
-  { id: 3, name: 'ASUS ROG Zephyrus G14', cat: 'gaming', brand: 'ASUS', mrp: 149999, price: 119999, discount: 20, rating: 4.7, reviews: 892, badge: 'Gaming Pick', badgeColor: 'bg-red-500' },
-  { id: 4, name: 'iPad Pro 12.9" M2', cat: 'laptops', brand: 'Apple', mrp: 112900, price: 89900, discount: 20, rating: 4.8, reviews: 1567, badge: "Editor's Choice", badgeColor: 'bg-purple-500' },
-  { id: 5, name: 'Dell XPS 15 OLED', cat: 'laptops', brand: 'Dell', mrp: 189999, price: 151999, discount: 20, rating: 4.7, reviews: 724, badge: 'Premium', badgeColor: 'bg-slate-600' },
-  { id: 6, name: 'Sony WH-1000XM5 Headphones', cat: 'audio', brand: 'Sony', mrp: 34990, price: 20994, discount: 40, rating: 4.9, reviews: 2841, badge: 'Best Seller', badgeColor: 'bg-amber-500' },
-  { id: 7, name: 'Sony A7 IV Camera', cat: 'accessories', brand: 'Sony', mrp: 249999, price: 199999, discount: 20, rating: 4.9, reviews: 431, badge: 'Pro Choice', badgeColor: 'bg-orange-500' },
-  { id: 8, name: 'Dyson V15 Detect', cat: 'smart-home', brand: 'Dyson', mrp: 64900, price: 51920, discount: 20, rating: 4.6, reviews: 2109, badge: 'Popular', badgeColor: 'bg-teal-500' },
-  { id: 9, name: 'Keychron Q1 Pro Keyboard', cat: 'accessories', brand: 'Keychron', mrp: 16999, price: 13599, discount: 20, rating: 4.8, reviews: 643, badge: 'Trending', badgeColor: 'bg-pink-500' },
-  { id: 10, name: 'LG 27" 4K IPS Monitor', cat: 'monitors', brand: 'LG', mrp: 42990, price: 25794, discount: 40, rating: 4.7, reviews: 1203, badge: 'Value Pick', badgeColor: 'bg-blue-500' },
-  { id: 11, name: 'JBL Flip 6 Speaker', cat: 'audio', brand: 'JBL', mrp: 11999, price: 7199, discount: 40, rating: 4.6, reviews: 1540, badge: 'Hot Deal', badgeColor: 'bg-red-500' },
-  { id: 12, name: 'Samsung T7 1TB SSD', cat: 'accessories', brand: 'Samsung', mrp: 9999, price: 5999, discount: 40, rating: 4.8, reviews: 876, badge: 'Fast Storage', badgeColor: 'bg-emerald-500' },
-  { id: 13, name: 'Logitech MX Master 3S', cat: 'accessories', brand: 'Logitech', mrp: 8995, price: 5397, discount: 40, rating: 4.8, reviews: 932, badge: 'Ergonomic', badgeColor: 'bg-violet-500' },
-  { id: 14, name: 'Xiaomi 14 Ultra 5G', cat: 'phones', brand: 'Xiaomi', mrp: 99999, price: 89999, discount: 10, rating: 4.8, reviews: 1102, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 15, name: 'ASUS ROG Flow Z13 Gaming Tablet', cat: 'gaming', brand: 'ASUS', mrp: 149999, price: 129999, discount: 13, rating: 4.7, reviews: 456, badge: 'Gaming', badgeColor: 'bg-red-500' },
-  { id: 16, name: 'Bose QuietComfort Ultra', cat: 'audio', brand: 'Bose', mrp: 34990, price: 32191, discount: 8, rating: 4.7, reviews: 987, badge: 'Premium', badgeColor: 'bg-slate-600' },
-  { id: 17, name: 'Corsair iCUE H170i Elite', cat: 'gaming', brand: 'Corsair', mrp: 22999, price: 20239, discount: 12, rating: 4.6, reviews: 321, badge: 'Cooling', badgeColor: 'bg-cyan-500' },
-  { id: 18, name: 'Samsung Neo QLED 8K 75"', cat: 'monitors', brand: 'Samsung', mrp: 549999, price: 467499, discount: 15, rating: 4.8, reviews: 198, badge: 'Premium TV', badgeColor: 'bg-amber-500' },
-  { id: 19, name: 'TP-Link Deco Mesh WiFi 6', cat: 'networking', brand: 'TP-Link', mrp: 24999, price: 17499, discount: 30, rating: 4.5, reviews: 1430, badge: 'Whole Home', badgeColor: 'bg-teal-500' },
-  { id: 20, name: 'Google Nest Hub Max', cat: 'smart-home', brand: 'Google', mrp: 22999, price: 18399, discount: 20, rating: 4.4, reviews: 876, badge: 'Smart Display', badgeColor: 'bg-green-500' },
-  { id: 21, name: 'Lenovo Legion Pro 7i', cat: 'laptops', brand: 'Lenovo', mrp: 219999, price: 175999, discount: 20, rating: 4.7, reviews: 543, badge: 'Gaming Laptop', badgeColor: 'bg-red-500' },
-  { id: 22, name: 'OnePlus 12 5G', cat: 'phones', brand: 'OnePlus', mrp: 69999, price: 59999, discount: 14, rating: 4.6, reviews: 1876, badge: 'Flagship', badgeColor: 'bg-red-500' },
-  { id: 23, name: 'Apple AirPods Pro 2', cat: 'audio', brand: 'Apple', mrp: 24900, price: 22410, discount: 10, rating: 4.8, reviews: 3456, badge: 'Best Seller', badgeColor: 'bg-amber-500' },
-  { id: 24, name: 'Philips Hue Starter Kit', cat: 'smart-home', brand: 'Philips', mrp: 14999, price: 11999, discount: 20, rating: 4.5, reviews: 2100, badge: 'Smart Lighting', badgeColor: 'bg-amber-500' },
-];
+const CATEGORY_ICONS = {
+  laptops: '💻',
+  phones: '📱',
+  audio: '🎧',
+  monitors: '🖥️',
+  networking: '🌐',
+  gaming: '🎮',
+  'smart-home': '🏠',
+  accessories: '🖱️',
+};
+
+const categoryIcon = (cat) => CATEGORY_ICONS[cat?.slug] || '📦';
+
+const PRODUCT_BADGE_CLASS = 'bg-amber-500';
 
 const SORT_OPTIONS = [
   { value: 'popular', label: 'Most Popular' },
@@ -72,13 +75,26 @@ function ImgPlaceholder({ className = '', icon = '📦' }) {
   );
 }
 
-function AddToCartBtn({ small = false }) {
+function AddToCartBtn({ product, small = false }) {
+  const { addToCart } = useCart();
   const [state, setState] = useState('idle');
-  const handle = () => {
+  const soldOut = (product?.stock ?? 0) === 0;
+  const handle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (soldOut || state === 'added') return;
+    addToCart(product, 1);
     setState('added');
     setTimeout(() => setState('idle'), 1500);
   };
   const base = `font-semibold rounded-full transition-all duration-200 flex items-center justify-center gap-1.5 ${small ? 'px-3 py-1.5 text-xs' : 'px-5 py-2.5 text-sm'}`;
+  if (soldOut) {
+    return (
+      <button onClick={handle} disabled className={`${base} bg-gray-200 dark:bg-white/10 text-gray-400 dark:text-gray-500 cursor-not-allowed`}>
+        Sold Out
+      </button>
+    );
+  }
   if (state === 'added') return <button className={`${base} bg-emerald-500 text-white scale-95`}>✓ Added!</button>;
   return (
     <button onClick={handle} className={`${base} bg-[#FB641B] hover:bg-orange-600 text-white shadow hover:shadow-md active:scale-95`}>
@@ -98,37 +114,93 @@ export default function CategoryDetail() {
   const [sortBy, setSortBy] = useState('popular');
   const [viewMode, setViewMode] = useState('grid');
 
-  const category = CATEGORIES.find(c => c.slug === slug);
+  const [category, setCategory] = useState(null);
+  const [categoryLoading, setCategoryLoading] = useState(true);
+  const [categoryError, setCategoryError] = useState('');
+  const [notFound, setNotFound] = useState(false);
+  const [categories, setCategories] = useState([]);
 
-  const categoryProducts = useMemo(() => {
-    let items = PRODUCTS.filter(p => p.cat === slug);
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState('');
 
-    switch (sortBy) {
-      case 'price-low':
-        items = [...items].sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        items = [...items].sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        items = [...items].sort((a, b) => b.rating - a.rating);
-        break;
-      case 'newest':
-        items = [...items].sort((a, b) => b.id - a.id);
-        break;
-      case 'discount':
-        items = [...items].sort((a, b) => b.discount - a.discount);
-        break;
-      default:
-        items = [...items].sort((a, b) => b.reviews - a.reviews);
-    }
+  useEffect(() => {
+    let cancelled = false;
+    const loadCategory = async () => {
+      setCategoryLoading(true);
+      setCategoryError('');
+      setNotFound(false);
+      try {
+        const data = await categoryService.getCategory(slug);
+        if (!cancelled) setCategory(data);
+      } catch (err) {
+        if (!cancelled) {
+          if (err?.response?.status === 404) setNotFound(true);
+          else setCategoryError(getApiErrorMessage(err, 'Failed to load category.'));
+        }
+      } finally {
+        if (!cancelled) setCategoryLoading(false);
+      }
+    };
+    loadCategory();
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
 
-    return items;
+  useEffect(() => {
+    let cancelled = false;
+    categoryService
+      .getCategories()
+      .then((data) => {
+        if (!cancelled) setCategories(unwrapList(data));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadProducts = async () => {
+      setProductsLoading(true);
+      setProductsError('');
+      try {
+        const params = { category: slug };
+        const ordering = ORDERING_PARAMS[sortBy];
+        if (ordering) params.ordering = ordering;
+        params.page_size = 24;
+        const data = await productService.getProducts(params);
+        if (!cancelled) setProducts(unwrapList(data));
+      } catch (err) {
+        if (!cancelled) setProductsError(getApiErrorMessage(err, 'Failed to load products.'));
+      } finally {
+        if (!cancelled) setProductsLoading(false);
+      }
+    };
+    loadProducts();
+    return () => {
+      cancelled = true;
+    };
   }, [slug, sortBy]);
 
-  const relatedCategories = CATEGORIES.filter(c => c.slug !== slug).slice(0, 4);
+  const relatedCategories = categories.filter(c => c.slug !== slug).slice(0, 4);
 
-  if (!category) {
+  const prices = products.map(p => p.price ?? 0);
+  const discounts = products.map(p => p.discount ?? 0);
+  const startingPrice = products.length > 0 ? Math.min(...prices) : null;
+  const bestDiscount = products.length > 0 ? Math.max(0, ...discounts) : null;
+
+  if (categoryLoading) {
+    return (
+      <div className="min-h-screen bg-[var(--page-bg)] transition-colors duration-300">
+        <LoadingSpinner label="Loading..." />
+      </div>
+    );
+  }
+
+  if (notFound) {
     return (
       <div className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
@@ -144,11 +216,27 @@ export default function CategoryDetail() {
     );
   }
 
+  if (categoryError || !category) {
+    return (
+      <div className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center transition-colors duration-300">
+        <div className="text-center">
+          <span className="text-6xl mb-4 block">⚠️</span>
+          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load category</h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">{categoryError}</p>
+          <Link to="/categories"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#2874F0] text-white font-bold rounded-full hover:shadow-lg transition">
+            ← All Categories
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[var(--page-bg)] transition-colors duration-300">
 
       {/* ─── CATEGORY HERO BANNER ─── */}
-      <section className={`relative bg-gradient-to-r ${category.gradient} text-white overflow-hidden`}>
+      <section className={`relative bg-gradient-to-r ${CATEGORY_GRADIENTS[categories.findIndex(c => c.slug === slug) % CATEGORY_GRADIENTS.length] || 'from-[#2874F0] to-[#0f1e3d]'} text-white overflow-hidden`}>
         <div className="absolute top-[-80px] right-[-80px] w-80 h-80 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute bottom-[-60px] left-[30%] w-64 h-64 rounded-full bg-white/5 pointer-events-none" />
 
@@ -165,7 +253,11 @@ export default function CategoryDetail() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-5xl">{category.icon}</span>
+                {category.image ? (
+                  <img src={category.image} alt={category.name} loading="lazy" className="w-12 h-12 object-cover rounded-xl shadow-md" />
+                ) : (
+                  <span className="text-5xl">{categoryIcon(category)}</span>
+                )}
                 <div>
                   <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">{category.name}</h1>
                   <p className="text-white/70 text-sm mt-1">{category.description}</p>
@@ -173,7 +265,7 @@ export default function CategoryDetail() {
               </div>
               <div className="flex items-center gap-4 mt-4">
                 <span className="bg-white/15 border border-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-medium">
-                  {categoryProducts.length} Products
+                  {products.length} Products
                 </span>
                 <span className="bg-white/15 border border-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-medium">
                   Free Shipping ₹2,000+
@@ -187,18 +279,18 @@ export default function CategoryDetail() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-white/70">Total Products</span>
-                  <span className="text-sm font-bold text-white">{category.count}</span>
+                  <span className="text-sm font-bold text-white">{category.product_count}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-white/70">Starting from</span>
                   <span className="text-sm font-bold text-[#FB641B]">
-                    ₹{Math.min(...categoryProducts.map(p => p.price)).toLocaleString('en-IN')}
+                    {startingPrice !== null ? `₹${startingPrice.toLocaleString('en-IN')}` : '—'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-white/70">Best Discount</span>
                   <span className="text-sm font-bold text-emerald-400">
-                    {Math.max(...categoryProducts.map(p => p.discount))}% OFF
+                    {bestDiscount !== null ? `${bestDiscount}% OFF` : '—'}
                   </span>
                 </div>
               </div>
@@ -213,17 +305,16 @@ export default function CategoryDetail() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <p className="text-sm font-bold text-gray-900 dark:text-white hidden sm:block">
-                {categoryProducts.length} results
+                {products.length} results
               </p>
               <div className="hidden md:flex items-center gap-2">
-                {CATEGORIES.slice(0, 5).map(cat => (
+                {categories.slice(0, 5).map(cat => (
                   <Link key={cat.id} to={`/categories/${cat.slug}`}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
-                      cat.slug === slug
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${cat.slug === slug
                         ? 'bg-[#2874F0] text-white shadow'
                         : 'bg-gray-100 text-gray-600 dark:text-gray-400 hover:bg-gray-200'
-                    }`}>
-                    {cat.icon} {cat.name.split(' ')[0]}
+                      }`}>
+                    {categoryIcon(cat)} {cat.name.split(' ')[0]}
                   </Link>
                 ))}
               </div>
@@ -260,9 +351,17 @@ export default function CategoryDetail() {
 
       {/* ─── PRODUCTS GRID ─── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {categoryProducts.length === 0 ? (
+        {productsLoading ? (
+          <LoadingSpinner label="Loading..." />
+        ) : productsError ? (
           <div className="text-center py-20">
-            <span className="text-6xl mb-4 block">{category.icon}</span>
+            <span className="text-6xl mb-4 block">⚠️</span>
+            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load products</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">{productsError}</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-20">
+            <span className="text-6xl mb-4 block">{categoryIcon(category)}</span>
             <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No products found</h2>
             <p className="text-gray-500 dark:text-gray-400 mb-6">We're adding new products to this category soon!</p>
             <Link to="/shop"
@@ -272,14 +371,20 @@ export default function CategoryDetail() {
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {categoryProducts.map(p => (
+            {products.map(p => (
               <Link key={p.id} to={`/product/${p.id}`}
                 className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
                 <div className="relative">
-                  <ImgPlaceholder className="h-44 w-full" icon={category.icon} />
-                  <span className={`absolute top-2.5 left-2.5 ${p.badgeColor} text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow`}>
-                    {p.badge}
-                  </span>
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} loading="lazy" className="h-44 w-full object-cover" />
+                  ) : (
+                    <ImgPlaceholder className="h-44 w-full" icon={categoryIcon(category)} />
+                  )}
+                  {p.badge && (
+                    <span className={`absolute top-2.5 left-2.5 ${PRODUCT_BADGE_CLASS} text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow`}>
+                      {p.badge}
+                    </span>
+                  )}
                   {p.discount > 0 && (
                     <span className="absolute top-2.5 right-2.5 bg-[#FB641B] text-white text-[10px] font-extrabold px-2 py-1 rounded-full">
                       -{p.discount}%
@@ -291,14 +396,16 @@ export default function CategoryDetail() {
                   <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 mb-2 flex-1">{p.name}</p>
                   <div className="flex items-center gap-1.5 mb-3">
                     <Stars rating={p.rating} />
-                    <span className="text-[10px] text-gray-400">({p.reviews.toLocaleString()})</span>
+                    <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()})</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-xs text-gray-400 line-through">₹{p.mrp.toLocaleString('en-IN')}</p>
+                      {p.original_price > p.price && (
+                        <p className="text-xs text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
+                      )}
                       <p className="text-base font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
                     </div>
-                    <AddToCartBtn small />
+                    <AddToCartBtn product={p} small />
                   </div>
                 </div>
               </Link>
@@ -306,14 +413,20 @@ export default function CategoryDetail() {
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {categoryProducts.map(p => (
+            {products.map(p => (
               <Link key={p.id} to={`/product/${p.id}`}
                 className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-row">
                 <div className="relative flex-shrink-0 w-40 md:w-52">
-                  <ImgPlaceholder className="h-full min-h-[140px] w-full" icon={category.icon} />
-                  <span className={`absolute top-2.5 left-2.5 ${p.badgeColor} text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow`}>
-                    {p.badge}
-                  </span>
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} loading="lazy" className="h-full min-h-[140px] w-full object-cover" />
+                  ) : (
+                    <ImgPlaceholder className="h-full min-h-[140px] w-full" icon={categoryIcon(category)} />
+                  )}
+                  {p.badge && (
+                    <span className={`absolute top-2.5 left-2.5 ${PRODUCT_BADGE_CLASS} text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow`}>
+                      {p.badge}
+                    </span>
+                  )}
                   {p.discount > 0 && (
                     <span className="absolute top-2.5 right-2.5 bg-[#FB641B] text-white text-[10px] font-extrabold px-2 py-1 rounded-full">
                       -{p.discount}%
@@ -326,22 +439,22 @@ export default function CategoryDetail() {
                     <p className="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">{p.name}</p>
                     <div className="flex items-center gap-1.5 mb-2">
                       <Stars rating={p.rating} />
-                      <span className="text-[10px] text-gray-400">({p.reviews.toLocaleString()} reviews)</span>
+                      <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()} reviews)</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-baseline gap-2">
                       <p className="text-lg font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
-                      {p.discount > 0 && (
+                      {p.discount > 0 && p.original_price > p.price && (
                         <>
-                          <p className="text-sm text-gray-400 line-through">₹{p.mrp.toLocaleString('en-IN')}</p>
+                          <p className="text-sm text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
                           <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                             {p.discount}% off
                           </span>
                         </>
                       )}
                     </div>
-                    <AddToCartBtn />
+                    <AddToCartBtn product={p} />
                   </div>
                 </div>
               </Link>
@@ -360,14 +473,18 @@ export default function CategoryDetail() {
           <Link to="/" className="text-sm font-semibold text-[#2874F0] hover:underline">View All →</Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {relatedCategories.map(cat => (
+          {relatedCategories.map((cat, idx) => (
             <Link key={cat.id} to={`/categories/${cat.slug}`}
               className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden p-5 flex flex-col items-center text-center">
-              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform duration-200 mb-3`}>
-                {cat.icon}
+              <div className={`w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br ${CATEGORY_GRADIENTS[idx % CATEGORY_GRADIENTS.length]} flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform duration-200 mb-3`}>
+                {cat.image ? (
+                  <img src={cat.image} alt={cat.name} loading="lazy" className="w-full h-full object-cover" />
+                ) : (
+                  categoryIcon(cat)
+                )}
               </div>
               <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">{cat.name}</p>
-              <p className="text-xs text-gray-400">{cat.count} items</p>
+              <p className="text-xs text-gray-400">{cat.product_count} items</p>
             </Link>
           ))}
         </div>
@@ -375,7 +492,7 @@ export default function CategoryDetail() {
 
       {/* ─── BOTTOM CTA BANNER ─── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
-        <div className={`relative rounded-3xl bg-gradient-to-r ${category.gradient} text-white p-8 overflow-hidden flex items-center justify-between gap-4 min-h-[180px]`}>
+        <div className={`relative rounded-3xl bg-gradient-to-r ${CATEGORY_GRADIENTS[categories.findIndex(c => c.slug === slug) % CATEGORY_GRADIENTS.length] || 'from-[#2874F0] to-[#0f1e3d]'} text-white p-8 overflow-hidden flex items-center justify-between gap-4 min-h-[180px]`}>
           <div className="absolute top-[-40px] right-[-40px] w-48 h-48 rounded-full bg-white/5" />
           <div className="relative z-10">
             <span className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full mb-3 inline-block">Deal</span>
@@ -387,7 +504,7 @@ export default function CategoryDetail() {
             </Link>
           </div>
           <div className="flex-shrink-0 w-28 h-28 rounded-2xl bg-white/10 flex items-center justify-center text-5xl">
-            {category.icon}
+            {categoryIcon(category)}
           </div>
         </div>
       </section>

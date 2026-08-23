@@ -1,24 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { productService } from '../../../services/productService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 // ─────────────────────────── DATA ─────────────────────────────────────────────
 
-const NEW_ARRIVALS = [
-  { id: 1, name: 'ASUS ROG Flow Z13 Gaming Tablet', cat: 'Gaming', brand: 'ASUS', mrp: 149999, price: 129999, discount: 13, rating: 4.7, reviews: 456, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 2, name: 'Xiaomi 14 Ultra 5G', cat: 'Smartphones', brand: 'Xiaomi', mrp: 99999, price: 89999, discount: 10, rating: 4.8, reviews: 1102, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 3, name: 'Apple Vision Pro', cat: 'Wearables', brand: 'Apple', mrp: 299999, price: 299999, discount: 0, rating: 4.9, reviews: 312, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 4, name: 'Samsung Neo QLED 8K 75"', cat: 'TVs', brand: 'Samsung', mrp: 549999, price: 467499, discount: 15, rating: 4.8, reviews: 198, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 5, name: 'Bose QuietComfort Ultra', cat: 'Audio', brand: 'Bose', mrp: 34990, price: 32191, discount: 8, rating: 4.7, reviews: 987, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 6, name: 'Corsair iCUE H170i Elite', cat: 'PC Components', brand: 'Corsair', mrp: 22999, price: 20239, discount: 12, rating: 4.6, reviews: 321, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 7, name: 'Google Nest Hub Max', cat: 'Smart Home', brand: 'Google', mrp: 22999, price: 18399, discount: 20, rating: 4.4, reviews: 876, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 8, name: 'TP-Link Deco Mesh WiFi 6', cat: 'Networking', brand: 'TP-Link', mrp: 24999, price: 17499, discount: 30, rating: 4.5, reviews: 1430, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 9, name: 'Philips Hue Starter Kit', cat: 'Smart Home', brand: 'Philips', mrp: 14999, price: 11999, discount: 20, rating: 4.5, reviews: 2100, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 10, name: 'Apple AirPods Pro 2', cat: 'Audio', brand: 'Apple', mrp: 24900, price: 22410, discount: 10, rating: 4.8, reviews: 3456, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 11, name: 'OnePlus 12 5G', cat: 'Smartphones', brand: 'OnePlus', mrp: 69999, price: 59999, discount: 14, rating: 4.6, reviews: 1876, badge: 'New', badgeColor: 'bg-blue-500' },
-  { id: 12, name: 'Lenovo Legion Pro 7i', cat: 'Laptops', brand: 'Lenovo', mrp: 219999, price: 175999, discount: 20, rating: 4.7, reviews: 543, badge: 'New', badgeColor: 'bg-blue-500' },
-];
-
-const CATEGORIES = ['All', 'Gaming', 'Smartphones', 'Audio', 'TVs', 'Wearables', 'PC Components', 'Smart Home', 'Networking', 'Laptops'];
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest First' },
   { value: 'price-low', label: 'Price: Low to High' },
@@ -71,17 +59,45 @@ export default function NewArrivals() {
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
 
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadProducts = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await productService.getProducts({ ordering: '-created_at', page_size: 24 });
+        if (!cancelled) setAllProducts(unwrapList(data));
+      } catch (err) {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load products.'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const categoryOptions = ['All', ...new Set(allProducts.map(p => p.category_name).filter(Boolean))];
+
   const products = useMemo(() => {
-    let items = activeCategory === 'All' ? [...NEW_ARRIVALS] : NEW_ARRIVALS.filter(p => p.cat === activeCategory);
+    let items = activeCategory === 'All'
+      ? [...allProducts]
+      : allProducts.filter(p => p.category_name === activeCategory);
     switch (sortBy) {
-      case 'price-low':  items.sort((a, b) => a.price - b.price); break;
+      case 'price-low': items.sort((a, b) => a.price - b.price); break;
       case 'price-high': items.sort((a, b) => b.price - a.price); break;
-      case 'rating':     items.sort((a, b) => b.rating - a.rating); break;
-      case 'discount':   items.sort((a, b) => b.discount - a.discount); break;
-      default:           items.sort((a, b) => b.id - a.id);
+      case 'rating': items.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)); break;
+      case 'discount': items.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0)); break;
+      default: items.sort((a, b) => b.id - a.id);
     }
     return items;
-  }, [activeCategory, sortBy]);
+  }, [allProducts, activeCategory, sortBy]);
 
   return (
     <div className="min-h-screen bg-[var(--page-bg)] transition-colors duration-300">
@@ -113,7 +129,7 @@ export default function NewArrivals() {
 
             <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: '🆕', value: `${NEW_ARRIVALS.length}+`, label: 'New Items' },
+                { icon: '🆕', value: `${products.length}+`, label: 'New Items' },
                 { icon: '🏷️', value: '30%', label: 'Max Discount' },
                 { icon: '⭐', value: '4.7', label: 'Avg Rating' },
               ].map((s, i) => (
@@ -135,11 +151,10 @@ export default function NewArrivals() {
             <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
               <p className="text-sm font-bold text-gray-900 dark:text-white hidden sm:block whitespace-nowrap">{products.length} products</p>
               <div className="flex items-center gap-2">
-                {CATEGORIES.map(cat => (
+                {categoryOptions.map(cat => (
                   <button key={cat} onClick={() => setActiveCategory(cat)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
-                      cat === activeCategory ? 'bg-[#198754] text-white shadow' : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/15'
-                    }`}>
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${cat === activeCategory ? 'bg-[#198754] text-white shadow' : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/15'
+                      }`}>
                     {cat}
                   </button>
                 ))}
@@ -165,7 +180,15 @@ export default function NewArrivals() {
 
       {/* ─── PRODUCTS ─── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {products.length === 0 ? (
+        {loading ? (
+          <LoadingSpinner label="Loading new arrivals..." />
+        ) : error ? (
+          <div className="text-center py-20">
+            <span className="text-6xl mb-4 block">⚠️</span>
+            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load new arrivals</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">{error}</p>
+          </div>
+        ) : products.length === 0 ? (
           <div className="text-center py-20">
             <span className="text-6xl mb-4 block">🆕</span>
             <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No new arrivals in this category</h2>
@@ -178,22 +201,28 @@ export default function NewArrivals() {
               <Link key={p.id} to={`/product/${p.id}`}
                 className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
                 <div className="relative">
-                  <ImgPlaceholder className="h-44 w-full" icon="✨" />
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} loading="lazy" className="h-44 w-full object-cover" />
+                  ) : (
+                    <ImgPlaceholder className="h-44 w-full" icon="✨" />
+                  )}
                   <span className="absolute top-2.5 left-2.5 bg-[#2874F0] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">NEW</span>
                   {p.discount > 0 && (
                     <span className="absolute top-2.5 right-2.5 bg-[#FB641B] text-white text-[10px] font-extrabold px-2 py-1 rounded-full">-{p.discount}%</span>
                   )}
                 </div>
                 <div className="p-4 flex flex-col flex-1">
-                  <p className="text-[10px] font-bold text-[#FB641B] uppercase tracking-wide mb-1">{p.brand}</p>
+                  <p className="text-[10px] font-bold text-[#FB641B] uppercase tracking-wide mb-1">{p.category_name}</p>
                   <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 mb-2 flex-1">{p.name}</p>
                   <div className="flex items-center gap-1.5 mb-3">
-                    <Stars rating={p.rating} />
-                    <span className="text-[10px] text-gray-400">({p.reviews.toLocaleString()})</span>
+                    <Stars rating={p.rating ?? 0} />
+                    <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()})</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-xs text-gray-400 line-through">₹{p.mrp.toLocaleString('en-IN')}</p>
+                      {p.original_price > p.price && (
+                        <p className="text-xs text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
+                      )}
                       <p className="text-base font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
                     </div>
                     <AddToCartBtn small />
@@ -208,16 +237,20 @@ export default function NewArrivals() {
               <Link key={p.id} to={`/product/${p.id}`}
                 className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-row">
                 <div className="relative flex-shrink-0 w-40 md:w-52">
-                  <ImgPlaceholder className="h-full min-h-[140px] w-full" icon="✨" />
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} loading="lazy" className="h-full min-h-[140px] w-full object-cover" />
+                  ) : (
+                    <ImgPlaceholder className="h-full min-h-[140px] w-full" icon="✨" />
+                  )}
                   <span className="absolute top-2.5 left-2.5 bg-[#2874F0] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">NEW</span>
                 </div>
                 <div className="p-4 flex flex-col flex-1 justify-between">
                   <div>
-                    <p className="text-[10px] font-bold text-[#FB641B] uppercase tracking-wide mb-1">{p.brand}</p>
+                    <p className="text-[10px] font-bold text-[#FB641B] uppercase tracking-wide mb-1">{p.category_name}</p>
                     <p className="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">{p.name}</p>
                     <div className="flex items-center gap-1.5 mb-2">
-                      <Stars rating={p.rating} />
-                      <span className="text-[10px] text-gray-400">({p.reviews.toLocaleString()} reviews)</span>
+                      <Stars rating={p.rating ?? 0} />
+                      <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()} reviews)</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-2">
@@ -225,7 +258,7 @@ export default function NewArrivals() {
                       <p className="text-lg font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
                       {p.discount > 0 && (
                         <>
-                          <p className="text-sm text-gray-400 line-through">₹{p.mrp.toLocaleString('en-IN')}</p>
+                          <p className="text-sm text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
                           <span className="text-xs font-bold text-[#198754] bg-green-50 px-2 py-0.5 rounded-full">{p.discount}% off</span>
                         </>
                       )}

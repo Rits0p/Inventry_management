@@ -1,28 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { productService } from '../../../services/productService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 // ─────────────────────────── DATA ─────────────────────────────────────────────
 
-const TOP_PRODUCTS = [
-  { id: 1, name: 'Apple MacBook Air M2', cat: 'Laptops', brand: 'Apple', mrp: 114900, price: 91920, discount: 20, rating: 4.9, reviews: 3241, badge: 'Best Seller', badgeColor: 'bg-amber-500' },
-  { id: 2, name: 'Samsung Galaxy S24 Ultra', cat: 'Smartphones', brand: 'Samsung', mrp: 129999, price: 99999, discount: 23, rating: 4.8, reviews: 2104, badge: 'Top Rated', badgeColor: 'bg-blue-500' },
-  { id: 3, name: 'ASUS ROG Zephyrus G14', cat: 'Gaming', brand: 'ASUS', mrp: 149999, price: 119999, discount: 20, rating: 4.7, reviews: 892, badge: 'Gaming Pick', badgeColor: 'bg-red-500' },
-  { id: 4, name: 'iPad Pro 12.9" M2', cat: 'Tablets', brand: 'Apple', mrp: 112900, price: 89900, discount: 20, rating: 4.8, reviews: 1567, badge: "Editor's Choice", badgeColor: 'bg-purple-500' },
-  { id: 5, name: 'Dell XPS 15 OLED', cat: 'Laptops', brand: 'Dell', mrp: 189999, price: 151999, discount: 20, rating: 4.7, reviews: 724, badge: 'Premium', badgeColor: 'bg-slate-600' },
-  { id: 6, name: 'Sony A7 IV Camera', cat: 'Cameras', brand: 'Sony', mrp: 249999, price: 199999, discount: 20, rating: 4.9, reviews: 431, badge: 'Pro Choice', badgeColor: 'bg-orange-500' },
-  { id: 7, name: 'Dyson V15 Detect', cat: 'Home', brand: 'Dyson', mrp: 64900, price: 51920, discount: 20, rating: 4.6, reviews: 2109, badge: 'Popular', badgeColor: 'bg-teal-500' },
-  { id: 8, name: 'Keychron Q1 Pro Keyboard', cat: 'Accessories', brand: 'Keychron', mrp: 16999, price: 13599, discount: 20, rating: 4.8, reviews: 643, badge: 'Trending', badgeColor: 'bg-pink-500' },
-  { id: 9, name: 'Sony WH-1000XM5 Headphones', cat: 'Audio', brand: 'Sony', mrp: 34990, price: 20994, discount: 40, rating: 4.9, reviews: 2841, badge: 'Best Seller', badgeColor: 'bg-amber-500' },
-  { id: 10, name: 'LG 27" 4K IPS Monitor', cat: 'Monitors', brand: 'LG', mrp: 42990, price: 25794, discount: 40, rating: 4.7, reviews: 1203, badge: 'Value Pick', badgeColor: 'bg-blue-500' },
-  { id: 11, name: 'Logitech MX Master 3S', cat: 'Accessories', brand: 'Logitech', mrp: 8995, price: 5397, discount: 40, rating: 4.8, reviews: 932, badge: 'Ergonomic', badgeColor: 'bg-violet-500' },
-  { id: 12, name: 'JBL Flip 6 Speaker', cat: 'Audio', brand: 'JBL', mrp: 11999, price: 7199, discount: 40, rating: 4.6, reviews: 1540, badge: 'Hot Deal', badgeColor: 'bg-red-500' },
-  { id: 13, name: 'Samsung T7 1TB SSD', cat: 'Storage', brand: 'Samsung', mrp: 9999, price: 5999, discount: 40, rating: 4.8, reviews: 876, badge: 'Fast Storage', badgeColor: 'bg-emerald-500' },
-  { id: 14, name: 'Bose QuietComfort Ultra', cat: 'Audio', brand: 'Bose', mrp: 34990, price: 32191, discount: 8, rating: 4.7, reviews: 987, badge: 'Premium', badgeColor: 'bg-slate-600' },
-  { id: 15, name: 'OnePlus 12 5G', cat: 'Smartphones', brand: 'OnePlus', mrp: 69999, price: 59999, discount: 14, rating: 4.6, reviews: 1876, badge: 'Flagship', badgeColor: 'bg-red-500' },
-  { id: 16, name: 'Lenovo Legion Pro 7i', cat: 'Laptops', brand: 'Lenovo', mrp: 219999, price: 175999, discount: 20, rating: 4.7, reviews: 543, badge: 'Gaming Laptop', badgeColor: 'bg-red-500' },
-];
-
-const CATEGORIES = ['All', 'Laptops', 'Smartphones', 'Audio', 'Gaming', 'Accessories', 'Monitors', 'Tablets', 'Cameras', 'Storage', 'Home'];
 const SORT_OPTIONS = [
   { value: 'popular', label: 'Most Popular' },
   { value: 'rating', label: 'Top Rated' },
@@ -75,17 +59,45 @@ export default function TopSelling() {
   const [sortBy, setSortBy] = useState('popular');
   const [viewMode, setViewMode] = useState('grid');
 
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadProducts = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await productService.getProducts({ ordering: '-rating', page_size: 24 });
+        if (!cancelled) setAllProducts(unwrapList(data));
+      } catch (err) {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load products.'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const categoryOptions = ['All', ...new Set(allProducts.map(p => p.category_name).filter(Boolean))];
+
   const products = useMemo(() => {
-    let items = activeCategory === 'All' ? [...TOP_PRODUCTS] : TOP_PRODUCTS.filter(p => p.cat === activeCategory);
+    let items = activeCategory === 'All'
+      ? [...allProducts]
+      : allProducts.filter(p => p.category_name === activeCategory);
     switch (sortBy) {
-      case 'rating':     items.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews); break;
-      case 'price-low':  items.sort((a, b) => a.price - b.price); break;
+      case 'rating': items.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || (b.review_count ?? 0) - (a.review_count ?? 0)); break;
+      case 'price-low': items.sort((a, b) => a.price - b.price); break;
       case 'price-high': items.sort((a, b) => b.price - a.price); break;
-      case 'discount':   items.sort((a, b) => b.discount - a.discount); break;
-      default:           items.sort((a, b) => b.reviews - a.reviews);
+      case 'discount': items.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0)); break;
+      default: items.sort((a, b) => (b.review_count ?? 0) - (a.review_count ?? 0));
     }
     return items;
-  }, [activeCategory, sortBy]);
+  }, [allProducts, activeCategory, sortBy]);
 
   return (
     <div className="min-h-screen bg-[var(--page-bg)] transition-colors duration-300">
@@ -117,7 +129,7 @@ export default function TopSelling() {
 
             <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: '🏆', value: `${TOP_PRODUCTS.length}+`, label: 'Top Products' },
+                { icon: '🏆', value: `${products.length}+`, label: 'Top Products' },
                 { icon: '⭐', value: '4.8', label: 'Avg Rating' },
                 { icon: '📦', value: '20K+', label: 'Sold' },
               ].map((s, i) => (
@@ -139,11 +151,10 @@ export default function TopSelling() {
             <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
               <p className="text-sm font-bold text-gray-900 dark:text-white hidden sm:block whitespace-nowrap">{products.length} products</p>
               <div className="flex items-center gap-2">
-                {CATEGORIES.map(cat => (
+                {categoryOptions.map(cat => (
                   <button key={cat} onClick={() => setActiveCategory(cat)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
-                      cat === activeCategory ? 'bg-[#2874F0] text-white shadow' : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/15'
-                    }`}>
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${cat === activeCategory ? 'bg-[#2874F0] text-white shadow' : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/15'
+                      }`}>
                     {cat}
                   </button>
                 ))}
@@ -169,7 +180,15 @@ export default function TopSelling() {
 
       {/* ─── PRODUCTS ─── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {products.length === 0 ? (
+        {loading ? (
+          <LoadingSpinner label="Loading products..." />
+        ) : error ? (
+          <div className="text-center py-20">
+            <span className="text-6xl mb-4 block">⚠️</span>
+            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load products</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">{error}</p>
+          </div>
+        ) : products.length === 0 ? (
           <div className="text-center py-20">
             <span className="text-6xl mb-4 block">🏆</span>
             <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No products in this category</h2>
@@ -182,7 +201,11 @@ export default function TopSelling() {
               <Link key={p.id} to={`/product/${p.id}`}
                 className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
                 <div className="relative">
-                  <ImgPlaceholder className="h-44 w-full" icon="📦" />
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} loading="lazy" className="h-44 w-full object-cover" />
+                  ) : (
+                    <ImgPlaceholder className="h-44 w-full" icon="📦" />
+                  )}
                   <span className="absolute top-2.5 left-2.5 bg-amber-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow flex items-center gap-1">
                     #{i + 1} RANK
                   </span>
@@ -194,12 +217,14 @@ export default function TopSelling() {
                   <p className="text-[10px] font-bold text-[#2874F0] uppercase tracking-wide mb-1">{p.brand}</p>
                   <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 mb-2 flex-1">{p.name}</p>
                   <div className="flex items-center gap-1.5 mb-3">
-                    <Stars rating={p.rating} />
-                    <span className="text-[10px] text-gray-400">({p.reviews.toLocaleString()})</span>
+                    <Stars rating={p.rating ?? 0} />
+                    <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()})</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-xs text-gray-400 line-through">₹{p.mrp.toLocaleString('en-IN')}</p>
+                      {p.original_price > p.price && (
+                        <p className="text-xs text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
+                      )}
                       <p className="text-base font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
                     </div>
                     <AddToCartBtn small />
@@ -214,7 +239,11 @@ export default function TopSelling() {
               <Link key={p.id} to={`/product/${p.id}`}
                 className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-row">
                 <div className="relative flex-shrink-0 w-40 md:w-52">
-                  <ImgPlaceholder className="h-full min-h-[140px] w-full" icon="📦" />
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} loading="lazy" className="h-full min-h-[140px] w-full object-cover" />
+                  ) : (
+                    <ImgPlaceholder className="h-full min-h-[140px] w-full" icon="📦" />
+                  )}
                   <span className="absolute top-2.5 left-2.5 bg-amber-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow flex items-center gap-1">
                     #{i + 1}
                   </span>
@@ -224,15 +253,19 @@ export default function TopSelling() {
                     <p className="text-[10px] font-bold text-[#2874F0] uppercase tracking-wide mb-1">{p.brand}</p>
                     <p className="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">{p.name}</p>
                     <div className="flex items-center gap-1.5 mb-2">
-                      <Stars rating={p.rating} />
-                      <span className="text-[10px] text-gray-400">({p.reviews.toLocaleString()} reviews)</span>
+                      <Stars rating={p.rating ?? 0} />
+                      <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()} reviews)</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-baseline gap-2">
                       <p className="text-lg font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
-                      <p className="text-sm text-gray-400 line-through">₹{p.mrp.toLocaleString('en-IN')}</p>
-                      {p.discount > 0 && <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{p.discount}% off</span>}
+                      {p.original_price > p.price && (
+                        <>
+                          <p className="text-sm text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
+                          {p.discount > 0 && <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{p.discount}% off</span>}
+                        </>
+                      )}
                     </div>
                     <AddToCartBtn />
                   </div>

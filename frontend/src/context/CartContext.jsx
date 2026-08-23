@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 // CartContext – manages cart state globally
 const CartContext = createContext(null);
@@ -61,6 +61,7 @@ export function CartProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {

@@ -14,10 +14,11 @@ export function useAuth() {
     throw new Error('useAuth must be used within a UserProvider');
   }
 
-  const { user, login, logout } = context;
+  const { user, isLoading, login, logout } = context;
 
   return {
     user,
+    isLoading,
     login,
     logout,
     isAuthenticated: !!user,

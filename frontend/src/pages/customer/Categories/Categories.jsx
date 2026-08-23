@@ -1,30 +1,71 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { categoryService } from '../../../services/categoryService';
+import { unwrapList } from '../../../services/api';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
-// ─────────────────────────── DATA ─────────────────────────────────────────────
+// ─────────────────────── PRESENTATION HELPERS ────────────────────────────────
 
-const CATEGORIES = [
-  { id: 1, name: 'Laptops & Computers', slug: 'laptops', icon: '💻', count: 342, gradient: 'from-blue-500 to-blue-700', description: 'Powerful laptops, desktops, and workstations for every need.', featured: ['MacBook Air M2', 'Dell XPS 15', 'Lenovo Legion'] },
-  { id: 2, name: 'Smartphones', slug: 'phones', icon: '📱', count: 218, gradient: 'from-violet-500 to-purple-700', description: 'Latest flagship and budget smartphones from top brands.', featured: ['Galaxy S24 Ultra', 'OnePlus 12', 'Xiaomi 14'] },
-  { id: 3, name: 'Audio & Headphones', slug: 'audio', icon: '🎧', count: 156, gradient: 'from-pink-500 to-rose-600', description: 'Premium headphones, earbuds, and speakers for immersive sound.', featured: ['Sony WH-1000XM5', 'AirPods Pro 2', 'Bose QC Ultra'] },
-  { id: 4, name: 'Monitors & Displays', slug: 'monitors', icon: '🖥️', count: 89, gradient: 'from-amber-500 to-orange-600', description: 'Stunning displays for gaming, productivity, and creative work.', featured: ['LG 27" 4K', 'Samsung QLED 8K', 'ASUS ProArt'] },
-  { id: 5, name: 'Networking', slug: 'networking', icon: '🌐', count: 64, gradient: 'from-teal-500 to-cyan-700', description: 'Routers, mesh systems, and networking gear for seamless connectivity.', featured: ['TP-Link Deco', 'ASUS ROG Rapture', 'Netgear Orbi'] },
-  { id: 6, name: 'Gaming', slug: 'gaming', icon: '🎮', count: 112, gradient: 'from-red-500 to-red-700', description: 'Consoles, gaming PCs, accessories, and peripherals.', featured: ['ROG Zephyrus', 'PS5', 'Corsair Gear'] },
-  { id: 7, name: 'Smart Home', slug: 'smart-home', icon: '🏠', count: 78, gradient: 'from-emerald-500 to-green-700', description: 'Smart speakers, lights, cameras, and home automation devices.', featured: ['Google Nest Hub', 'Philips Hue', 'Dyson V15'] },
-  { id: 8, name: 'Accessories', slug: 'accessories', icon: '🖱️', count: 234, gradient: 'from-slate-500 to-gray-700', description: 'Keyboards, mice, adapters, cables, and essential peripherals.', featured: ['MX Master 3S', 'Keychron Q1', 'Samsung T7'] },
+const CATEGORY_GRADIENTS = [
+  'from-blue-500 to-blue-700',
+  'from-violet-500 to-purple-700',
+  'from-pink-500 to-rose-600',
+  'from-amber-500 to-orange-600',
+  'from-teal-500 to-cyan-700',
+  'from-red-500 to-red-700',
+  'from-emerald-500 to-green-700',
+  'from-slate-500 to-gray-700',
 ];
 
-const STATS = [
-  { label: 'Categories', value: '8+', icon: '📂' },
-  { label: 'Products', value: '1,293+', icon: '📦' },
-  { label: 'Brands', value: '50+', icon: '🏷️' },
-  { label: 'Happy Customers', value: '10K+', icon: '😊' },
-];
+const CATEGORY_ICONS = {
+  laptops: '💻',
+  phones: '📱',
+  audio: '🎧',
+  monitors: '🖥️',
+  networking: '🌐',
+  gaming: '🎮',
+  'smart-home': '🏠',
+  accessories: '🖱️',
+};
+
+const categoryIcon = (cat) => CATEGORY_ICONS[cat?.slug] || '📦';
 
 // ─────────────────────── PAGE ────────────────────────────────────────────────
 
 export default function Categories() {
-  const [hoveredId, setHoveredId] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadCategories = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await categoryService.getCategories();
+        if (!cancelled) setCategories(unwrapList(data));
+      } catch (err) {
+        if (!cancelled) setError(getApiErrorMessage(err, 'Failed to load categories.'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadCategories();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const totalProducts = categories.reduce((sum, c) => sum + (c.product_count ?? 0), 0);
+
+  const stats = [
+    { label: 'Categories', value: `${categories.length}+`, icon: '📂' },
+    { label: 'Products', value: `${totalProducts.toLocaleString('en-IN')}+`, icon: '📦' },
+    { label: 'Brands', value: '50+', icon: '🏷️' },
+    { label: 'Happy Customers', value: '10K+', icon: '😊' },
+  ];
 
   return (
     <div className="min-h-screen bg-[var(--page-bg)] transition-colors duration-300">
@@ -58,7 +99,7 @@ export default function Categories() {
 
             {/* Stats row */}
             <div className="grid grid-cols-2 gap-3">
-              {STATS.map((s, i) => (
+              {stats.map((s, i) => (
                 <div key={i} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 min-w-[120px]">
                   <span className="text-2xl block mb-1">{s.icon}</span>
                   <p className="text-xl font-extrabold text-white">{s.value}</p>
@@ -77,59 +118,79 @@ export default function Categories() {
             <p className="text-xs font-bold text-[#FB641B] uppercase tracking-widest mb-1">Browse</p>
             <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">Shop by Category</h2>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{CATEGORIES.length} categories available</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{categories.length} categories available</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {CATEGORIES.map(cat => (
-            <Link key={cat.id} to={`/categories/${cat.slug}`}
-              onMouseEnter={() => setHoveredId(cat.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              className="group relative bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
-              {/* Gradient header */}
-              <div className={`relative bg-gradient-to-br ${cat.gradient} p-6 text-white overflow-hidden`}>
-                <div className="absolute top-[-30px] right-[-30px] w-32 h-32 rounded-full bg-white/10 pointer-events-none" />
-                <div className="absolute bottom-[-20px] left-[40%] w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
+        {loading ? (
+          <LoadingSpinner label="Loading..." />
+        ) : error ? (
+          <div className="text-center py-20">
+            <span className="text-6xl mb-4 block">⚠️</span>
+            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load categories</h2>
+            <p className="text-gray-500 dark:text-gray-400">{error}</p>
+          </div>
+        ) : categories.length === 0 ? (
+          <div className="text-center py-20">
+            <span className="text-6xl mb-4 block">📂</span>
+            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No categories found</h2>
+            <p className="text-gray-500 dark:text-gray-400">Check back soon — new categories are on the way!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {categories.map((cat, idx) => (
+              <Link key={cat.id} to={`/categories/${cat.slug}`}
+                className="group relative bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+                {/* Gradient header */}
+                <div className={`relative bg-gradient-to-br ${CATEGORY_GRADIENTS[idx % CATEGORY_GRADIENTS.length]} p-6 text-white overflow-hidden`}>
+                  <div className="absolute top-[-30px] right-[-30px] w-32 h-32 rounded-full bg-white/10 pointer-events-none" />
+                  <div className="absolute bottom-[-20px] left-[40%] w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
 
-                <div className="relative z-10 flex items-center justify-between">
-                  <span className="text-5xl group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
-                  <span className="bg-white/20 backdrop-blur-sm text-xs font-bold px-3 py-1 rounded-full">
-                    {cat.count} items
-                  </span>
-                </div>
-              </div>
-
-              {/* Card body */}
-              <div className="p-5 flex flex-col flex-1">
-                <h3 className="text-base font-extrabold text-gray-900 dark:text-white mb-1.5 group-hover:text-[#2874F0] transition-colors">
-                  {cat.name}
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4 flex-1">
-                  {cat.description}
-                </p>
-
-                {/* Featured products tags */}
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {cat.featured.map((item, i) => (
-                    <span key={i} className="text-[10px] font-semibold bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">
-                      {item}
+                  <div className="relative z-10 flex items-center justify-between">
+                    {cat.image ? (
+                      <img src={cat.image} alt={cat.name} loading="lazy" className="w-12 h-12 object-cover rounded-xl shadow-md" />
+                    ) : (
+                      <span className="text-5xl group-hover:scale-110 transition-transform duration-300">{categoryIcon(cat)}</span>
+                    )}
+                    <span className="bg-white/20 backdrop-blur-sm text-xs font-bold px-3 py-1 rounded-full">
+                      {cat.product_count} items
                     </span>
-                  ))}
-                </div>
-
-                {/* CTA */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-white/10">
-                  <span className="text-xs font-bold text-[#2874F0] group-hover:underline">
-                    Shop Now →
-                  </span>
-                  <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-white text-sm shadow-sm group-hover:scale-110 transition-transform duration-200`}>
-                    →
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+
+                {/* Card body */}
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="text-base font-extrabold text-gray-900 dark:text-white mb-1.5 group-hover:text-[#2874F0] transition-colors">
+                    {cat.name}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4 flex-1">
+                    {cat.description}
+                  </p>
+
+                  {/* Featured products tags */}
+                  {Array.isArray(cat.featured) && cat.featured.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {cat.featured.map((item, i) => (
+                        <span key={i} className="text-[10px] font-semibold bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* CTA */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-white/10">
+                    <span className="text-xs font-bold text-[#2874F0] group-hover:underline">
+                      Shop Now →
+                    </span>
+                    <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${CATEGORY_GRADIENTS[idx % CATEGORY_GRADIENTS.length]} flex items-center justify-center text-white text-sm shadow-sm group-hover:scale-110 transition-transform duration-200`}>
+                      →
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ─── PROMO BANNER ─── */}

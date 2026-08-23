@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Package, Eye, EyeOff } from 'lucide-react';
 import ForgotPassword from './ForgotPassword';
 import { useTheme } from '../../../context/ThemeContext';
+import { useAuth } from '../../../hooks/useAuth';
+import { authService } from '../../../services/authService';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
 
 export default function Login() {
   const { brandConfig } = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [apiError, setApiError] = useState('');
   const [showForgot, setShowForgot] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,8 +42,19 @@ export default function Login() {
     if (!validate()) return;
 
     setIsLoading(true);
-    console.log({ email, password });
-    setTimeout(() => setIsLoading(false), 1200);
+    setApiError('');
+    try {
+      const data = await authService.login(email.trim(), password);
+      login(data.user);
+      const from = location.state?.from?.pathname;
+      navigate(from || (data.user.role === 'Admin' ? '/admin/dashboard' : '/'), {
+        replace: true,
+      });
+    } catch (err) {
+      setApiError(getApiErrorMessage(err, 'Unable to sign in. Please try again.'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -189,6 +207,13 @@ export default function Login() {
                 <p className="mt-1.5 text-xs text-red-500 font-medium">{passwordError}</p>
               )}
             </div>
+
+            {/* API Error */}
+            {apiError && (
+              <div className="text-xs font-medium text-red-500 bg-red-500/[0.06] border border-red-500/20 rounded-lg px-3.5 py-2.5">
+                {apiError}
+              </div>
+            )}
 
             {/* Terms */}
             <p className="text-[11px] leading-relaxed -mt-1" style={{ color: 'var(--text-secondary)' }}>

@@ -22,9 +22,17 @@ export const authService = {
   },
 
   /**
-   * Logout – remove tokens from storage.
+   * Logout – blacklist refresh token on server, remove tokens from storage.
    */
-  logout: () => {
+  logout: async () => {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      try {
+        await api.post('/auth/logout/', { refresh: refreshToken });
+      } catch {
+        // token may already be blacklisted or expired – ignore
+      }
+    }
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
   },
