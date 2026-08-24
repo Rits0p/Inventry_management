@@ -107,7 +107,7 @@ function TimeBox({ v, label }) {
       <div className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xl md:text-2xl font-extrabold w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center tabular-nums shadow">
         {v}
       </div>
-      <span className="text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase mt-1 tracking-widest">{label}</span>
+      <span className="text-[9px] text-[var(--text-secondary)] font-bold uppercase mt-1 tracking-widest">{label}</span>
     </div>
   );
 }
@@ -252,7 +252,7 @@ function CategoriesSection() {
       <div className="flex items-end justify-between mb-6">
         <div>
           <p className="text-xs font-bold text-[#FB641B] uppercase tracking-widest mb-1">Browse</p>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">Shop by Category</h2>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)]">Shop by Category</h2>
         </div>
         <Link to="/categories" className="text-sm font-semibold text-[#2874F0] hover:underline">View All →</Link>
       </div>
@@ -263,8 +263,8 @@ function CategoriesSection() {
             <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-200`}>
               {cat.icon}
             </div>
-            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 text-center leading-tight">{cat.name}</p>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500">{cat.count} items</p>
+            <p className="text-xs font-semibold text-[var(--text-primary)] text-center leading-tight">{cat.name}</p>
+            <p className="text-[10px] text-[var(--text-secondary)]">{cat.count} items</p>
           </Link>
         ))}
       </div>
@@ -312,7 +312,7 @@ function FlashSaleSection() {
   }, []);
 
   return (
-    <section className="bg-gray-100 dark:bg-gradient-to-r dark:from-gray-900 dark:to-gray-800 py-10 transition-colors duration-300" style={{ backgroundColor: 'var(--page-bg-secondary)' }}>
+    <section className="py-10 transition-colors duration-300" style={{ backgroundColor: 'var(--page-bg-secondary)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -320,19 +320,19 @@ function FlashSaleSection() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl">⚡</span>
-                <span className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white">Flash Sale</span>
+                <span className="text-xl md:text-2xl font-extrabold text-[var(--text-primary)]">Flash Sale</span>
                 <span className="bg-[#FB641B] text-white text-xs font-bold px-2.5 py-1 rounded-full">UP TO 40% OFF</span>
               </div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">Prices drop every day — don't miss out!</p>
+              <p className="text-[var(--text-secondary)] text-sm">Prices drop every day — don't miss out!</p>
             </div>
           </div>
           {/* Countdown */}
           <div className="flex items-center gap-2">
-            <span className="text-gray-500 dark:text-gray-400 text-sm font-medium mr-1">Ends in:</span>
+            <span className="text-[var(--text-secondary)] text-sm font-medium mr-1">Ends in:</span>
             <TimeBox v={timeLeft.h} label="Hrs" />
-            <span className="text-gray-900 dark:text-white font-bold text-xl mb-4">:</span>
+            <span className="text-[var(--text-primary)] font-bold text-xl mb-4">:</span>
             <TimeBox v={timeLeft.m} label="Min" />
-            <span className="text-gray-900 dark:text-white font-bold text-xl mb-4">:</span>
+            <span className="text-[var(--text-primary)] font-bold text-xl mb-4">:</span>
             <TimeBox v={timeLeft.s} label="Sec" />
           </div>
         </div>
@@ -343,20 +343,20 @@ function FlashSaleSection() {
         ) : error ? (
           <div className="text-center py-10">
             <span className="text-6xl mb-4 block">⚠️</span>
-            <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load flash deals</h3>
-            <p className="text-gray-500 dark:text-gray-400">{error}</p>
+            <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">Could not load flash deals</h3>
+            <p className="text-[var(--text-secondary)]">{error}</p>
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-10">
             <span className="text-6xl mb-4 block">⚡</span>
-            <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No flash deals right now</h3>
-            <p className="text-gray-500 dark:text-gray-400">Check back soon — new deals drop every day!</p>
+            <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">No flash deals right now</h3>
+            <p className="text-[var(--text-secondary)]">Check back soon — new deals drop every day!</p>
           </div>
         ) : (
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
             {products.map(p => (
               <Link key={p.id} to={`/product/${p.id}`}
-                className="flex-shrink-0 w-52 bg-white dark:bg-[#1a1a24] rounded-2xl overflow-hidden shadow hover:shadow-lg transition-all duration-200 flex flex-col hover:-translate-y-1">
+                className="flex-shrink-0 w-52 bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl overflow-hidden shadow hover:shadow-lg transition-all duration-200 flex flex-col hover:-translate-y-1">
                 <div className="relative">
                   {p.image ? (
                     <img src={p.image} alt={p.name} loading="lazy" className="h-36 w-full object-cover" />
@@ -369,19 +369,19 @@ function FlashSaleSection() {
                     </span>
                   )}
                 </div>
-                <div className="p-3 flex-1 flex flex-col bg-white dark:bg-[#1a1a24]">
+                <div className="p-3 flex-1 flex flex-col bg-[var(--card-bg)] backdrop-blur-xl">
                   <p className="text-[10px] font-bold text-[#FB641B] uppercase mb-1">{p.category_name}</p>
-                  <p className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 mb-1 flex-1">{p.name}</p>
+                  <p className="text-xs font-bold text-[var(--text-primary)] line-clamp-2 mb-1 flex-1">{p.name}</p>
                   <div className="flex items-center gap-1 mb-2">
                     <Stars rating={p.rating ?? 0} />
-                    <span className="text-[10px] text-gray-400">({p.review_count ?? 0})</span>
+                    <span className="text-[10px] text-gray-400">({p.reviews_count ?? 0})</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       {p.original_price > p.price && (
                         <p className="text-xs text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
                       )}
-                      <p className="text-sm font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
+                      <p className="text-sm font-extrabold text-[var(--text-primary)]">₹{p.price.toLocaleString('en-IN')}</p>
                     </div>
                     <AddToCartBtn small />
                   </div>
@@ -431,7 +431,7 @@ function TopProductsSection() {
       <div className="flex items-end justify-between mb-7">
         <div>
           <p className="text-xs font-bold text-[#FB641B] uppercase tracking-widest mb-1">🔥 Best Sellers</p>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">Top Selling Products</h2>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)]">Top Selling Products</h2>
         </div>
         <Link to="/top-selling" className="text-sm font-semibold text-[#2874F0] hover:underline">View Full Ranking →</Link>
       </div>
@@ -441,20 +441,20 @@ function TopProductsSection() {
       ) : error ? (
         <div className="text-center py-10">
           <span className="text-6xl mb-4 block">⚠️</span>
-          <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load top products</h3>
-          <p className="text-gray-500 dark:text-gray-400">{error}</p>
+          <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">Could not load top products</h3>
+          <p className="text-[var(--text-secondary)]">{error}</p>
         </div>
       ) : products.length === 0 ? (
         <div className="text-center py-10">
           <span className="text-6xl mb-4 block">📦</span>
-          <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No products found</h3>
-          <p className="text-gray-500 dark:text-gray-400">Check back soon — our catalogue is growing!</p>
+          <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">No products found</h3>
+          <p className="text-[var(--text-secondary)]">Check back soon — our catalogue is growing!</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {products.map(p => (
             <Link key={p.id} to={`/product/${p.id}`}
-              className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+              className="group bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
               {/* Image */}
               <div className="relative">
                 {p.image ? (
@@ -476,17 +476,17 @@ function TopProductsSection() {
               {/* Info */}
               <div className="p-4 flex flex-col flex-1">
                 <p className="text-[10px] font-bold text-[#2874F0] uppercase tracking-wide mb-1">{p.category_name}</p>
-                <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 mb-2 flex-1">{p.name}</p>
+                <p className="text-sm font-bold text-[var(--text-primary)] line-clamp-2 mb-2 flex-1">{p.name}</p>
                 <div className="flex items-center gap-1.5 mb-3">
                   <Stars rating={p.rating ?? 0} />
-                  <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()})</span>
+                  <span className="text-[10px] text-gray-400">({(p.reviews_count ?? 0).toLocaleString()})</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <div>
                     {p.original_price > p.price && (
                       <p className="text-xs text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
                     )}
-                    <p className="text-base font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
+                    <p className="text-base font-extrabold text-[var(--text-primary)]">₹{p.price.toLocaleString('en-IN')}</p>
                   </div>
                   <AddToCartBtn small />
                 </div>
@@ -560,7 +560,7 @@ function NewArrivalsSection() {
         <div className="flex items-end justify-between mb-7">
           <div>
             <p className="text-xs font-bold text-[#2874F0] uppercase tracking-widest mb-1">🆕 Just Landed</p>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">New Arrivals</h2>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)]">New Arrivals</h2>
           </div>
           <Link to="/new-arrivals" className="text-sm font-semibold text-[#2874F0] hover:underline">See All New →</Link>
         </div>
@@ -570,20 +570,20 @@ function NewArrivalsSection() {
         ) : error ? (
           <div className="text-center py-10">
             <span className="text-6xl mb-4 block">⚠️</span>
-            <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load new arrivals</h3>
-            <p className="text-gray-500 dark:text-gray-400">{error}</p>
+            <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">Could not load new arrivals</h3>
+            <p className="text-[var(--text-secondary)]">{error}</p>
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-10">
             <span className="text-6xl mb-4 block">✨</span>
-            <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No new arrivals yet</h3>
-            <p className="text-gray-500 dark:text-gray-400">Check back soon — fresh products land every week!</p>
+            <h3 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">No new arrivals yet</h3>
+            <p className="text-[var(--text-secondary)]">Check back soon — fresh products land every week!</p>
           </div>
         ) : (
           <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
             {products.map(p => (
               <Link key={p.id} to={`/product/${p.id}`}
-                className="group flex-shrink-0 w-48 bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 overflow-hidden">
+                className="group flex-shrink-0 w-48 bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)] shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 overflow-hidden">
                 <div className="relative">
                   {p.image ? (
                     <img src={p.image} alt={p.name} loading="lazy" className="h-36 w-full object-cover" />
@@ -597,9 +597,9 @@ function NewArrivalsSection() {
                 </div>
                 <div className="p-3">
                   <p className="text-[10px] font-bold text-[#FB641B] uppercase mb-1">{p.category_name}</p>
-                  <p className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 mb-2">{p.name}</p>
+                  <p className="text-xs font-bold text-[var(--text-primary)] line-clamp-2 mb-2">{p.name}</p>
                   <Stars rating={p.rating ?? 0} />
-                  <p className="text-sm font-extrabold text-gray-900 dark:text-white mt-1.5">₹{p.price.toLocaleString('en-IN')}</p>
+                  <p className="text-sm font-extrabold text-[var(--text-primary)] mt-1.5">₹{p.price.toLocaleString('en-IN')}</p>
                 </div>
               </Link>
             ))}
@@ -614,13 +614,13 @@ function NewArrivalsSection() {
 
 function BrandsSection() {
   return (
-    <section className="bg-white dark:bg-[#14141e] border-y border-gray-100 dark:border-white/10 py-8">
+    <section className="bg-[var(--card-bg)] backdrop-blur-xl border-y border-[var(--card-border)] py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <p className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Trusted Brands We Carry</p>
         <div className="flex items-center justify-center gap-6 flex-wrap">
           {BRANDS.map(brand => (
             <Link key={brand} to={`/shop?brand=${brand.toLowerCase()}`}
-              className="px-6 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-[#2874F0] hover:text-white hover:border-[#2874F0] transition-all duration-200">
+              className="px-6 py-2.5 bg-[rgba(128,128,128,0.06)] border border-[var(--card-border)] rounded-full text-sm font-semibold text-[var(--text-secondary)] hover:bg-[#2874F0] hover:text-white hover:border-[#2874F0] transition-all duration-200">
               {brand}
             </Link>
           ))}
@@ -647,3 +647,4 @@ export default function Home() {
     </div>
   );
 }
+

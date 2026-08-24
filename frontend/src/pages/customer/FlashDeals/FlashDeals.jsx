@@ -126,7 +126,7 @@ export default function FlashDeals() {
       case 'price-low': items.sort((a, b) => a.price - b.price); break;
       case 'price-high': items.sort((a, b) => b.price - a.price); break;
       case 'rating': items.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)); break;
-      case 'popular': items.sort((a, b) => (b.review_count ?? 0) - (a.review_count ?? 0)); break;
+      case 'popular': items.sort((a, b) => (b.reviews_count ?? 0) - (a.reviews_count ?? 0)); break;
       default: items.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0));
     }
     return items;
@@ -297,7 +297,7 @@ export default function FlashDeals() {
                   <p className="text-sm font-bold line-clamp-2 mb-2 flex-1" style={{ color: 'var(--text-primary)' }}>{p.name}</p>
                   <div className="flex items-center gap-1.5 mb-3">
                     <Stars rating={p.rating ?? 0} />
-                    <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>({(p.review_count ?? 0).toLocaleString()})</span>
+                    <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>({(p.reviews_count ?? 0).toLocaleString()})</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div>
@@ -340,7 +340,7 @@ export default function FlashDeals() {
                     <p className="text-sm md:text-base font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{p.name}</p>
                     <div className="flex items-center gap-1.5 mb-2">
                       <Stars rating={p.rating ?? 0} />
-                      <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>({(p.review_count ?? 0).toLocaleString()} reviews)</span>
+                      <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>({(p.reviews_count ?? 0).toLocaleString()} reviews)</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-2">
@@ -393,3 +393,4 @@ export default function FlashDeals() {
     </div>
   );
 }
+

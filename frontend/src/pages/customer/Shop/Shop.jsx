@@ -171,7 +171,7 @@ export default function Shop() {
                     </Link>
                     <div className="shop-card-rating">
                       <span className="shop-rating-badge">{Number(product.rating ?? 0).toFixed(1)} ★</span>
-                      <span className="shop-rating-count">({(product.review_count ?? 0).toLocaleString()})</span>
+                      <span className="shop-rating-count">({(product.reviews_count ?? 0).toLocaleString()})</span>
                     </div>
                     <div className="shop-card-price">
                       <span className="shop-price-current">₹{product.price.toLocaleString('en-IN')}</span>
@@ -203,7 +203,7 @@ export default function Shop() {
                     </Link>
                     <div className="shop-card-rating">
                       <span className="shop-rating-badge">{Number(product.rating ?? 0).toFixed(1)} ★</span>
-                      <span className="shop-rating-count">({(product.review_count ?? 0).toLocaleString()} reviews)</span>
+                      <span className="shop-rating-count">({(product.reviews_count ?? 0).toLocaleString()} reviews)</span>
                     </div>
                     <p className="shop-list-category">{product.category_name || ''}</p>
                   </div>
@@ -228,3 +228,4 @@ export default function Shop() {
     </main>
   );
 }
+

@@ -10,15 +10,15 @@ import Badge from '../common/Badge';
  */
 export default function CategoryCard({ category, onEdit, onDelete }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white dark:bg-[#1a1a24] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm hover:shadow-md transition">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--card-border)] rounded-sm shadow-sm hover:shadow-md transition">
       {/* Info */}
       <div className="flex items-center gap-4">
         <div className="w-10 h-10 rounded-full bg-[#2874F0]/10 text-[#2874F0] flex items-center justify-center font-bold text-lg flex-shrink-0">
           {category.name.charAt(0)}
         </div>
         <div>
-          <p className="font-semibold text-gray-900 dark:text-white">{category.name}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="font-semibold text-[var(--text-primary)]">{category.name}</p>
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
             slug: <span className="font-mono">{category.slug}</span> •{' '}
             {category.products} products
           </p>
@@ -27,7 +27,7 @@ export default function CategoryCard({ category, onEdit, onDelete }) {
 
       {/* Right */}
       <div className="flex items-center gap-4">
-        <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">{category.createdAt}</div>
+        <div className="text-xs text-[var(--text-secondary)] hidden sm:block">{category.createdAt}</div>
         <Badge variant={category.status === 'Active' ? 'green' : 'gray'}>
           {category.status}
         </Badge>

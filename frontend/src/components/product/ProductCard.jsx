@@ -9,10 +9,10 @@ import { Link } from 'react-router-dom';
  */
 export default function ProductCard({ product, onAddToCart }) {
   return (
-    <div className="bg-white dark:bg-[#1a1a24] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm hover:shadow-md transition group overflow-hidden">
+    <div className="bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--card-border)] rounded-sm shadow-sm hover:shadow-md transition group overflow-hidden">
       {/* Image */}
       <Link to={`/product/${product.id}`} className="block relative">
-        <div className="aspect-square bg-gray-50 dark:bg-white/5 flex items-center justify-center p-4">
+        <div className="aspect-square bg-[rgba(128,128,128,0.06)] flex items-center justify-center p-4">
           <img
             src={product.image}
             alt={product.name}
@@ -28,10 +28,10 @@ export default function ProductCard({ product, onAddToCart }) {
 
       {/* Info */}
       <div className="p-3 space-y-1.5">
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{product.brand}</p>
+        <p className="text-xs text-[var(--text-secondary)] font-medium">{product.brand}</p>
 
         <Link to={`/product/${product.id}`}>
-          <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 leading-snug hover:text-[#2874F0] transition">
+          <h3 className="text-sm font-medium text-[var(--text-primary)] line-clamp-2 leading-snug hover:text-[#2874F0] transition">
             {product.name}
           </h3>
         </Link>
@@ -41,18 +41,18 @@ export default function ProductCard({ product, onAddToCart }) {
           <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-green-600 text-white text-[11px] font-medium rounded">
             {product.rating} ★
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-[var(--text-secondary)]">
             ({product.reviews?.toLocaleString()})
           </span>
         </div>
 
         {/* Price */}
         <div className="flex items-baseline gap-2 pt-1">
-          <span className="text-base font-bold text-gray-900 dark:text-white">
+          <span className="text-base font-bold text-[var(--text-primary)]">
             ₹{Number(product.price).toLocaleString('en-IN')}
           </span>
           {product.originalPrice && (
-            <span className="text-xs text-gray-500 dark:text-gray-400 line-through">
+            <span className="text-xs text-[var(--text-secondary)] line-through">
               ₹{Number(product.originalPrice).toLocaleString('en-IN')}
             </span>
           )}

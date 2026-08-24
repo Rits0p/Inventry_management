@@ -55,4 +55,24 @@ export const authService = {
     });
     return data;
   },
+
+  /**
+   * Request a password-reset email. Always succeeds (no account leaking).
+   */
+  requestPasswordReset: async (email) => {
+    const { data } = await api.post('/auth/password-reset/', { email });
+    return data;
+  },
+
+  /**
+   * Confirm password reset with uid + token from the emailed link.
+   */
+  resetPassword: async (uid, token, newPassword) => {
+    const { data } = await api.post('/auth/password-reset/confirm/', {
+      uid,
+      token,
+      new_password: newPassword,
+    });
+    return data;
+  },
 };

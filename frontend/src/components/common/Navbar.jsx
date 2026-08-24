@@ -63,7 +63,7 @@ export default function Navbar({ role }) {
 
   return (
     <>
-      <header className="bg-white dark:bg-[#111118] border-b border-gray-200 dark:border-white/10 sticky top-0 z-50">
+      <header className="bg-[var(--card-bg)] backdrop-blur-xl border-b border-[var(--card-border)] sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
 
@@ -72,7 +72,7 @@ export default function Navbar({ role }) {
               {/* Mobile hamburger */}
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition text-gray-600 dark:text-gray-300"
+                className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition text-[var(--text-secondary)]"
                 aria-label="Open menu"
               >
                 <Menu className="w-5 h-5" />
@@ -111,7 +111,7 @@ export default function Navbar({ role }) {
                     className={`flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition-all duration-200
                       ${active
                         ? 'bg-orange-50 dark:bg-white/10 text-[#FF6B35] border border-orange-100 dark:border-white/10'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent'
+                        : 'text-[var(--text-secondary)] hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent'
                       }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -130,8 +130,8 @@ export default function Navbar({ role }) {
             {/* ── Search Bar (always visible) ── */}
             {!isAdmin && (
               <form onSubmit={handleSearch} className="flex items-center w-64 ml-auto mr-4">
-                <div className="flex items-center w-full border border-gray-200 dark:border-white/10 rounded-full bg-gray-100 dark:bg-white/5 focus-within:border-[#FF6B35]/50 focus-within:bg-gray-50 dark:focus-within:bg-white/[0.07] transition-all duration-200">
-                  <span className="pl-3 text-gray-400 dark:text-gray-500">
+                <div className="flex items-center w-full border border-[var(--card-border)] rounded-full bg-[rgba(128,128,128,0.08)] focus-within:border-[#FF6B35]/50 focus-within:bg-gray-50 dark:focus-within:bg-white/[0.07] transition-all duration-200">
+                  <span className="pl-3 text-[var(--text-secondary)]">
                     <Search className="w-4 h-4" />
                   </span>
                   <input
@@ -139,7 +139,7 @@ export default function Navbar({ role }) {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search products..."
-                    className="flex-1 px-2 py-2 text-sm bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
+                    className="flex-1 px-2 py-2 text-sm bg-transparent text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
                   />
                 </div>
               </form>
@@ -151,7 +151,7 @@ export default function Navbar({ role }) {
               {/* Theme toggle pill */}
               <button
                 onClick={toggleTheme}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 text-sm font-medium transition-all duration-200 hover:bg-gray-200 dark:hover:bg-white/15"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[rgba(128,128,128,0.08)] border border-[var(--card-border)] text-sm font-medium transition-all duration-200 hover:bg-gray-200 dark:hover:bg-white/15"
               >
                 {isDark ? (
                   <>
@@ -170,11 +170,11 @@ export default function Navbar({ role }) {
               {!isAdmin && (
                 <Link
                   to="/cart"
-                  className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200"
+                  className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium text-[var(--text-secondary)] hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200"
                   aria-label="Cart"
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  <span className="hidden sm:inline text-xs font-medium text-gray-600 dark:text-gray-300">Cart</span>
+                  <span className="hidden sm:inline text-xs font-medium text-[var(--text-secondary)]">Cart</span>
                   {cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-[#FF4444] text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 shadow-lg shadow-red-500/30">
                       {cartCount > 99 ? '99+' : cartCount}
@@ -188,7 +188,7 @@ export default function Navbar({ role }) {
                 <div className="flex items-center gap-2">
                   <Link
                     to="/login"
-                    className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition px-2 py-1.5"
+                    className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-gray-900 dark:hover:text-white transition px-2 py-1.5"
                   >
                     Sign In
                   </Link>
@@ -210,48 +210,48 @@ export default function Navbar({ role }) {
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF6B35] to-[#FF4444] flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-orange-500/20">
                       {displayName.charAt(0).toUpperCase()}
                     </div>
-                    <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[90px] truncate">
+                    <span className="hidden sm:inline text-sm font-medium text-[var(--text-primary)] max-w-[90px] truncate">
                       {displayName}
                     </span>
                     <ChevronDown
-                      className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+                      className={`w-4 h-4 text-[var(--text-secondary)] transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
                     />
                   </button>
 
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a1a24] rounded-2xl shadow-2xl z-50 border border-gray-200 dark:border-white/10 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{displayName}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{displayEmail}</p>
+                    <div className="absolute right-0 mt-2 w-56 bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl shadow-2xl z-50 border border-[var(--card-border)] overflow-hidden">
+                      <div className="px-4 py-3 border-b border-[var(--card-border)] bg-[rgba(128,128,128,0.06)]">
+                        <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{displayName}</p>
+                        <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{displayEmail}</p>
                       </div>
                       <div className="py-1">
                         {!isAdmin && (
                           <>
                             <Link to="/dashboard" onClick={() => setDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
-                              <LayoutDashboard className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
+                              <LayoutDashboard className="w-4 h-4 text-[var(--text-secondary)]" />
                               My Dashboard
                             </Link>
                             <Link to="/orders" onClick={() => setDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
-                              <Package className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
+                              <Package className="w-4 h-4 text-[var(--text-secondary)]" />
                               My Orders
                             </Link>
                             <Link to="/profile" onClick={() => setDropdownOpen(false)}
-                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
-                              <User className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
+                              <User className="w-4 h-4 text-[var(--text-secondary)]" />
                               Profile
                             </Link>
                           </>
                         )}
                         {isAdmin && (
                           <Link to="/admin/dashboard" onClick={() => setDropdownOpen(false)}
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
-                            <LayoutDashboard className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition">
+                            <LayoutDashboard className="w-4 h-4 text-[var(--text-secondary)]" />
                             Dashboard
                           </Link>
                         )}
-                        <hr className="my-1 border-gray-100 dark:border-white/10" />
+                        <hr className="my-1 border-[var(--card-border)]" />
                         <button onClick={handleLogout}
                           className="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition">
                           <LogOut className="w-4 h-4" />
@@ -279,9 +279,9 @@ export default function Navbar({ role }) {
             onClick={() => setMobileMenuOpen(false)}
           />
           {/* Drawer */}
-          <div className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-[#111118] border-r border-gray-200 dark:border-white/10 shadow-2xl flex flex-col animate-slide-in">
+          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[var(--card-bg)] backdrop-blur-xl border-r border-[var(--card-border)] shadow-2xl flex flex-col animate-slide-in">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-white/10">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--card-border)]">
               <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileMenuOpen(false)}>
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#FF4444] flex items-center justify-center shadow">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,13 +290,13 @@ export default function Navbar({ role }) {
                   </svg>
                 </div>
                 <div className="flex flex-col leading-none">
-                  <span className="font-extrabold text-[15px] text-gray-900 dark:text-white">RPD<span className="text-[#FF6B35]">.</span></span>
+                  <span className="font-extrabold text-[15px] text-[var(--text-primary)]">RPD<span className="text-[#FF6B35]">.</span></span>
                   <span className="text-[8px] font-bold text-[#FF6B35] tracking-[0.2em] uppercase">Store</span>
                 </div>
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition text-gray-500 dark:text-gray-400"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition text-[var(--text-secondary)]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -305,13 +305,13 @@ export default function Navbar({ role }) {
             {/* Search */}
             {!isAdmin && (
               <form onSubmit={(e) => { handleSearch(e); setMobileMenuOpen(false); }} className="px-4 py-3">
-                <div className="flex border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5">
+                <div className="flex border border-[var(--card-border)] rounded-xl overflow-hidden bg-[rgba(128,128,128,0.08)]">
                   <input
                     type="text"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search products..."
-                    className="flex-1 pl-4 pr-2 py-2.5 text-sm bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
+                    className="flex-1 pl-4 pr-2 py-2.5 text-sm bg-transparent text-[var(--text-primary)] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
                   />
                   <button type="submit" className="px-3 py-2.5 text-[#FF6B35]">
                     <Search className="w-4 h-4" />
@@ -332,7 +332,7 @@ export default function Navbar({ role }) {
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
                       ${active
                         ? 'bg-orange-50 dark:bg-white/10 text-[#FF6B35]'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
+                        : 'text-[var(--text-secondary)] hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
                       }`}
                   >
                     <Icon className="w-4.5 h-4.5" />
@@ -345,7 +345,7 @@ export default function Navbar({ role }) {
                 <Link
                   to="/cart"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all"
                 >
                   <ShoppingCart className="w-4.5 h-4.5" />
                   Cart
@@ -359,13 +359,13 @@ export default function Navbar({ role }) {
             </nav>
 
             {/* Bottom auth */}
-            <div className="px-3 py-4 border-t border-gray-200 dark:border-white/10 space-y-2">
+            <div className="px-3 py-4 border-t border-[var(--card-border)] space-y-2">
               {!user ? (
                 <>
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 transition"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--text-secondary)] border border-[var(--card-border)] hover:bg-gray-100 dark:hover:bg-white/5 transition"
                   >
                     <LogIn className="w-4 h-4" />
                     Sign In

@@ -20,10 +20,10 @@ export default function EmptyState({
   onAction,
 }) {
   return (
-    <div className="bg-white dark:bg-[#1a1a24] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm p-12 text-center">
+    <div className="bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--card-border)] rounded-sm shadow-sm p-12 text-center">
       <div className="text-5xl mb-3">{icon}</div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-      {message && <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{message}</p>}
+      <h3 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h3>
+      {message && <p className="text-[var(--text-secondary)] mt-1 text-sm">{message}</p>}
 
       {actionLabel && (
         <div className="mt-6">

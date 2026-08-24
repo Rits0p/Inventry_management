@@ -25,7 +25,7 @@ export default function LoadingSpinner({
         role="status"
         aria-label={label}
       />
-      {label && <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>}
+      {label && <p className="text-sm text-[var(--text-secondary)]">{label}</p>}
     </div>
   );
 

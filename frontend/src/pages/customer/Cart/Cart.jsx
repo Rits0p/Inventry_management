@@ -1,28 +1,40 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Cart.css';
-
-const initialCart = [
-  { id: 1, name: 'Sony WH-1000XM5 Wireless Headphones', price: 29990, quantity: 1, icon: '🎧', stock: 48 },
-  { id: 2, name: 'Logitech MX Master 3S Wireless Mouse', price: 8995, quantity: 2, icon: '🖱️', stock: 15 },
-  { id: 3, name: 'Stainless Steel Water Bottle 1L', price: 599, quantity: 1, icon: '🧴', stock: 120 },
-];
+import { useCart } from '../../../context/CartContext';
+import { useUser } from '../../../context/UserContext';
+import { orderService } from '../../../services/orderService';
+import { getApiErrorMessage } from '../../../utils/apiErrors';
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState(initialCart);
-
-  const updateQuantity = (id, newQty) => {
-    if (newQty < 1) return;
-    setCartItems(cartItems.map(item => item.id === id ? { ...item, quantity: Math.min(newQty, item.stock) } : item));
-  };
-
-  const removeItem = (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
-  };
+  const navigate = useNavigate();
+  const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { user } = useUser();
+  const [address, setAddress] = useState(user?.address || '');
+  const [placing, setPlacing] = useState(false);
+  const [error, setError] = useState('');
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const delivery = subtotal > 500 ? 0 : 40;
   const total = subtotal + delivery;
+
+  const handlePlaceOrder = async () => {
+    if (placing) return;
+    setPlacing(true);
+    setError('');
+    try {
+      await orderService.placeOrder({
+        items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity })),
+        delivery_address: address,
+      });
+      clearCart();
+      navigate('/orders');
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Failed to place your order.'));
+    } finally {
+      setPlacing(false);
+    }
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -48,27 +60,37 @@ export default function Cart() {
           <span className="cart-count">{cartItems.length} item{cartItems.length > 1 ? 's' : ''}</span>
         </header>
 
+        {error && <div className="cart-error">{error}</div>}
+
         <div className="cart-layout">
           {/* Cart Items */}
           <div className="cart-items">
             {cartItems.map(item => (
               <div key={item.id} className="cart-item">
-                <div className="cart-item-icon">{item.icon}</div>
+                <div className="cart-item-icon">
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} />
+                  ) : (
+                    '📦'
+                  )}
+                </div>
                 <div className="cart-item-details">
                   <h3 className="cart-item-name">{item.name}</h3>
-                  <p className="cart-item-stock">In Stock</p>
+                  <p className={`cart-item-stock ${item.stock === 0 ? 'out' : ''}`}>
+                    {item.stock === 0 ? 'Out of Stock' : `In Stock (${item.stock} left)`}
+                  </p>
                   <div className="cart-item-actions">
                     <div className="cart-qty-control">
                       <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="cart-qty-btn">−</button>
                       <span className="cart-qty-value">{item.quantity}</span>
                       <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="cart-qty-btn">+</button>
                     </div>
-                    <button onClick={() => removeItem(item.id)} className="cart-remove-btn">Remove</button>
+                    <button onClick={() => removeFromCart(item.id)} className="cart-remove-btn">Remove</button>
                   </div>
                 </div>
                 <div className="cart-item-price">
                   <p className="cart-price-total">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
-                  <p className="cart-price-each">₹{item.price.toLocaleString('en-IN')} each</p>
+                  <p className="cart-price-each">₹{Number(item.price).toLocaleString('en-IN')} each</p>
                 </div>
               </div>
             ))}
@@ -93,7 +115,26 @@ export default function Cart() {
                 </div>
               </div>
               {delivery === 0 && <p className="cart-savings">You save ₹40 on delivery</p>}
-              <button className="cart-checkout-btn">Place Order</button>
+
+              <div className="cart-address-group">
+                <label className="cart-address-label" htmlFor="delivery-address">Delivery Address</label>
+                <textarea
+                  id="delivery-address"
+                  rows="3"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="House no, street, city, pincode…"
+                  className="cart-address-input"
+                />
+              </div>
+
+              <button
+                onClick={handlePlaceOrder}
+                disabled={placing || cartItems.some(item => item.stock === 0)}
+                className="cart-checkout-btn"
+              >
+                {placing ? 'Placing Order…' : 'Place Order'}
+              </button>
               <Link to="/" className="cart-continue">Continue Shopping →</Link>
             </div>
           </div>

@@ -1,6 +1,11 @@
 // productService.js – Product API calls (admin & customer)
 import api from './api';
 
+const buildConfig = (payload) =>
+  payload instanceof FormData
+    ? { headers: { 'Content-Type': 'multipart/form-data' } }
+    : {};
+
 export const productService = {
   /**
    * Get all products with optional filters.
@@ -21,17 +26,19 @@ export const productService = {
 
   /**
    * Create a new product (Admin only).
+   * Accepts a plain object or FormData (for image uploads).
    */
   createProduct: async (payload) => {
-    const { data } = await api.post('/products/', payload);
+    const { data } = await api.post('/products/', payload, buildConfig(payload));
     return data;
   },
 
   /**
    * Update an existing product (Admin only).
+   * Accepts a plain object or FormData (for image uploads).
    */
   updateProduct: async (id, payload) => {
-    const { data } = await api.patch(`/products/${id}/`, payload);
+    const { data } = await api.patch(`/products/${id}/`, payload, buildConfig(payload));
     return data;
   },
 

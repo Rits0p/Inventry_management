@@ -22,7 +22,7 @@ const variants = {
   danger:
     'bg-red-600 hover:bg-red-700 text-white border border-transparent',
   ghost:
-    'bg-transparent border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5',
+    'bg-transparent border border-[var(--card-border)] text-[var(--text-primary)] hover:bg-gray-50 dark:hover:bg-white/5',
 };
 
 const sizes = {

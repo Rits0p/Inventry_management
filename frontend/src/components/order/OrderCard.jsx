@@ -19,21 +19,21 @@ const statusVariant = {
  */
 export default function OrderCard({ order, onViewDetail, onBuyAgain }) {
   return (
-    <div className="bg-white dark:bg-[#1a1a24] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm overflow-hidden">
+    <div className="bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--card-border)] rounded-sm shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 bg-[rgba(128,128,128,0.06)] border-b border-[var(--card-border)]">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
           <div>
-            <span className="text-gray-500 dark:text-gray-400">Order ID:</span>{' '}
+            <span className="text-[var(--text-secondary)]">Order ID:</span>{' '}
             <span className="font-medium text-[#2874F0]">{order.id}</span>
           </div>
           <div>
-            <span className="text-gray-500 dark:text-gray-400">Ordered on:</span>{' '}
-            <span className="font-medium text-gray-900 dark:text-white">{order.date}</span>
+            <span className="text-[var(--text-secondary)]">Ordered on:</span>{' '}
+            <span className="font-medium text-[var(--text-primary)]">{order.date}</span>
           </div>
           <div>
-            <span className="text-gray-500 dark:text-gray-400">Total:</span>{' '}
-            <span className="font-bold text-gray-900 dark:text-white">
+            <span className="text-[var(--text-secondary)]">Total:</span>{' '}
+            <span className="font-bold text-[var(--text-primary)]">
               ₹{Number(order.amount).toLocaleString('en-IN')}
             </span>
           </div>
@@ -48,11 +48,11 @@ export default function OrderCard({ order, onViewDetail, onBuyAgain }) {
             <img
               src={item.image}
               alt={item.name}
-              className="w-16 h-16 object-cover rounded border border-gray-200 dark:border-white/10 flex-shrink-0"
+              className="w-16 h-16 object-cover rounded border border-[var(--card-border)] flex-shrink-0"
             />
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900 dark:text-white line-clamp-2">{item.name}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="font-medium text-[var(--text-primary)] line-clamp-2">{item.name}</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">
                 Qty: {item.qty} • ₹{Number(item.price).toLocaleString('en-IN')}
               </p>
             </div>
@@ -60,8 +60,8 @@ export default function OrderCard({ order, onViewDetail, onBuyAgain }) {
         ))}
 
         {/* Footer */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-gray-100 dark:border-white/10">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-[var(--card-border)]">
+          <p className="text-sm text-[var(--text-secondary)]">
             {order.status === 'Delivered' && (
               <>Delivered on <span className="font-medium">{order.deliveryDate}</span></>
             )}
@@ -75,7 +75,7 @@ export default function OrderCard({ order, onViewDetail, onBuyAgain }) {
             {order.status === 'Delivered' && (
               <button
                 onClick={() => onBuyAgain?.(order)}
-                className="px-4 py-2 text-sm font-medium border border-gray-300 dark:border-white/10 rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition"
+                className="px-4 py-2 text-sm font-medium border border-[var(--card-border)] rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition"
               >
                 Buy Again
               </button>

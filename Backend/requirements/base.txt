@@ -3,3 +3,6 @@ mysqlclient>=2.2.0
 djangorestframework
 django-cors-headers
 djangorestframework-simplejwt>=5.3
+django-filter
+Pillow
+

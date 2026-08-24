@@ -44,14 +44,14 @@ export default function Sidebar({ role, isOpen, onClose }) {
       <aside
         className={`
           fixed lg:static inset-y-0 left-0 z-50
-          w-64 bg-white dark:bg-[#14141e] border-r border-gray-200 dark:border-white/10
+          w-64 bg-[var(--card-bg)] backdrop-blur-xl border-r border-[var(--card-border)]
           transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           flex flex-col
         `}
       >
         {/* Mobile header */}
-        <div className="lg:hidden flex items-center justify-between px-4 h-14 border-b border-gray-100 dark:border-white/10">
+        <div className="lg:hidden flex items-center justify-between px-4 h-14 border-b border-[var(--card-border)]">
           <span className="font-bold text-lg text-[#2874F0]">Menu</span>
           <button
             onClick={onClose}
@@ -66,14 +66,14 @@ export default function Sidebar({ role, isOpen, onClose }) {
 
         {/* User info strip (visible inside sidebar) */}
         {user && (
-          <div className="px-4 py-3 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 lg:block">
+          <div className="px-4 py-3 border-b border-[var(--card-border)] bg-[rgba(128,128,128,0.06)] lg:block">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-[#2874F0] text-white flex items-center justify-center font-bold flex-shrink-0">
                 {user.fullName?.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user.fullName}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.role}</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{user.fullName}</p>
+                <p className="text-xs text-[var(--text-secondary)] truncate">{user.role}</p>
               </div>
             </div>
           </div>
@@ -92,7 +92,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
                     `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       isActive
                         ? 'bg-[#2874F0]/10 text-[#2874F0] font-semibold'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                        : 'text-[var(--text-primary)] hover:bg-gray-50 dark:hover:bg-white/5'
                     }`
                   }
                 >
@@ -105,14 +105,14 @@ export default function Sidebar({ role, isOpen, onClose }) {
         </nav>
 
         {/* Bottom: Logout */}
-        <div className="p-3 border-t border-gray-100 dark:border-white/10 space-y-2">
+        <div className="p-3 border-t border-[var(--card-border)] space-y-2">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition"
           >
             🚪 Logout
           </button>
-          <p className="text-xs text-gray-400 dark:text-gray-500 text-center pb-1">InventoryPro v1.0</p>
+          <p className="text-xs text-[var(--text-secondary)] text-center pb-1">InventoryPro v1.0</p>
         </div>
       </aside>
     </>

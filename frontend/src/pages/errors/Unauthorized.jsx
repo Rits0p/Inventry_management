@@ -11,8 +11,8 @@ export default function Unauthorized() {
           <div className="text-6xl mt-2">🔒</div>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h1>
-        <p className="text-gray-500 dark:text-gray-400 mb-8">
+        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Access Denied</h1>
+        <p className="text-[var(--text-secondary)] mb-8">
           You don't have permission to view this page. Please log in with the correct account or
           contact support.
         </p>
@@ -20,7 +20,7 @@ export default function Unauthorized() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={() => navigate(-1)}
-            className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-sm hover:bg-gray-100 transition"
+            className="px-6 py-3 border border-[var(--card-border)] text-[var(--text-primary)] font-medium rounded-sm hover:bg-[rgba(128,128,128,0.08)] transition"
           >
             ← Go Back
           </button>

@@ -9,10 +9,12 @@ import './styles/App.css';
 // Auth pages
 import Login from './pages/auth/Login/Login';
 import Register from './pages/auth/Register/Register';
+import ResetPassword from './pages/auth/ResetPassword/ResetPassword';
 
 // Admin pages
 import AdminDashboard from './pages/admin/Dashboard/Dashboard';
 import AdminProducts from './pages/admin/Products/Products';
+import AddProduct from './pages/admin/Products/AddProduct';
 import AdminCategories from './pages/admin/Categories/Categories';
 import AdminOrders from './pages/admin/Orders/Orders';
 import AdminStock from './pages/admin/Stock/Stock';
@@ -46,6 +48,7 @@ function App() {
               {/* Public */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/password-reset" element={<ResetPassword />} />
 
               {/* Error pages */}
               <Route path="/403" element={<Unauthorized />} />
@@ -62,6 +65,8 @@ function App() {
               >
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="products" element={<AdminProducts />} />
+                <Route path="products/add" element={<AddProduct />} />
+                <Route path="products/edit/:id" element={<AddProduct />} />
                 <Route path="categories" element={<AdminCategories />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="stock" element={<AdminStock />} />

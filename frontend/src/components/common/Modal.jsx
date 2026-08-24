@@ -32,14 +32,14 @@ export default function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60">
       <div
-        className={`bg-white dark:bg-[#1a1a24] rounded-sm shadow-xl w-full ${maxWidth} max-h-[90vh] flex flex-col`}
+        className={`bg-[var(--card-bg)] backdrop-blur-xl rounded-sm shadow-xl w-full ${maxWidth} max-h-[90vh] flex flex-col`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/10 flex-shrink-0">
-          <h2 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--card-border)] flex-shrink-0">
+          <h2 id="modal-title" className="text-lg font-semibold text-[var(--text-primary)]">
             {title}
           </h2>
           <button
@@ -56,7 +56,7 @@ export default function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="flex-shrink-0 border-t border-gray-200 dark:border-white/10 px-6 py-4 bg-gray-50 dark:bg-white/5">
+          <div className="flex-shrink-0 border-t border-[var(--card-border)] px-6 py-4 bg-[rgba(128,128,128,0.06)]">
             {footer}
           </div>
         )}

@@ -23,7 +23,7 @@ export default function ProductFilters({
   showSearch = true,
 }) {
   return (
-    <div className="bg-white dark:bg-[#1a1a24] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm p-4 space-y-4">
+    <div className="bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--card-border)] rounded-sm shadow-sm p-4 space-y-4">
       {/* Search */}
       {showSearch && (
         <div className="relative">
@@ -32,7 +32,7 @@ export default function ProductFilters({
             placeholder="Search products..."
             value={search}
             onChange={(e) => onSearch?.(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-white/10 rounded-sm text-sm bg-white dark:bg-[#1a1a24] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2874F0] focus:border-[#2874F0]"
+            className="w-full pl-10 pr-4 py-2.5 border border-[var(--card-border)] rounded-sm text-sm bg-[var(--card-bg)] backdrop-blur-xl dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2874F0] focus:border-[#2874F0]"
           />
           <svg
             className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
@@ -56,7 +56,7 @@ export default function ProductFilters({
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
                 category === cat
                   ? 'bg-[#2874F0] text-white'
-                  : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/15'
+                  : 'bg-[rgba(128,128,128,0.08)] text-[var(--text-primary)] hover:bg-gray-200 dark:hover:bg-white/15'
               }`}
             >
               {cat}
@@ -66,11 +66,11 @@ export default function ProductFilters({
 
         {/* Sort dropdown */}
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Sort:</span>
+          <span className="text-sm text-[var(--text-secondary)] whitespace-nowrap">Sort:</span>
           <select
             value={sortBy}
             onChange={(e) => onSort?.(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 dark:border-white/10 rounded-sm text-sm bg-white dark:bg-[#1a1a24] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2874F0]"
+            className="px-3 py-1.5 border border-[var(--card-border)] rounded-sm text-sm bg-[var(--card-bg)] backdrop-blur-xl dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2874F0]"
           >
             <option value="popularity">Popularity</option>
             <option value="price-low">Price: Low to High</option>

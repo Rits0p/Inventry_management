@@ -114,8 +114,8 @@ export default function ProductDetail() {
       <main className="pd-page">
         <div className="flex flex-col items-center justify-center py-24 text-center px-4">
           <span className="text-6xl mb-4">⚠️</span>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load product</h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">{error}</p>
+          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] mb-2">Could not load product</h1>
+          <p className="text-[var(--text-secondary)] mb-6">{error}</p>
           <Link to="/shop"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#2874F0] text-white font-bold rounded-full hover:shadow-lg transition">
             ← Back to Shop
@@ -170,7 +170,7 @@ export default function ProductDetail() {
             <div className="pd-rating-inline">
               <span className="pd-rating-score">{Number(product.rating ?? 0).toFixed(1)}</span>
               <Stars rating={product.rating} />
-              <span className="pd-rating-text">{(product.review_count ?? 0).toLocaleString()} reviews</span>
+              <span className="pd-rating-text">{(product.reviews_count ?? 0).toLocaleString()} reviews</span>
             </div>
           </div>
 
@@ -317,7 +317,7 @@ export default function ProductDetail() {
                     <h3 className="pd-related-name">{p.name}</h3>
                     <div className="pd-related-rating">
                       <Stars rating={p.rating} />
-                      <span>({(p.review_count ?? 0).toLocaleString()})</span>
+                      <span>({(p.reviews_count ?? 0).toLocaleString()})</span>
                     </div>
                     <div className="pd-related-price">
                       <span className="pd-related-current">₹{p.price.toLocaleString('en-IN')}</span>
@@ -335,3 +335,4 @@ export default function ProductDetail() {
     </main>
   );
 }
+

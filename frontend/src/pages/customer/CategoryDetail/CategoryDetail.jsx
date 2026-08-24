@@ -40,7 +40,13 @@ const CATEGORY_ICONS = {
   accessories: '🖱️',
 };
 
-const categoryIcon = (cat) => CATEGORY_ICONS[cat?.slug] || '📦';
+const categoryIcon = (cat) => {
+  const haystack = `${cat?.slug ?? ''} ${cat?.name ?? ''}`.toLowerCase();
+  const match = Object.keys(CATEGORY_ICONS).find(
+    (key) => haystack.includes(key) || haystack.includes(key.replace(/-/g, ' '))
+  );
+  return match ? CATEGORY_ICONS[match] : '🛍️';
+};
 
 const PRODUCT_BADGE_CLASS = 'bg-amber-500';
 
@@ -59,7 +65,7 @@ function Stars({ rating }) {
   return (
     <span className="flex items-center gap-0.5 text-amber-400 text-xs">
       {[1, 2, 3, 4, 5].map(s => (
-        <svg key={s} className={`w-3 h-3 ${s <= Math.round(rating) ? 'fill-current' : 'fill-gray-200 text-gray-200'}`} viewBox="0 0 20 20">
+        <svg key={s} className={`w-3 h-3 ${s <= Math.round(rating) ? 'fill-current' : 'fill-[rgba(128,128,128,0.35)] text-[rgba(128,128,128,0.35)]'}`} viewBox="0 0 20 20">
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
       ))}
@@ -90,7 +96,7 @@ function AddToCartBtn({ product, small = false }) {
   const base = `font-semibold rounded-full transition-all duration-200 flex items-center justify-center gap-1.5 ${small ? 'px-3 py-1.5 text-xs' : 'px-5 py-2.5 text-sm'}`;
   if (soldOut) {
     return (
-      <button onClick={handle} disabled className={`${base} bg-gray-200 dark:bg-white/10 text-gray-400 dark:text-gray-500 cursor-not-allowed`}>
+      <button onClick={handle} disabled className={`${base} bg-[rgba(128,128,128,0.12)] text-[var(--text-secondary)] cursor-not-allowed`}>
         Sold Out
       </button>
     );
@@ -205,8 +211,8 @@ export default function CategoryDetail() {
       <div className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
           <span className="text-6xl mb-4 block">🔍</span>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">Category Not Found</h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">The category you're looking for doesn't exist.</p>
+          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] mb-2">Category Not Found</h1>
+          <p className="text-[var(--text-secondary)] mb-6">The category you're looking for doesn't exist.</p>
           <Link to="/"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#2874F0] text-white font-bold rounded-full hover:shadow-lg transition">
             ← Back to Home
@@ -221,8 +227,8 @@ export default function CategoryDetail() {
       <div className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
           <span className="text-6xl mb-4 block">⚠️</span>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load category</h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">{categoryError}</p>
+          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] mb-2">Could not load category</h1>
+          <p className="text-[var(--text-secondary)] mb-6">{categoryError}</p>
           <Link to="/categories"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#2874F0] text-white font-bold rounded-full hover:shadow-lg transition">
             ← All Categories
@@ -300,11 +306,11 @@ export default function CategoryDetail() {
       </section>
 
       {/* ─── FILTERS & SORT BAR ─── */}
-      <section className="bg-white dark:bg-[#1a1a24] border-b border-gray-100 dark:border-white/10 sticky top-0 z-30">
+      <section className="bg-[var(--card-bg)] backdrop-blur-xl border-b border-[var(--card-border)] sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <p className="text-sm font-bold text-gray-900 dark:text-white hidden sm:block">
+              <p className="text-sm font-bold text-[var(--text-primary)] hidden sm:block">
                 {products.length} results
               </p>
               <div className="hidden md:flex items-center gap-2">
@@ -312,7 +318,7 @@ export default function CategoryDetail() {
                   <Link key={cat.id} to={`/categories/${cat.slug}`}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${cat.slug === slug
                         ? 'bg-[#2874F0] text-white shadow'
-                        : 'bg-gray-100 text-gray-600 dark:text-gray-400 hover:bg-gray-200'
+                        : 'bg-[rgba(128,128,128,0.08)] text-[var(--text-secondary)] hover:bg-[rgba(128,128,128,0.16)]'
                       }`}>
                     {categoryIcon(cat)} {cat.name.split(' ')[0]}
                   </Link>
@@ -322,15 +328,15 @@ export default function CategoryDetail() {
 
             <div className="flex items-center gap-3">
               {/* View mode toggle */}
-              <div className="hidden sm:flex items-center bg-gray-100 dark:bg-white/10 rounded-lg p-0.5">
+              <div className="hidden sm:flex items-center bg-[rgba(128,128,128,0.08)] rounded-lg p-0.5">
                 <button onClick={() => setViewMode('grid')}
-                  className={`p-1.5 rounded-md transition ${viewMode === 'grid' ? 'bg-white dark:bg-white/15 shadow text-[#2874F0]' : 'text-gray-400 hover:text-gray-600 dark:text-gray-400'}`}>
+                  className={`p-1.5 rounded-md transition ${viewMode === 'grid' ? 'bg-white dark:bg-white/15 shadow text-[#2874F0]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                   </svg>
                 </button>
                 <button onClick={() => setViewMode('list')}
-                  className={`p-1.5 rounded-md transition ${viewMode === 'list' ? 'bg-white dark:bg-white/15 shadow text-[#2874F0]' : 'text-gray-400 hover:text-gray-600 dark:text-gray-400'}`}>
+                  className={`p-1.5 rounded-md transition ${viewMode === 'list' ? 'bg-white dark:bg-white/15 shadow text-[#2874F0]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
@@ -339,7 +345,7 @@ export default function CategoryDetail() {
 
               {/* Sort dropdown */}
               <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 border-0 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-[#2874F0] cursor-pointer">
+                className="text-sm font-medium text-[var(--text-primary)] bg-[rgba(128,128,128,0.08)] border-0 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-[#2874F0] cursor-pointer">
                 {SORT_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
@@ -356,14 +362,14 @@ export default function CategoryDetail() {
         ) : productsError ? (
           <div className="text-center py-20">
             <span className="text-6xl mb-4 block">⚠️</span>
-            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load products</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">{productsError}</p>
+            <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">Could not load products</h2>
+            <p className="text-[var(--text-secondary)] mb-6">{productsError}</p>
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
             <span className="text-6xl mb-4 block">{categoryIcon(category)}</span>
-            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No products found</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">We're adding new products to this category soon!</p>
+            <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">No products found</h2>
+            <p className="text-[var(--text-secondary)] mb-6">We're adding new products to this category soon!</p>
             <Link to="/shop"
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#2874F0] text-white font-bold rounded-full hover:shadow-lg transition">
               Browse All Products →
@@ -373,7 +379,7 @@ export default function CategoryDetail() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {products.map(p => (
               <Link key={p.id} to={`/product/${p.id}`}
-                className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+                className="group bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
                 <div className="relative">
                   {p.image ? (
                     <img src={p.image} alt={p.name} loading="lazy" className="h-44 w-full object-cover" />
@@ -393,17 +399,17 @@ export default function CategoryDetail() {
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <p className="text-[10px] font-bold text-[#2874F0] uppercase tracking-wide mb-1">{p.brand}</p>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 mb-2 flex-1">{p.name}</p>
+                  <p className="text-sm font-bold text-[var(--text-primary)] line-clamp-2 mb-2 flex-1">{p.name}</p>
                   <div className="flex items-center gap-1.5 mb-3">
                     <Stars rating={p.rating} />
-                    <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()})</span>
+                    <span className="text-[10px] text-[var(--text-secondary)]">({(p.reviews_count ?? 0).toLocaleString()})</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       {p.original_price > p.price && (
-                        <p className="text-xs text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
+                        <p className="text-xs text-[var(--text-secondary)] line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
                       )}
-                      <p className="text-base font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
+                      <p className="text-base font-extrabold text-[var(--text-primary)]">₹{p.price.toLocaleString('en-IN')}</p>
                     </div>
                     <AddToCartBtn product={p} small />
                   </div>
@@ -415,7 +421,7 @@ export default function CategoryDetail() {
           <div className="flex flex-col gap-3">
             {products.map(p => (
               <Link key={p.id} to={`/product/${p.id}`}
-                className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-row">
+                className="group bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)] shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-row">
                 <div className="relative flex-shrink-0 w-40 md:w-52">
                   {p.image ? (
                     <img src={p.image} alt={p.name} loading="lazy" className="h-full min-h-[140px] w-full object-cover" />
@@ -436,19 +442,19 @@ export default function CategoryDetail() {
                 <div className="p-4 flex flex-col flex-1 justify-between">
                   <div>
                     <p className="text-[10px] font-bold text-[#2874F0] uppercase tracking-wide mb-1">{p.brand}</p>
-                    <p className="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">{p.name}</p>
+                    <p className="text-sm md:text-base font-bold text-[var(--text-primary)] mb-2">{p.name}</p>
                     <div className="flex items-center gap-1.5 mb-2">
                       <Stars rating={p.rating} />
-                      <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()} reviews)</span>
+                      <span className="text-[10px] text-[var(--text-secondary)]">({(p.reviews_count ?? 0).toLocaleString()} reviews)</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-baseline gap-2">
-                      <p className="text-lg font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
+                      <p className="text-lg font-extrabold text-[var(--text-primary)]">₹{p.price.toLocaleString('en-IN')}</p>
                       {p.discount > 0 && p.original_price > p.price && (
                         <>
-                          <p className="text-sm text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
-                          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                          <p className="text-sm text-[var(--text-secondary)] line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
+                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
                             {p.discount}% off
                           </span>
                         </>
@@ -468,14 +474,14 @@ export default function CategoryDetail() {
         <div className="flex items-end justify-between mb-6">
           <div>
             <p className="text-xs font-bold text-[#FB641B] uppercase tracking-widest mb-1">Explore More</p>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">Related Categories</h2>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)]">Related Categories</h2>
           </div>
           <Link to="/" className="text-sm font-semibold text-[#2874F0] hover:underline">View All →</Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {relatedCategories.map((cat, idx) => (
             <Link key={cat.id} to={`/categories/${cat.slug}`}
-              className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden p-5 flex flex-col items-center text-center">
+              className="group bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden p-5 flex flex-col items-center text-center">
               <div className={`w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br ${CATEGORY_GRADIENTS[idx % CATEGORY_GRADIENTS.length]} flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform duration-200 mb-3`}>
                 {cat.image ? (
                   <img src={cat.image} alt={cat.name} loading="lazy" className="w-full h-full object-cover" />
@@ -483,8 +489,8 @@ export default function CategoryDetail() {
                   categoryIcon(cat)
                 )}
               </div>
-              <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">{cat.name}</p>
-              <p className="text-xs text-gray-400">{cat.product_count} items</p>
+              <p className="text-sm font-bold text-[var(--text-primary)] mb-1">{cat.name}</p>
+              <p className="text-xs text-[var(--text-secondary)]">{cat.product_count} items</p>
             </Link>
           ))}
         </div>
@@ -512,3 +518,4 @@ export default function CategoryDetail() {
     </div>
   );
 }
+

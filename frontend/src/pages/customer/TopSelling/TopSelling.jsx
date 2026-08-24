@@ -90,11 +90,11 @@ export default function TopSelling() {
       ? [...allProducts]
       : allProducts.filter(p => p.category_name === activeCategory);
     switch (sortBy) {
-      case 'rating': items.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || (b.review_count ?? 0) - (a.review_count ?? 0)); break;
+      case 'rating': items.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || (b.reviews_count ?? 0) - (a.reviews_count ?? 0)); break;
       case 'price-low': items.sort((a, b) => a.price - b.price); break;
       case 'price-high': items.sort((a, b) => b.price - a.price); break;
       case 'discount': items.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0)); break;
-      default: items.sort((a, b) => (b.review_count ?? 0) - (a.review_count ?? 0));
+      default: items.sort((a, b) => (b.reviews_count ?? 0) - (a.reviews_count ?? 0));
     }
     return items;
   }, [allProducts, activeCategory, sortBy]);
@@ -145,15 +145,15 @@ export default function TopSelling() {
       </section>
 
       {/* ─── FILTERS ─── */}
-      <section className="bg-white dark:bg-[#14141e] border-b border-gray-100 dark:border-white/10 sticky top-0 z-30 transition-colors duration-300">
+      <section className="bg-[var(--card-bg)] backdrop-blur-xl border-b border-[var(--card-border)] sticky top-0 z-30 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-              <p className="text-sm font-bold text-gray-900 dark:text-white hidden sm:block whitespace-nowrap">{products.length} products</p>
+              <p className="text-sm font-bold text-[var(--text-primary)] hidden sm:block whitespace-nowrap">{products.length} products</p>
               <div className="flex items-center gap-2">
                 {categoryOptions.map(cat => (
                   <button key={cat} onClick={() => setActiveCategory(cat)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${cat === activeCategory ? 'bg-[#2874F0] text-white shadow' : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/15'
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${cat === activeCategory ? 'bg-[#2874F0] text-white shadow' : 'bg-[rgba(128,128,128,0.08)] text-[var(--text-secondary)] hover:bg-gray-200 dark:hover:bg-white/15'
                       }`}>
                     {cat}
                   </button>
@@ -161,16 +161,16 @@ export default function TopSelling() {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-shrink-0">
-              <div className="hidden sm:flex items-center bg-gray-100 dark:bg-white/10 rounded-lg p-0.5">
-                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition ${viewMode === 'grid' ? 'bg-white dark:bg-white/15 shadow text-[#2874F0]' : 'text-gray-400 dark:text-gray-500'}`}>
+              <div className="hidden sm:flex items-center bg-[rgba(128,128,128,0.08)] rounded-lg p-0.5">
+                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition ${viewMode === 'grid' ? 'bg-white dark:bg-white/15 shadow text-[#2874F0]' : 'text-[var(--text-secondary)]'}`}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                 </button>
-                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition ${viewMode === 'list' ? 'bg-white dark:bg-white/15 shadow text-[#2874F0]' : 'text-gray-400 dark:text-gray-500'}`}>
+                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition ${viewMode === 'list' ? 'bg-white dark:bg-white/15 shadow text-[#2874F0]' : 'text-[var(--text-secondary)]'}`}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </button>
               </div>
               <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/10 border-0 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-[#2874F0] cursor-pointer">
+                className="text-sm font-medium text-[var(--text-primary)] bg-[rgba(128,128,128,0.08)] border-0 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-[#2874F0] cursor-pointer">
                 {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
@@ -185,21 +185,21 @@ export default function TopSelling() {
         ) : error ? (
           <div className="text-center py-20">
             <span className="text-6xl mb-4 block">⚠️</span>
-            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load products</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">{error}</p>
+            <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">Could not load products</h2>
+            <p className="text-[var(--text-secondary)] mb-6">{error}</p>
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
             <span className="text-6xl mb-4 block">🏆</span>
-            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No products in this category</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">Try selecting a different category.</p>
+            <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">No products in this category</h2>
+            <p className="text-[var(--text-secondary)] mb-6">Try selecting a different category.</p>
             <button onClick={() => setActiveCategory('All')} className="inline-flex items-center gap-2 px-6 py-3 bg-[#2874F0] text-white font-bold rounded-full hover:shadow-lg transition">View All Products →</button>
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {products.map((p, i) => (
               <Link key={p.id} to={`/product/${p.id}`}
-                className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+                className="group bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
                 <div className="relative">
                   {p.image ? (
                     <img src={p.image} alt={p.name} loading="lazy" className="h-44 w-full object-cover" />
@@ -215,17 +215,17 @@ export default function TopSelling() {
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <p className="text-[10px] font-bold text-[#2874F0] uppercase tracking-wide mb-1">{p.brand}</p>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 mb-2 flex-1">{p.name}</p>
+                  <p className="text-sm font-bold text-[var(--text-primary)] line-clamp-2 mb-2 flex-1">{p.name}</p>
                   <div className="flex items-center gap-1.5 mb-3">
                     <Stars rating={p.rating ?? 0} />
-                    <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()})</span>
+                    <span className="text-[10px] text-gray-400">({(p.reviews_count ?? 0).toLocaleString()})</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       {p.original_price > p.price && (
                         <p className="text-xs text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
                       )}
-                      <p className="text-base font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
+                      <p className="text-base font-extrabold text-[var(--text-primary)]">₹{p.price.toLocaleString('en-IN')}</p>
                     </div>
                     <AddToCartBtn small />
                   </div>
@@ -237,7 +237,7 @@ export default function TopSelling() {
           <div className="flex flex-col gap-3">
             {products.map((p, i) => (
               <Link key={p.id} to={`/product/${p.id}`}
-                className="group bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-row">
+                className="group bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)] shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-row">
                 <div className="relative flex-shrink-0 w-40 md:w-52">
                   {p.image ? (
                     <img src={p.image} alt={p.name} loading="lazy" className="h-full min-h-[140px] w-full object-cover" />
@@ -251,15 +251,15 @@ export default function TopSelling() {
                 <div className="p-4 flex flex-col flex-1 justify-between">
                   <div>
                     <p className="text-[10px] font-bold text-[#2874F0] uppercase tracking-wide mb-1">{p.brand}</p>
-                    <p className="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">{p.name}</p>
+                    <p className="text-sm md:text-base font-bold text-[var(--text-primary)] mb-2">{p.name}</p>
                     <div className="flex items-center gap-1.5 mb-2">
                       <Stars rating={p.rating ?? 0} />
-                      <span className="text-[10px] text-gray-400">({(p.review_count ?? 0).toLocaleString()} reviews)</span>
+                      <span className="text-[10px] text-gray-400">({(p.reviews_count ?? 0).toLocaleString()} reviews)</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-baseline gap-2">
-                      <p className="text-lg font-extrabold text-gray-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</p>
+                      <p className="text-lg font-extrabold text-[var(--text-primary)]">₹{p.price.toLocaleString('en-IN')}</p>
                       {p.original_price > p.price && (
                         <>
                           <p className="text-sm text-gray-400 line-through">₹{p.original_price.toLocaleString('en-IN')}</p>
@@ -291,3 +291,4 @@ export default function TopSelling() {
     </div>
   );
 }
+

@@ -13,7 +13,7 @@ const variantStyles = {
   yellow: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
   blue:   'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   indigo: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-  gray:   'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-300',
+  gray:   'bg-[rgba(128,128,128,0.08)] text-[var(--text-primary)]',
   orange: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   amber:  'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
 };

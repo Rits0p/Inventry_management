@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 import sys
 from datetime import timedelta
 from pathlib import Path
@@ -20,10 +21,13 @@ sys.path.insert(0, str(BASE_DIR / 'apps'))
 
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/6.1/topics/settings/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-5#c@5oqor%3(60q^zvf#bp-jh@1=7ws79ja$ajy(@f*yv-+^q='
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-5#c@5oqor%3(60q^zvf#bp-jh@1=7ws79ja$ajy(@f*yv-+^q=',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -95,6 +99,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.StandardPagination',
     'PAGE_SIZE': 12,
     'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
@@ -161,15 +168,20 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Media files (user uploads)
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'no-reply@rpd.local'
+
+# Public base URL of the React SPA (used for links inside emails,
+# e.g. password reset). Override via FRONTEND_URL env var.
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
 # CORS settings for frontend
 CORS_ALLOW_ALL_ORIGINS = True  # Allows all origins, you can restrict this in production

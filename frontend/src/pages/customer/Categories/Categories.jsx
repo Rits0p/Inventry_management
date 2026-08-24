@@ -29,7 +29,13 @@ const CATEGORY_ICONS = {
   accessories: '🖱️',
 };
 
-const categoryIcon = (cat) => CATEGORY_ICONS[cat?.slug] || '📦';
+const categoryIcon = (cat) => {
+  const haystack = `${cat?.slug ?? ''} ${cat?.name ?? ''}`.toLowerCase();
+  const match = Object.keys(CATEGORY_ICONS).find(
+    (key) => haystack.includes(key) || haystack.includes(key.replace(/-/g, ' '))
+  );
+  return match ? CATEGORY_ICONS[match] : '🛍️';
+};
 
 // ─────────────────────── PAGE ────────────────────────────────────────────────
 
@@ -61,10 +67,10 @@ export default function Categories() {
   const totalProducts = categories.reduce((sum, c) => sum + (c.product_count ?? 0), 0);
 
   const stats = [
-    { label: 'Categories', value: `${categories.length}+`, icon: '📂' },
-    { label: 'Products', value: `${totalProducts.toLocaleString('en-IN')}+`, icon: '📦' },
-    { label: 'Brands', value: '50+', icon: '🏷️' },
-    { label: 'Happy Customers', value: '10K+', icon: '😊' },
+    { label: 'Categories', value: String(categories.length), icon: '📂' },
+    { label: 'Products', value: totalProducts.toLocaleString('en-IN'), icon: '📦' },
+    { label: 'Free Delivery', value: '₹500+', icon: '🚚' },
+    { label: 'Secure Payments', value: 'UPI · Cards', icon: '🔒' },
   ];
 
   return (
@@ -116,9 +122,9 @@ export default function Categories() {
         <div className="flex items-end justify-between mb-8">
           <div>
             <p className="text-xs font-bold text-[#FB641B] uppercase tracking-widest mb-1">Browse</p>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">Shop by Category</h2>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)]">Shop by Category</h2>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{categories.length} categories available</p>
+          <p className="text-sm text-[var(--text-secondary)]">{categories.length} categories available</p>
         </div>
 
         {loading ? (
@@ -126,20 +132,20 @@ export default function Categories() {
         ) : error ? (
           <div className="text-center py-20">
             <span className="text-6xl mb-4 block">⚠️</span>
-            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">Could not load categories</h2>
-            <p className="text-gray-500 dark:text-gray-400">{error}</p>
+            <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">Could not load categories</h2>
+            <p className="text-[var(--text-secondary)]">{error}</p>
           </div>
         ) : categories.length === 0 ? (
           <div className="text-center py-20">
             <span className="text-6xl mb-4 block">📂</span>
-            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2">No categories found</h2>
-            <p className="text-gray-500 dark:text-gray-400">Check back soon — new categories are on the way!</p>
+            <h2 className="text-xl font-extrabold text-[var(--text-primary)] mb-2">No categories found</h2>
+            <p className="text-[var(--text-secondary)]">Check back soon — new categories are on the way!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {categories.map((cat, idx) => (
               <Link key={cat.id} to={`/categories/${cat.slug}`}
-                className="group relative bg-white dark:bg-[#1a1a24] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+                className="group relative bg-[var(--card-bg)] backdrop-blur-xl rounded-2xl border border-[var(--card-border)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
                 {/* Gradient header */}
                 <div className={`relative bg-gradient-to-br ${CATEGORY_GRADIENTS[idx % CATEGORY_GRADIENTS.length]} p-6 text-white overflow-hidden`}>
                   <div className="absolute top-[-30px] right-[-30px] w-32 h-32 rounded-full bg-white/10 pointer-events-none" />
@@ -159,10 +165,10 @@ export default function Categories() {
 
                 {/* Card body */}
                 <div className="p-5 flex flex-col flex-1">
-                  <h3 className="text-base font-extrabold text-gray-900 dark:text-white mb-1.5 group-hover:text-[#2874F0] transition-colors">
+                  <h3 className="text-base font-extrabold text-[var(--text-primary)] mb-1.5 group-hover:text-[#2874F0] transition-colors">
                     {cat.name}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4 flex-1">
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-4 flex-1">
                     {cat.description}
                   </p>
 
@@ -170,7 +176,7 @@ export default function Categories() {
                   {Array.isArray(cat.featured) && cat.featured.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-4">
                       {cat.featured.map((item, i) => (
-                        <span key={i} className="text-[10px] font-semibold bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">
+                        <span key={i} className="text-[10px] font-semibold bg-[rgba(128,128,128,0.1)] text-[var(--text-secondary)] px-2 py-0.5 rounded-full">
                           {item}
                         </span>
                       ))}
@@ -178,7 +184,7 @@ export default function Categories() {
                   )}
 
                   {/* CTA */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-white/10">
+                  <div className="flex items-center justify-between pt-3 border-t border-[var(--card-border)]">
                     <span className="text-xs font-bold text-[#2874F0] group-hover:underline">
                       Shop Now →
                     </span>
@@ -220,7 +226,7 @@ export default function Categories() {
       </section>
 
       {/* ─── TRUST SECTION ─── */}
-      <section className="bg-white dark:bg-[#1a1a24] border-y border-gray-100 dark:border-white/10 py-10">
+      <section className="bg-[var(--card-bg)] backdrop-blur-xl border-y border-[var(--card-border)] py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -230,12 +236,12 @@ export default function Categories() {
               { icon: '💬', title: '24/7 Support', sub: 'Dedicated help center' },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#F0F2F5] dark:bg-white/10 flex items-center justify-center text-2xl flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-[rgba(128,128,128,0.08)] flex items-center justify-center text-2xl flex-shrink-0">
                   {item.icon}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">{item.title}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{item.sub}</p>
+                  <p className="text-sm font-bold text-[var(--text-primary)]">{item.title}</p>
+                  <p className="text-xs text-[var(--text-secondary)]">{item.sub}</p>
                 </div>
               </div>
             ))}
