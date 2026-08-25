@@ -30,6 +30,7 @@ import NewArrivals from './pages/customer/NewArrivals/NewArrivals';
 import CustomerDashboard from './pages/customer/Dashboard/Dashboard';
 import Cart from './pages/customer/Cart/Cart';
 import CustomerOrders from './pages/customer/Orders/Orders';
+import OrderDetail from './pages/customer/OrderDetail/OrderDetail';
 import ProductDetail from './pages/customer/ProductDetail/ProductDetail';
 import Profile from './pages/customer/Profile/Profile';
 
@@ -103,6 +104,14 @@ function App() {
                   element={
                     <ProtectedRoute role="Customer">
                       <CustomerOrders />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="orders/:id"
+                  element={
+                    <ProtectedRoute role="Customer">
+                      <OrderDetail />
                     </ProtectedRoute>
                   }
                 />

@@ -1,0 +1,438 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Order Detail Page
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.od-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  font-family: var(--font-sans);
+  padding: 2rem 1.5rem;
+}
+
+.od-container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* ── Back Button ── */
+.od-back-btn {
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-flipkart-blue);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  transition: opacity 0.2s;
+}
+
+.od-back-btn:hover {
+  opacity: 0.7;
+}
+
+/* ── Header ── */
+.od-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.od-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #111;
+  font-family: var(--font-display);
+}
+
+.od-date {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.od-payment-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.od-payment-badge.paid {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.od-payment-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.od-payment-badge.failed {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.od-payment-badge.refunded {
+  background: #e0e7ff;
+  color: #4f46e5;
+}
+
+/* ── Tracking Timeline ── */
+.od-tracking {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  animation: fadeInUp 0.5s ease-out 0.1s both;
+}
+
+.od-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+  font-family: var(--font-display);
+  margin-bottom: 1.5rem;
+}
+
+.od-timeline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  padding: 0 1rem;
+}
+
+.od-timeline-track {
+  position: absolute;
+  top: 20px;
+  left: 2.5rem;
+  right: 2.5rem;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  z-index: 0;
+}
+
+.od-timeline-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6C63FF, #4a9af5);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.od-timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 1;
+  flex: 1;
+}
+
+.od-step-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.od-step-icon {
+  font-size: 1rem;
+  opacity: 0.4;
+  transition: opacity 0.4s;
+}
+
+.od-step-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-align: center;
+  transition: color 0.4s;
+}
+
+.od-timeline-step.completed .od-step-dot {
+  background: linear-gradient(135deg, #6C63FF, #4a9af5);
+  box-shadow: 0 4px 16px rgba(108, 99, 255, 0.3);
+}
+
+.od-timeline-step.completed .od-step-icon {
+  opacity: 1;
+}
+
+.od-timeline-step.completed .od-step-label {
+  color: #111;
+}
+
+.od-timeline-step.current .od-step-dot {
+  width: 48px;
+  height: 48px;
+  box-shadow: 0 4px 20px rgba(108, 99, 255, 0.4);
+}
+
+/* ── Cancelled Banner ── */
+.od-cancelled-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+}
+
+.od-cancelled-icon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+
+.od-cancelled-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.od-cancelled-date {
+  font-size: 0.8rem;
+  color: #b91c1c;
+  margin-top: 0.125rem;
+}
+
+/* ── Grid Layout ── */
+.od-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.5rem;
+  animation: fadeInUp 0.5s ease-out 0.2s both;
+}
+
+/* ── Card ── */
+.od-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Items ── */
+.od-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.od-item {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem;
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  transition: background 0.2s;
+}
+
+.od-item:hover {
+  background: #f3f4f6;
+}
+
+.od-item-icon {
+  font-size: 1.5rem;
+  width: 3rem;
+  height: 3rem;
+  background: white;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.od-item-info {
+  flex: 1;
+}
+
+.od-item-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.od-item-meta {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.125rem;
+}
+
+.od-item-total {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111;
+  white-space: nowrap;
+}
+
+/* ── Side Panel ── */
+.od-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Price Summary ── */
+.od-summary-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.od-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.od-free {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.od-summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.od-payment-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+  font-size: 0.8rem;
+}
+
+.od-payment-label {
+  color: #9ca3af;
+}
+
+.od-payment-method {
+  font-weight: 600;
+  color: #374151;
+}
+
+.od-payment-id {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.7rem;
+  font-family: monospace;
+}
+
+/* ── Address ── */
+.od-address {
+  font-size: 0.85rem;
+  color: #374151;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* ── Error State ── */
+.od-error {
+  background: white;
+  border-radius: 1rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.od-error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+}
+
+.od-error h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.od-error p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.od-back-link {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--color-flipkart-blue), #4a9af5);
+  color: white;
+  border-radius: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.od-back-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(40, 116, 240, 0.3);
+}
+
+/* ── Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══ Dark Mode ═══ */
+.dark .od-page { background: #0e0e14; }
+.dark .od-title { color: #fff; }
+.dark .od-date { color: #9ca3af; }
+.dark .od-card { background: #1a1a24; }
+.dark .od-tracking { background: #1a1a24; }
+.dark .od-section-title { color: #e5e7eb; }
+.dark .od-item { background: rgba(255,255,255,0.05); }
+.dark .od-item:hover { background: rgba(255,255,255,0.08); }
+.dark .od-item-icon { background: rgba(255,255,255,0.05); }
+.dark .od-item-name { color: #e5e7eb; }
+.dark .od-item-meta { color: #6b7280; }
+.dark .od-item-total { color: #e5e7eb; }
+.dark .od-summary-row { color: #9ca3af; }
+.dark .od-summary-total { color: #fff; border-top-color: rgba(255,255,255,0.1); }
+.dark .od-payment-info { border-top-color: rgba(255,255,255,0.1); }
+.dark .od-payment-method { color: #d1d5db; }
+.dark .od-payment-id { color: #d1d5db; }
+.dark .od-address { color: #d1d5db; }
+.dark .od-step-label { color: #6b7280; }
+.dark .od-timeline-step.completed .od-step-label { color: #e5e7eb; }
+.dark .od-cancelled-banner { background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.2); }
+.dark .od-cancelled-text { color: #fca5a5; }
+.dark .od-cancelled-date { color: #f87171; }
+.dark .od-error { background: #1a1a24; }
+.dark .od-error h2 { color: #fff; }

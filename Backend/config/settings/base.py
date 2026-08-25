@@ -185,3 +185,7 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
 # CORS settings for frontend
 CORS_ALLOW_ALL_ORIGINS = True  # Allows all origins, you can restrict this in production
+
+# Razorpay
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_TTwB84Lhl5j4nd')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', 'X6PYlnPgwq3CqPih1RUHQnGl')

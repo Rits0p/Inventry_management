@@ -23,15 +23,61 @@ export default function Cart() {
     setPlacing(true);
     setError('');
     try {
-      await orderService.placeOrder({
+      // Step 1: Create the order in the backend
+      const order = await orderService.placeOrder({
         items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity })),
         delivery_address: address,
       });
-      clearCart();
-      navigate('/orders');
+
+      // Step 2: Create Razorpay order
+      const rzpData = await orderService.createRazorpayOrder(order.id);
+
+      // Step 3: Open Razorpay checkout modal
+      const options = {
+        key: rzpData.key_id,
+        amount: rzpData.amount,
+        currency: rzpData.currency,
+        name: 'RPD Store',
+        description: `Order ${rzpData.order_number}`,
+        order_id: rzpData.razorpay_order_id,
+        prefill: {
+          name: rzpData.customer_name || '',
+          email: rzpData.customer_email || '',
+        },
+        theme: {
+          color: '#6C63FF',
+        },
+        handler: async (response) => {
+          // Step 4: Payment successful — verify on backend
+          try {
+            await orderService.verifyPayment(order.id, {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            clearCart();
+            navigate('/orders?payment=success');
+          } catch (verifyErr) {
+            setError(getApiErrorMessage(verifyErr, 'Payment was received but verification failed. Contact support.'));
+            setPlacing(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setError('Payment was cancelled. Your order is pending — you can retry from the Orders page.');
+            setPlacing(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (response) => {
+        setError(`Payment failed: ${response.error.description}. Please try again.`);
+        setPlacing(false);
+      });
+      rzp.open();
     } catch (err) {
       setError(getApiErrorMessage(err, 'Failed to place your order.'));
-    } finally {
       setPlacing(false);
     }
   };
@@ -133,7 +179,7 @@ export default function Cart() {
                 disabled={placing || cartItems.some(item => item.stock === 0)}
                 className="cart-checkout-btn"
               >
-                {placing ? 'Placing Order…' : 'Place Order'}
+                {placing ? 'Processing…' : 'Pay Now'}
               </button>
               <Link to="/" className="cart-continue">Continue Shopping →</Link>
             </div>

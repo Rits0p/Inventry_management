@@ -350,6 +350,97 @@
   background: #f9fafb;
 }
 
+.orders-btn-retry {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.orders-btn-retry:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.orders-btn-retry:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Payment Badge ── */
+.orders-payment-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.orders-payment-badge.paid {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.orders-payment-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.orders-payment-badge.failed {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.orders-payment-badge.refunded {
+  background: #e0e7ff;
+  color: #4f46e5;
+}
+
+/* ── Success Banner ── */
+.orders-success-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #166534;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.orders-success-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.orders-success-dismiss {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #16a34a;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.orders-success-dismiss:hover {
+  opacity: 1;
+}
+
 /* ── Animations ── */
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -389,3 +480,9 @@
 .dark .orders-delivery-info { color: #9ca3af; }
 .dark .orders-btn-secondary { background: #1a1a24; color: #d1d5db; border-color: rgba(255,255,255,0.1); }
 .dark .orders-btn-secondary:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+.dark .orders-success-banner { background: rgba(22,163,74,0.15); border-color: rgba(22,163,74,0.3); color: #86efac; }
+.dark .orders-success-dismiss { color: #86efac; }
+.dark .orders-payment-badge.paid { background: rgba(22,163,74,0.15); color: #86efac; }
+.dark .orders-payment-badge.pending { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.dark .orders-payment-badge.failed { background: rgba(220,38,38,0.15); color: #fca5a5; }
+.dark .orders-payment-badge.refunded { background: rgba(79,70,229,0.15); color: #a5b4fc; }

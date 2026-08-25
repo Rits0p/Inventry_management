@@ -44,4 +44,20 @@ export const orderService = {
     const { data } = await api.post(`/orders/${id}/cancel/`);
     return data;
   },
+
+  /**
+   * Create a Razorpay order for an existing Order.
+   */
+  createRazorpayOrder: async (orderId) => {
+    const { data } = await api.post(`/orders/${orderId}/razorpay-order/`);
+    return data;
+  },
+
+  /**
+   * Verify a Razorpay payment after checkout.
+   */
+  verifyPayment: async (orderId, payload) => {
+    const { data } = await api.post(`/orders/${orderId}/verify-payment/`, payload);
+    return data;
+  },
 };

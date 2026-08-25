@@ -46,6 +46,8 @@ class OrderDetailSerializer(OrderListSerializer):
         fields = OrderListSerializer.Meta.fields + [
             'items',
             'delivery_address',
+            'razorpay_order_id',
+            'razorpay_payment_id',
             'cancelled_at',
             'updated_at',
         ]

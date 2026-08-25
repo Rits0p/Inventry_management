@@ -1,5 +1,9 @@
 from decimal import Decimal
+import hashlib
+import hmac
 
+import razorpay
+from django.conf import settings
 from django.db import transaction
 from django.utils.timezone import now
 
@@ -103,4 +107,49 @@ def cancel_order(order):
     order.status = Order.Status.CANCELLED
     order.cancelled_at = now()
     order.save(update_fields=['status', 'cancelled_at', 'updated_at'])
+    return order
+
+
+def _get_razorpay_client():
+    return razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+
+def create_razorpay_order(order):
+    """Create a Razorpay order and store its ID on the Order."""
+    if order.razorpay_order_id:
+        return order.razorpay_order_id
+
+    client = _get_razorpay_client()
+    amount_in_paise = int(order.total_amount * 100)
+
+    rzp_order = client.order.create({
+        'amount': amount_in_paise,
+        'currency': 'INR',
+        'receipt': order.order_number,
+        'payment_capture': 1,
+    })
+
+    order.razorpay_order_id = rzp_order['id']
+    order.save(update_fields=['razorpay_order_id', 'updated_at'])
+    return rzp_order['id']
+
+
+def verify_razorpay_payment(order, razorpay_payment_id, razorpay_order_id, razorpay_signature):
+    """Verify the Razorpay payment signature and mark the order as paid."""
+    if order.payment_status == Order.PaymentStatus.PAID:
+        return order
+
+    generated_signature = hmac.new(
+        settings.RAZORPAY_KEY_SECRET.encode(),
+        f'{razorpay_order_id}|{razorpay_payment_id}'.encode(),
+        hashlib.sha256,
+    ).hexdigest()
+
+    if not hmac.compare_digest(generated_signature, razorpay_signature):
+        raise ValidationError({'payment': 'Payment verification failed. Invalid signature.'})
+
+    order.razorpay_payment_id = razorpay_payment_id
+    order.razorpay_signature = razorpay_signature
+    order.payment_status = Order.PaymentStatus.PAID
+    order.save(update_fields=['razorpay_payment_id', 'razorpay_signature', 'payment_status', 'updated_at'])
     return order

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import './Orders.css';
 import { orderService } from '../../../services/orderService';
 import { unwrapList } from '../../../services/api';
@@ -8,11 +8,25 @@ import { formatINR, formatDate } from '../../../utils/formatters';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 export default function CustomerOrders() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [retryingId, setRetryingId] = useState(null);
+  const navigate = useNavigate();
+
+  const paymentSuccess = searchParams.get('payment') === 'success';
+
+  useEffect(() => {
+    if (paymentSuccess) {
+      const timer = setTimeout(() => {
+        setSearchParams({}, { replace: true });
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentSuccess, setSearchParams]);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,6 +52,53 @@ export default function CustomerOrders() {
     setExpandedOrder(expandedOrder === id ? null : id);
   };
 
+  const retryPayment = useCallback(async (order) => {
+    if (retryingId) return;
+    setRetryingId(order.id);
+    setError('');
+    try {
+      const rzpData = await orderService.createRazorpayOrder(order.id);
+      const options = {
+        key: rzpData.key_id,
+        amount: rzpData.amount,
+        currency: rzpData.currency,
+        name: 'RPD Store',
+        description: `Order ${rzpData.order_number}`,
+        order_id: rzpData.razorpay_order_id,
+        prefill: {
+          name: rzpData.customer_name || '',
+          email: rzpData.customer_email || '',
+        },
+        theme: { color: '#6C63FF' },
+        handler: async (response) => {
+          try {
+            await orderService.verifyPayment(order.id, {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            setOrders(prev => prev.map(o =>
+              o.id === order.id ? { ...o, payment_status: 'Paid' } : o
+            ));
+          } catch (verifyErr) {
+            setError(getApiErrorMessage(verifyErr, 'Payment verification failed. Contact support.'));
+          } finally {
+            setRetryingId(null);
+          }
+        },
+        modal: {
+          ondismiss: () => { setRetryingId(null); },
+        },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', () => { setRetryingId(null); });
+      rzp.open();
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Failed to initiate payment.'));
+      setRetryingId(null);
+    }
+  }, [retryingId]);
+
   const statusCounts = {
     All: orders.length,
     Delivered: orders.filter(o => o.status === 'Delivered').length,
@@ -48,6 +109,15 @@ export default function CustomerOrders() {
   return (
     <main className="orders-page">
       <div className="orders-container">
+        {/* Payment Success Banner */}
+        {paymentSuccess && (
+          <div className="orders-success-banner">
+            <span className="orders-success-icon">✅</span>
+            <span>Payment successful! Your order has been confirmed.</span>
+            <button onClick={() => setSearchParams({}, { replace: true })} className="orders-success-dismiss">✕</button>
+          </div>
+        )}
+
         {/* Header */}
         <header className="orders-header">
           <h1 className="orders-title">My Orders</h1>
@@ -101,6 +171,7 @@ export default function CustomerOrders() {
                   <div className="orders-card-right">
                     <span className="orders-card-amount">{formatINR(order.total_amount)}</span>
                     <span className={`orders-status-badge ${(order.status || '').toLowerCase()}`}>{order.status}</span>
+                    <span className={`orders-payment-badge ${(order.payment_status || '').toLowerCase()}`}>{order.payment_status}</span>
                   </div>
                   <span className="orders-expand-icon">{expandedOrder === order.id ? '−' : '+'}</span>
                 </div>
@@ -125,10 +196,24 @@ export default function CustomerOrders() {
                         {order.status === 'Cancelled' && <span className="orders-cancelled-text">Order was cancelled</span>}
                       </p>
                       <div className="orders-card-actions">
+                        {order.payment_status === 'Pending' && (
+                          <button
+                            className="orders-btn-retry"
+                            disabled={retryingId === order.id}
+                            onClick={(e) => { e.stopPropagation(); retryPayment(order); }}
+                          >
+                            {retryingId === order.id ? 'Processing…' : 'Retry Payment'}
+                          </button>
+                        )}
                         {order.status === 'Delivered' && (
                           <button className="orders-btn-secondary">Buy Again</button>
                         )}
-                        <button className="orders-btn-primary">View Details</button>
+                        <button
+                          className="orders-btn-primary"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/orders/${order.id}`); }}
+                        >
+                          View Details
+                        </button>
                       </div>
                     </div>
                   </div>
