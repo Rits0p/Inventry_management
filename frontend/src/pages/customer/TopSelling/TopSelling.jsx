@@ -130,8 +130,8 @@ export default function TopSelling() {
             <div className="grid grid-cols-3 gap-3">
               {[
                 { icon: '🏆', value: `${products.length}+`, label: 'Top Products' },
-                { icon: '⭐', value: '4.8', label: 'Avg Rating' },
-                { icon: '📦', value: '20K+', label: 'Sold' },
+                { icon: '⭐', value: products.length > 0 ? (products.reduce((sum, p) => sum + (p.rating ?? 0), 0) / products.length).toFixed(1) : '0.0', label: 'Avg Rating' },
+                { icon: '📦', value: products.length > 0 ? `${products.reduce((sum, p) => sum + (p.reviews_count ?? 0), 0).toLocaleString()}` : '0', label: 'Total Reviews' },
               ].map((s, i) => (
                 <div key={i} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 text-center">
                   <span className="text-2xl block mb-1">{s.icon}</span>

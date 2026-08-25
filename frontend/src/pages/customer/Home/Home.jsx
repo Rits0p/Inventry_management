@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { productService } from '../../../services/productService';
+import { categoryService } from '../../../services/categoryService';
 import { unwrapList } from '../../../services/api';
 import { getApiErrorMessage } from '../../../utils/apiErrors';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
@@ -46,18 +47,23 @@ const HERO_SLIDES = [
   },
 ];
 
-const CATEGORIES = [
-  { id: 1, name: 'Laptops & Computers', slug: 'laptops', icon: '💻', count: 342, gradient: 'from-blue-500 to-blue-700' },
-  { id: 2, name: 'Smartphones', slug: 'phones', icon: '📱', count: 218, gradient: 'from-violet-500 to-purple-700' },
-  { id: 3, name: 'Audio & Headphones', slug: 'audio', icon: '🎧', count: 156, gradient: 'from-pink-500 to-rose-600' },
-  { id: 4, name: 'Monitors & Displays', slug: 'monitors', icon: '🖥️', count: 89, gradient: 'from-amber-500 to-orange-600' },
-  { id: 5, name: 'Networking', slug: 'networking', icon: '🌐', count: 64, gradient: 'from-teal-500 to-cyan-700' },
-  { id: 6, name: 'Gaming', slug: 'gaming', icon: '🎮', count: 112, gradient: 'from-red-500 to-red-700' },
-  { id: 7, name: 'Smart Home', slug: 'smart-home', icon: '🏠', count: 78, gradient: 'from-emerald-500 to-green-700' },
-  { id: 8, name: 'Accessories', slug: 'accessories', icon: '🖱️', count: 234, gradient: 'from-slate-500 to-gray-700' },
+const CATEGORY_GRADIENTS = [
+  'from-blue-500 to-blue-700',
+  'from-violet-500 to-purple-700',
+  'from-pink-500 to-rose-600',
+  'from-amber-500 to-orange-600',
+  'from-teal-500 to-cyan-700',
+  'from-red-500 to-red-700',
+  'from-emerald-500 to-green-700',
+  'from-slate-500 to-gray-700',
 ];
 
-const BRANDS = ['Apple', 'Samsung', 'Sony', 'LG', 'Dell', 'ASUS', 'Logitech', 'JBL'];
+const CATEGORY_ICONS = {
+  laptops: '💻', computers: '💻', phones: '📱', smartphones: '📱',
+  audio: '🎧', headphones: '🎧', monitors: '🖥️', displays: '🖥️',
+  networking: '🌐', gaming: '🎮', 'smart-home': '🏠', accessories: '🖱️',
+  default: '📦',
+};
 
 const PROMO_BANNERS = [
   {
@@ -247,6 +253,25 @@ function HeroSection() {
 // ─────────────────────── SECTION: CATEGORIES ─────────────────────────────────
 
 function CategoriesSection() {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    categoryService
+      .getCategories()
+      .then((data) => {
+        if (!cancelled) setCategories(unwrapList(data));
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading || categories.length === 0) return null;
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
       <div className="flex items-end justify-between mb-6">
@@ -257,16 +282,21 @@ function CategoriesSection() {
         <Link to="/categories" className="text-sm font-semibold text-[#2874F0] hover:underline">View All →</Link>
       </div>
       <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
-        {CATEGORIES.map(cat => (
-          <Link key={cat.id} to={`/categories/${cat.slug}`}
-            className="group flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-white dark:hover:bg-white/5 hover:shadow-md dark:hover:shadow-none transition-all duration-200">
-            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-200`}>
-              {cat.icon}
-            </div>
-            <p className="text-xs font-semibold text-[var(--text-primary)] text-center leading-tight">{cat.name}</p>
-            <p className="text-[10px] text-[var(--text-secondary)]">{cat.count} items</p>
-          </Link>
-        ))}
+        {categories.map((cat, idx) => {
+          const slug = cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-');
+          const icon = CATEGORY_ICONS[slug] || CATEGORY_ICONS.default;
+          const gradient = CATEGORY_GRADIENTS[idx % CATEGORY_GRADIENTS.length];
+          return (
+            <Link key={cat.id} to={`/categories/${slug}`}
+              className="group flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-white dark:hover:bg-white/5 hover:shadow-md dark:hover:shadow-none transition-all duration-200">
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-200`}>
+                {icon}
+              </div>
+              <p className="text-xs font-semibold text-[var(--text-primary)] text-center leading-tight">{cat.name}</p>
+              <p className="text-[10px] text-[var(--text-secondary)]">{cat.product_count ?? 0} items</p>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );
@@ -613,12 +643,28 @@ function NewArrivalsSection() {
 // ─────────────────────── SECTION: BRANDS ─────────────────────────────────────
 
 function BrandsSection() {
+  const [brands, setBrands] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    productService
+      .getBrands()
+      .then((data) => {
+        if (!cancelled) setBrands(data);
+      })
+      .catch(() => {})
+      .finally(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  if (brands.length === 0) return null;
+
   return (
     <section className="bg-[var(--card-bg)] backdrop-blur-xl border-y border-[var(--card-border)] py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <p className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Trusted Brands We Carry</p>
         <div className="flex items-center justify-center gap-6 flex-wrap">
-          {BRANDS.map(brand => (
+          {brands.map(brand => (
             <Link key={brand} to={`/shop?brand=${brand.toLowerCase()}`}
               className="px-6 py-2.5 bg-[rgba(128,128,128,0.06)] border border-[var(--card-border)] rounded-full text-sm font-semibold text-[var(--text-secondary)] hover:bg-[#2874F0] hover:text-white hover:border-[#2874F0] transition-all duration-200">
               {brand}

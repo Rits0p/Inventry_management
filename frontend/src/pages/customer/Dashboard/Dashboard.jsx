@@ -44,7 +44,7 @@ export default function CustomerDashboard() {
 
   const quickLinks = [
     { title: 'Continue Shopping', desc: 'Browse latest products', icon: '🛍️', link: '/', color: 'purple' },
-    { title: 'My Cart', desc: '3 items ready to checkout', icon: '🛒', link: '/cart', color: 'orange' },
+    { title: 'My Cart', desc: 'Review items before checkout', icon: '🛒', link: '/cart', color: 'orange' },
     { title: 'My Orders', desc: 'Track your orders', icon: '📦', link: '/orders', color: 'green' },
   ];
 

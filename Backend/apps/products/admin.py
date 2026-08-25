@@ -19,3 +19,4 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name', 'sku', 'brand')
     list_editable = ('price', 'stock', 'status')
     list_per_page = 25
+    readonly_fields = ('highlights', 'specifications')

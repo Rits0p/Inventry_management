@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Avg, Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -101,3 +102,14 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(
             {'detail': f'Stock adjusted ({adjust_type} {quantity}).', 'product': read_serializer.data}
         )
+
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def brands(self, request):
+        brands = (
+            Product.objects.filter(status=Product.Status.ACTIVE, brand__isnull=False)
+            .exclude(brand='')
+            .values_list('brand', flat=True)
+            .distinct()
+            .order_by('brand')
+        )
+        return Response(list(brands))

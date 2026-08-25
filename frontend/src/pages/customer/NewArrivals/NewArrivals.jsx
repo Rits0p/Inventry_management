@@ -130,8 +130,8 @@ export default function NewArrivals() {
             <div className="grid grid-cols-3 gap-3">
               {[
                 { icon: '🆕', value: `${products.length}+`, label: 'New Items' },
-                { icon: '🏷️', value: '30%', label: 'Max Discount' },
-                { icon: '⭐', value: '4.7', label: 'Avg Rating' },
+                { icon: '🏷️', value: products.length > 0 ? `${Math.max(...products.map(p => p.discount ?? 0))}%` : '0%', label: 'Max Discount' },
+                { icon: '⭐', value: products.length > 0 ? (products.reduce((sum, p) => sum + (p.rating ?? 0), 0) / products.length).toFixed(1) : '0.0', label: 'Avg Rating' },
               ].map((s, i) => (
                 <div key={i} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 text-center">
                   <span className="text-2xl block mb-1">{s.icon}</span>

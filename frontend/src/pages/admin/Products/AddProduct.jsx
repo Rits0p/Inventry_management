@@ -16,6 +16,8 @@ const EMPTY_FORM = {
   discount: '0',
   stock: '',
   description: '',
+  highlights: '',
+  specifications: [{ label: '', value: '' }],
   status: 'Active',
 };
 
@@ -65,6 +67,10 @@ export default function AddProduct() {
           discount: product.discount ?? '0',
           stock: product.stock ?? '',
           description: product.description || '',
+          highlights: Array.isArray(product.highlights) ? product.highlights.join('\n') : '',
+          specifications: Array.isArray(product.specifications) && product.specifications.length > 0
+            ? product.specifications
+            : [{ label: '', value: '' }],
           status: product.status || 'Active',
         });
         setImagePreview(product.image || null);
@@ -83,6 +89,28 @@ export default function AddProduct() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSpecChange = (index, field, value) => {
+    setFormData(prev => {
+      const specs = [...prev.specifications];
+      specs[index] = { ...specs[index], [field]: value };
+      return { ...prev, specifications: specs };
+    });
+  };
+
+  const addSpecRow = () => {
+    setFormData(prev => ({
+      ...prev,
+      specifications: [...prev.specifications, { label: '', value: '' }],
+    }));
+  };
+
+  const removeSpecRow = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      specifications: prev.specifications.filter((_, i) => i !== index),
+    }));
   };
 
   const handleImageChange = (e) => {
@@ -106,6 +134,13 @@ export default function AddProduct() {
     payload.append('discount', formData.discount || 0);
     payload.append('stock', formData.stock);
     payload.append('description', formData.description);
+    const highlightsList = formData.highlights
+      .split('\n')
+      .map(h => h.trim())
+      .filter(Boolean);
+    payload.append('highlights', JSON.stringify(highlightsList));
+    const specsList = formData.specifications.filter(s => s.label.trim() && s.value.trim());
+    payload.append('specifications', JSON.stringify(specsList));
     payload.append('status', formData.status);
     if (imageFile) payload.append('image', imageFile);
     return payload;
@@ -228,6 +263,58 @@ export default function AddProduct() {
                 <h3 className="form-section-title">Description</h3>
                 <div className="admin-form-group full">
                   <textarea name="description" rows="4" value={formData.description} onChange={handleChange} placeholder="Product description..." className="admin-textarea" />
+                </div>
+              </div>
+
+              {/* Highlights */}
+              <div className="form-section">
+                <h3 className="form-section-title">Highlights</h3>
+                <div className="admin-form-group full">
+                  <label className="admin-label">Key Features (one per line)</label>
+                  <textarea
+                    name="highlights"
+                    rows="4"
+                    value={formData.highlights}
+                    onChange={handleChange}
+                    placeholder="Enter one highlight per line, e.g.:&#10;Active Noise Cancellation&#10;30-hour battery life&#10;Premium comfort fit"
+                    className="admin-textarea"
+                  />
+                </div>
+              </div>
+
+              {/* Specifications */}
+              <div className="form-section">
+                <h3 className="form-section-title">Specifications</h3>
+                <div className="admin-form-group full">
+                  <label className="admin-label">Technical Specifications</label>
+                  {formData.specifications.map((spec, idx) => (
+                    <div key={idx} className="flex items-center gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={spec.label}
+                        onChange={e => handleSpecChange(idx, 'label', e.target.value)}
+                        placeholder="Label (e.g. Weight)"
+                        className="admin-input flex-1"
+                      />
+                      <input
+                        type="text"
+                        value={spec.value}
+                        onChange={e => handleSpecChange(idx, 'value', e.target.value)}
+                        placeholder="Value (e.g. 250g)"
+                        className="admin-input flex-1"
+                      />
+                      {formData.specifications.length > 1 && (
+                        <button type="button" onClick={() => removeSpecRow(idx)}
+                          className="text-red-500 hover:text-red-700 text-lg font-bold px-2">
+                          &times;
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button type="button" onClick={addSpecRow}
+                    className="text-sm font-semibold text-[#2874F0] hover:underline mt-1">
+                    + Add Specification
+                  </button>
                 </div>
               </div>
             </div>

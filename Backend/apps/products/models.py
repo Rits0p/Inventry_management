@@ -42,6 +42,8 @@ class Product(models.Model):
         validators=[validate_rating],
     )
     reviews_count = models.PositiveIntegerField(default=0)
+    highlights = models.JSONField(default=list, blank=True)
+    specifications = models.JSONField(default=list, blank=True)
     badge = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     stock = models.PositiveIntegerField(

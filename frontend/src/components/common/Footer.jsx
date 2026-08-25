@@ -1,19 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, MapPin, Send, ChevronRight, Package } from 'lucide-react';
+import { categoryService } from '../../services/categoryService';
+import { unwrapList } from '../../services/api';
 
 const NAV_LINKS = [
   { label: 'Home Page', to: '/' },
   { label: 'Product Catalogue', to: '/shop' },
   { label: 'Shopping Cart', to: '/cart' },
-];
-
-const CATEGORIES = [
-  { name: 'Electronics & Computers', slug: 'electronics' },
-  { name: 'Networking & Storage', slug: 'networking' },
-  { name: 'Office Supplies', slug: 'office' },
-  { name: 'Peripherals & Accessories', slug: 'accessories' },
-  { name: 'Smart Home & Gadgets', slug: 'smart-home' },
 ];
 
 const ACCOUNT_LINKS = [
@@ -23,6 +17,19 @@ const ACCOUNT_LINKS = [
 
 export default function Footer() {
   const [email, setEmail] = useState('');
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    categoryService
+      .getCategories()
+      .then((data) => {
+        if (!cancelled) setCategories(unwrapList(data).slice(0, 5));
+      })
+      .catch(() => {})
+      .finally(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const handleSubscribe = (e) => {
     e.preventDefault();
@@ -128,17 +135,20 @@ export default function Footer() {
               Live Categories
             </h4>
             <ul className="flex flex-col gap-3">
-              {CATEGORIES.map((cat) => (
-                <li key={cat.slug}>
-                  <Link
-                    to={`/categories/${cat.slug}`}
-                    className="text-sm text-gray-500 hover:text-white transition-colors duration-200 inline-flex items-center justify-between w-full group/cat"
-                  >
-                    <span>{cat.name}</span>
-                    <ChevronRight className="w-4 h-4 text-[#FB641B] opacity-40 group-hover/cat:opacity-100 group-hover/cat:translate-x-1 transition-all duration-200 flex-shrink-0 ml-3" />
-                  </Link>
-                </li>
-              ))}
+              {categories.map((cat) => {
+                const slug = cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-');
+                return (
+                  <li key={slug}>
+                    <Link
+                      to={`/categories/${slug}`}
+                      className="text-sm text-gray-500 hover:text-white transition-colors duration-200 inline-flex items-center justify-between w-full group/cat"
+                    >
+                      <span>{cat.name}</span>
+                      <ChevronRight className="w-4 h-4 text-[#FB641B] opacity-40 group-hover/cat:opacity-100 group-hover/cat:translate-x-1 transition-all duration-200 flex-shrink-0 ml-3" />
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 

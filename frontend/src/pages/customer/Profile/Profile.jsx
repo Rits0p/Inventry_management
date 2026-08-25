@@ -63,11 +63,7 @@ export default function Profile() {
     };
   }, []);
 
-  // Local-only addresses (no API for these yet)
-  const [addresses] = useState([
-    { id: 1, type: 'Home', name: 'John Doe', phone: '+91 98765 43210', address: '123 Main Street, Apartment 4B', city: 'Mumbai', state: 'Maharashtra', pincode: '400001', isDefault: true },
-    { id: 2, type: 'Office', name: 'John Doe', phone: '+91 98765 43210', address: '456 Business Park, Tower A, 5th Floor', city: 'Mumbai', state: 'Maharashtra', pincode: '400051', isDefault: false },
-  ]);
+  const [addresses] = useState([]);
 
   const stats = [
     { label: 'Orders', value: '—', icon: Package, color: '#2874F0' },
@@ -301,7 +297,14 @@ export default function Profile() {
             </div>
 
             <div className="profile-addresses">
-              {addresses.map(addr => (
+              {addresses.length === 0 ? (
+                <div className="text-center py-8">
+                  <MapPin className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--text-secondary)', opacity: 0.4 }} />
+                  <p className="text-sm text-[var(--text-secondary)]">No saved addresses yet.</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">Add a new address to get started.</p>
+                </div>
+              ) : (
+                addresses.map(addr => (
                 <div key={addr.id} className={`profile-address ${addr.isDefault ? 'default' : ''}`}>
                   <div className="profile-address-header">
                     <MapPin className="w-3.5 h-3.5" style={{ color: '#8b5cf6' }} />
@@ -324,7 +327,7 @@ export default function Profile() {
                     )}
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
           </div>
         )}

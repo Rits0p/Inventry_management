@@ -50,6 +50,14 @@ export const productService = {
   },
 
   /**
+   * Get all distinct brand names from active products.
+   */
+  getBrands: async () => {
+    const { data } = await api.get('/products/brands/');
+    return data;
+  },
+
+  /**
    * Adjust product stock (Admin only).
    * type: 'add' | 'remove' | 'set'
    */
